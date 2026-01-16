@@ -1,0 +1,7 @@
+# Docker volumes
+mariadb_data/
+moodle_data/
+moodledata_data/
+
+# OS files
+.DS_Store
