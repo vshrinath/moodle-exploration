@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+  <name>Case and Surgical Logbook</name>
+  <intro><![CDATA[<p>This logbook is used to record patient cases and surgical procedures. Trainees must submit their logbook monthly for mentor review and approval.</p>
+<p><strong>Submission Requirements:</strong></p>
+<ul>
+<li>Submit by the last day of each month</li>
+<li>Include all cases handled during the month</li>
+<li>Provide complete procedure details and outcomes</li>
+<li>Await mentor approval before next month's submission</li>
+</ul>]]></intro>
+  <introformat>1</introformat>
+  <comments>1</comments>
+  <timeavailablefrom>0</timeavailablefrom>
+  <timeavailableto>0</timeavailableto>
+  <timeviewfrom>0</timeviewfrom>
+  <timeviewto>0</timeviewto>
+  <requiredentries>0</requiredentries>
+  <requiredentriestoview>0</requiredentriestoview>
+  <maxentries>0</maxentries>
+  <rssarticles>0</rssarticles>
+  <singletemplate><![CDATA[<div class="case-logbook-entry">
+  <h3>Case Entry ##id##</h3>
+  <table class="generaltable">
+    <tr><th>Case Date:</th><td>[[case_date]]</td></tr>
+    <tr><th>Subspecialty:</th><td>[[subspecialty]]</td></tr>
+    <tr><th>Procedure Type:</th><td>[[procedure_type]]</td></tr>
+    <tr><th>Procedure Details:</th><td>[[procedure_details]]</td></tr>
+    <tr><th>Patient Age:</th><td>[[patient_age]]</td></tr>
+    <tr><th>Diagnosis:</th><td>[[diagnosis]]</td></tr>
+    <tr><th>Surgical Role:</th><td>[[surgical_role]]</td></tr>
+    <tr><th>Outcomes:</th><td>[[outcomes]]</td></tr>
+    <tr><th>Complications:</th><td>[[complications]]</td></tr>
+    <tr><th>Learning Points:</th><td>[[learning_points]]</td></tr>
+    <tr><th>Approval Status:</th><td>[[approval_status]]</td></tr>
+    <tr><th>Mentor Feedback:</th><td>[[mentor_feedback]]</td></tr>
+  </table>
+  <div class="case-actions">
+    [[edit]] [[delete]] [[approve]]
+  </div>
+</div>]]></singletemplate>
+  <listtemplate><![CDATA[<div class="case-logbook-list">
+  <h2>Case Logbook Entries</h2>
+  <table class="generaltable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Subspecialty</th>
+        <th>Procedure</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      ##entries##
+    </tbody>
+  </table>
+</div>]]></listtemplate>
+  <listtemplateheader></listtemplateheader>
+  <listtemplatefooter></listtemplatefooter>
+  <addtemplate></addtemplate>
+  <rsstemplate></rsstemplate>
+  <rsstitletemplate></rsstitletemplate>
+  <csstemplate><![CDATA[.case-logbook-entry {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+.case-logbook-entry h3 {
+  margin-top: 0;
+  color: #0066cc;
+}
+.case-actions {
+  margin-top: 10px;
+  text-align: right;
+}]]></csstemplate>
+  <jstemplate></jstemplate>
+  <asearchtemplate></asearchtemplate>
+  <approval>1</approval>
+  <manageapproved>1</manageapproved>
+  <fields>
+    <field>
+      <name>case_date</name>
+      <description>Date when the case was handled</description>
+      <type>date</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>subspecialty</name>
+      <description>Ophthalmology subspecialty category</description>
+      <type>menu</type>
+      <required>1</required>
+      <param1><![CDATA[Cataract
+Retina
+Cornea
+Glaucoma
+Oculoplasty
+Pediatric Ophthalmology
+Neuro-Ophthalmology
+General Ophthalmology]]></param1>
+    </field>
+    <field>
+      <name>procedure_type</name>
+      <description>Type of procedure performed</description>
+      <type>text</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>procedure_details</name>
+      <description>Detailed description of the procedure</description>
+      <type>textarea</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>patient_age</name>
+      <description>Patient age in years</description>
+      <type>number</type>
+      <required>0</required>
+    </field>
+    <field>
+      <name>diagnosis</name>
+      <description>Primary diagnosis</description>
+      <type>text</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>surgical_role</name>
+      <description>Your role in the surgery</description>
+      <type>menu</type>
+      <required>1</required>
+      <param1><![CDATA[Primary Surgeon
+Assistant Surgeon
+Observer
+Supervised Practice]]></param1>
+    </field>
+    <field>
+      <name>outcomes</name>
+      <description>Surgical outcomes and results</description>
+      <type>textarea</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>complications</name>
+      <description>Any complications encountered (write "None" if no complications)</description>
+      <type>textarea</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>learning_points</name>
+      <description>Key learning points from this case</description>
+      <type>textarea</type>
+      <required>1</required>
+    </field>
+    <field>
+      <name>approval_status</name>
+      <description>Mentor approval status</description>
+      <type>menu</type>
+      <required>1</required>
+      <param1><![CDATA[Pending Review
+Approved
+Needs Revision
+Rejected]]></param1>
+      <param2>Pending Review</param2>
+    </field>
+    <field>
+      <name>mentor_feedback</name>
+      <description>Feedback from mentor (filled by mentor)</description>
+      <type>textarea</type>
+      <required>0</required>
+    </field>
+  </fields>
+</database>
