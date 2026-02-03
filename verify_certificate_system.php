@@ -8,10 +8,32 @@
  * Usage: php verify_certificate_system.php
  */
 
-require_once(__DIR__ . '/config.php');
+define('CLI_SCRIPT', true);
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 
-// Ensure we're running as admin
-require_login();
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 require_capability('moodle/site:config', context_system::instance());
 
 echo "=== Certificate Generation System Verification ===\n\n";
@@ -144,7 +166,7 @@ if ($dbman->table_exists($tracking_table)) {
     echo "✓ PASS: Credential tracking table exists\n";
     
     // Check table structure
-    $fields = $dbman->get_columns($tracking_table);
+    $fields = $DB->get_columns('customcert_credential_tracking');
     $required_fields = ['userid', 'certificateid', 'competencyid', 'code', 'timecreated'];
     $missing_fields = [];
     foreach ($required_fields as $field) {
@@ -187,12 +209,16 @@ $permission_checks = [
 
 $permissions_ok = true;
 foreach ($permission_checks as $role_shortname => $capabilities) {
-    $role = $DB->get_record('role', ['shortname' => $role_shortname]);
+    $role = $DB->get_record('role', ['shortname' => $role_shortname], 'id,shortname');
     if ($role) {
         echo "  Checking {$role_shortname} role:\n";
         foreach ($capabilities as $capability) {
-            $has_cap = has_capability($capability, $context, null, false, $role->id);
-            if ($has_cap) {
+            $rc = $DB->get_record('role_capabilities', [
+                'roleid' => $role->id,
+                'capability' => $capability,
+                'contextid' => $context->id
+            ], 'permission');
+            if ($rc && (int)$rc->permission === CAP_ALLOW) {
                 echo "    ✓ {$capability}\n";
             } else {
                 echo "    ✗ {$capability} - NOT GRANTED\n";

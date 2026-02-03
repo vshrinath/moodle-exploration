@@ -12,7 +12,23 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once('/opt/bitnami/moodle/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->dirroot.'/mod/quiz/lib.php');
 require_once($CFG->dirroot.'/mod/assign/lib.php');

@@ -12,7 +12,23 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
@@ -20,7 +36,13 @@ echo "========================================\n";
 echo "Fellowship Plugins Configuration\n";
 echo "========================================\n\n";
 
-// Ensure we're running as admin
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 if (!is_siteadmin()) {
     echo "Error: This script must be run as a site administrator\n";
     exit(1);

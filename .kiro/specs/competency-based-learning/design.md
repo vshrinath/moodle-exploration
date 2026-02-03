@@ -214,10 +214,11 @@ local_sceh_rules/
 
 ### Custom Development Summary
 
-**Phase 1 - Must-Have Custom Development** (5-8 weeks):
+**Phase 1 - Must-Have Custom Development** (10-14 weeks):
 1. Unified Rules Engine Plugin (consolidates attendance locking and roster automation) - 3-5 weeks
 2. Unified Kirkpatrick Dashboard - 2-3 weeks
-3. Database Activity Templates - 1 week (configuration, not custom development)
+3. Unified Fellowship Admin Dashboard - 5-6 weeks
+4. Database Activity Templates - 1 week (configuration, not custom development)
 
 **Phase 2 - Nice-to-Have Custom Development** (4-7 weeks Moodle + 6-10 weeks AI):
 1. Kirkpatrick Level 4 external DB integration plugin - 3-4 weeks
@@ -225,8 +226,8 @@ local_sceh_rules/
 3. AI Microservice development - 6-10 weeks (separate project, can be parallel)
 
 **Total Estimated Effort**:
-- Minimum viable product: 5-8 weeks custom development
-- Full-featured system: 9-15 weeks custom development (excluding AI microservice)
+- Minimum viable product: 10-14 weeks custom development (includes admin dashboard)
+- Full-featured system: 14-21 weeks custom development (excluding AI microservice)
 - AI microservice: 6-10 weeks (separate parallel project)
 
 **Architecture Principles**:
@@ -236,12 +237,14 @@ local_sceh_rules/
 4. **Template-Based**: Use Database Activity templates to reduce configuration complexity
 5. **API-First**: Moodle as workflow + storage, external services for heavy processing
 6. **Leverage Core Features**: Use Moodle's built-in conditional access and badge criteria before building custom solutions
+7. **UX-First**: Unified admin dashboard simplifies interface and makes all admin work more efficient
 
 **Recommended Approach**: 
-1. Implement Phase 1 (rules engine, dashboard, templates) alongside plugin configuration
-2. Validate with users and gather feedback
-3. Decide on Phase 2 features based on budget and user needs
-4. Develop AI microservice as separate parallel project if predictive analytics is needed
+1. Implement admin dashboard first (immediate UX improvement, makes remaining work easier)
+2. Implement rules engine and Kirkpatrick dashboard alongside plugin configuration
+3. Validate with users and gather feedback
+4. Decide on Phase 2 features based on budget and user needs
+5. Develop AI microservice as separate parallel project if predictive analytics is needed
 
 **Note on Scope Reduction**: Multi-level badge progression, competency overrides, and basic conditional logic can be achieved using Moodle's core features (conditional access, badge criteria, completion restrictions). The custom rules engine focuses only on features requiring custom event handling beyond core capabilities: attendance-based competency locking and automated roster-to-competency progression.
 
@@ -557,6 +560,124 @@ The system integrates multiple Moodle components to create a cohesive competency
 - Provides searchable research library
 - Generates research portfolios with publication lists
 - Tracks institutional research analytics and trends
+
+### Unified Fellowship Admin Dashboard
+
+**Dashboard Architecture**
+- Implemented as `local_sceh_admin` plugin (upgrade-safe, no core modifications)
+- Consolidates all administrative functions in single unified interface
+- Organizes functions by frequency of use and cross-stream applicability
+- Provides role-based access control for different admin permission levels
+
+**Dashboard Structure**
+
+**Top Priority Sections** (High frequency, cross-stream):
+1. **Quick Actions** - One-click access to most frequent operations
+   - Enroll new trainee
+   - Upload monthly roster
+   - Add/edit competency
+   - Generate attendance report
+   - Approve pending logbooks
+   - Create new cohort
+
+2. **Competency & Learning** - Core educational management
+   - Competency framework management
+   - Learning plan templates
+   - Course and content management
+   - Assessment configuration
+   - Progress tracking overview
+
+3. **Trainee Management** - Learner lifecycle
+   - Trainee registration and onboarding
+   - Profile management and user data
+   - Cohort assignments
+   - Progress monitoring
+   - Alumni transition and management
+
+4. **Trainer & Mentor Management** - Faculty administration
+   - Trainer assignments to cohorts
+   - Mentor-trainee pairing with workload balancing
+   - Trainer performance analytics
+   - Feedback tracking and quality metrics
+
+5. **Scheduling & Rosters** - Time and resource management
+   - Monthly roster uploads (5 types)
+   - Rotation scheduling
+   - Meeting scheduling (mentor sessions)
+   - Calendar management
+   - Conflict detection and resolution
+
+6. **Reports & Analytics** - Data insights
+   - Kirkpatrick evaluation dashboards
+   - Competency progress reports
+   - Attendance analytics
+   - Custom report builder
+   - Export capabilities for accreditation
+
+7. **User Roles & Permissions** - Access control
+   - Role assignments
+   - Permission management
+   - Access audit logs
+   - Security settings
+
+8. **System Settings** - Platform configuration
+   - Plugin configuration shortcuts
+   - Integration settings (payment gateways, external systems)
+   - Email templates and notifications
+   - Academic calendar management
+   - Performance monitoring
+
+**Lower Priority Sections** (Fellowship-specific, lower frequency):
+9. **Case Logbook** - Clinical case management
+   - Logbook template configuration
+   - Approval workflows
+   - Subspecialty analytics
+
+10. **Credentialing** - Certification management
+    - Credentialing sheet configuration
+    - Badge and certificate management
+    - Verification workflows
+
+11. **Research** - Academic tracking
+    - Research project management
+    - Publication tracking
+    - Research analytics
+
+12. **Badges** - Gamification management
+    - Badge criteria configuration
+    - Stash items management
+    - Leaderboard settings
+
+13. **Content** - Asset management
+    - Video repository management
+    - Content library organization
+    - Asset versioning
+
+14. **Advanced System Admin** - Technical administration
+    - Database maintenance
+    - Backup and restore
+    - System diagnostics
+    - Plugin updates
+
+**Technical Implementation**
+- Single-page application with tabbed navigation
+- AJAX-based content loading for performance
+- Responsive design for mobile admin access
+- Breadcrumb navigation for context awareness
+- Direct links to existing Moodle admin pages where appropriate
+- Custom widgets for frequently accessed functions
+- Dashboard customization based on admin role
+
+**Benefits**
+- Reduces admin interface complexity by 70-80%
+- Consolidates scattered functions into logical groupings
+- Prioritizes by frequency of use for efficiency
+- Maintains upgrade safety through local plugin architecture
+- Provides immediate UX improvement for administrators
+- Makes remaining implementation work easier by simplifying admin workflows
+
+**Effort**: 5-6 weeks
+**Priority**: Must-Have (immediate impact, simplifies all future admin work)
 
 ### External Service Integration
 

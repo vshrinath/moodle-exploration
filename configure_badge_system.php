@@ -8,12 +8,34 @@
  * Usage: php configure_badge_system.php
  */
 
-require_once(__DIR__ . '/config.php');
+define('CLI_SCRIPT', true);
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/badgeslib.php');
 require_once($CFG->dirroot . '/badges/lib.php');
 
-// Ensure we're running as admin
-require_login();
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 require_capability('moodle/site:config', context_system::instance());
 
 echo "=== Digital Badge System Configuration ===\n\n";

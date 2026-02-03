@@ -369,7 +369,58 @@ This implementation plan focuses on configuring and extending Moodle's existing 
     - Create user training materials
     - _Effort: 1 week_
 
-- [x] 13. Checkpoint - Core Functionality and Rules Engine Validation
+- [ ] 13. Unified Fellowship Admin Dashboard Development (CUSTOM DEV)
+  - [ ] 13.1 Create dashboard plugin structure and navigation
+    - Set up local_sceh_admin plugin directory structure
+    - Create main dashboard page with tabbed navigation
+    - Implement responsive layout and mobile support
+    - Build breadcrumb navigation system
+    - Configure role-based access control for dashboard sections
+    - _Requirements: 26.1, 26.6, 26.7_
+    - _Effort: 1 week_
+    - _Priority: Must-Have_
+
+  - [ ] 13.2 Implement Quick Actions section
+    - Create one-click trainee enrollment widget
+    - Build monthly roster upload interface
+    - Implement competency quick-add functionality
+    - Create attendance report generator shortcut
+    - Build pending logbook approval widget
+    - Add cohort creation quick action
+    - _Requirements: 26.2_
+    - _Effort: 1 week_
+
+  - [ ] 13.3 Implement core admin function sections
+    - Build Competency & Learning management interface
+    - Create Trainee Management section with lifecycle tracking
+    - Implement Trainer & Mentor Management with workload balancing
+    - Build Scheduling & Rosters section with conflict detection
+    - Create Reports & Analytics section with custom report builder
+    - Implement User Roles & Permissions management interface
+    - Build System Settings section with plugin configuration shortcuts
+    - _Requirements: 26.3, 26.8_
+    - _Effort: 2 weeks_
+
+  - [ ] 13.4 Implement specialized fellowship function sections
+    - Create Case Logbook management interface
+    - Build Credentialing section with approval workflows
+    - Implement Research management interface
+    - Create Badges and gamification management section
+    - Build Content asset management interface
+    - Implement Advanced System Admin section
+    - _Requirements: 26.4_
+    - _Effort: 1 week_
+
+  - [ ] 13.5 Testing, documentation, and deployment
+    - Write unit tests for dashboard widgets and navigation
+    - Test role-based access control across all sections
+    - Create admin user guide and video tutorials
+    - Test upgrade safety and plugin compatibility
+    - Validate performance with large datasets
+    - _Requirements: 26.5, 26.6, 26.7_
+    - _Effort: 1 week_
+
+- [x] 14. Checkpoint - Core Functionality and Rules Engine Validation
   - Ensure all core competency and learning path functionality works
   - Verify cohort management and access controls
   - Test content and assessment integration
@@ -379,8 +430,8 @@ This implementation plan focuses on configuring and extending Moodle's existing 
   - Test ophthalmology fellowship features (logbooks, rosters, credentialing)
   - Ask the user if questions arise
 
-- [ ] 14. AI Integration and Enhancement
-  - [ ] 14.1 Develop AI microservice integration plugin (CUSTOM DEV - OPTIONAL)
+- [ ] 15. AI Integration and Enhancement
+  - [ ] 15.1 Develop AI microservice integration plugin (CUSTOM DEV - OPTIONAL)
     - Create local plugin for Moodle-AI communication
     - Implement REST API client for AI microservice
     - Build scheduled tasks to pull AI insights
@@ -390,7 +441,7 @@ This implementation plan focuses on configuring and extending Moodle's existing 
     - _Effort: 1-2 weeks_
     - _Priority: Nice-to-Have_
 
-  - [ ] 14.2 Configure AI microservice (SEPARATE PROJECT - OPTIONAL)
+  - [ ] 15.2 Configure AI microservice (SEPARATE PROJECT - OPTIONAL)
     - Set up external AI microservice infrastructure
     - Implement question generation engine (OpenAI/Azure OpenAI)
     - Build predictive analytics engine (Azure ML/AWS SageMaker)
@@ -401,82 +452,82 @@ This implementation plan focuses on configuring and extending Moodle's existing 
     - _Effort: 6-10 weeks (separate parallel project)_
     - _Priority: Nice-to-Have_
 
-  - [ ] 14.3 Write property test for AI assessment workflow
+  - [ ] 15.3 Write property test for AI assessment workflow
     - **Property 14: AI Assessment Generation Workflow**
     - **Validates: Requirements 8.1, 8.2**
 
-- [ ] 15. Multilingual Support and Help System
-  - [ ] 15.1 Configure Hindi language support
+- [ ] 16. Multilingual Support and Help System
+  - [ ] 16.1 Configure Hindi language support
     - Install and configure Hindi language pack
     - Set up user language preference management
     - Configure custom translation capabilities
     - _Requirements: 12.1, 12.4_
 
-  - [ ] 15.2 Implement comprehensive help system
+  - [ ] 16.2 Implement comprehensive help system
     - Configure interactive tours for new user onboarding
     - Set up context-sensitive help blocks
     - Create embedded video tutorial system
     - Configure built-in documentation wiki
     - _Requirements: 12.2, 12.3_
 
-- [ ] 16. Advanced Analytics and Reporting
-  - [ ] 16.1 Configure comprehensive learner analytics
+- [ ] 17. Advanced Analytics and Reporting
+  - [ ] 17.1 Configure comprehensive learner analytics
     - Set up competency progression analytics with time tracking
     - Implement engagement metrics and interaction patterns
     - Configure learning path optimization analysis
     - _Requirements: 13.1, 13.5_
 
-  - [ ] 16.2 Implement cohort comparison analytics
+  - [ ] 17.2 Implement cohort comparison analytics
     - Configure cross-cohort performance analysis
     - Set up trainer effectiveness metrics
     - Implement content effectiveness analysis
     - Configure ROI analysis for training programs
     - _Requirements: 13.2, 13.4_
 
-  - [ ] 16.3 Write unit tests for analytics calculations
+  - [ ] 17.3 Write unit tests for analytics calculations
     - Test competency progression calculations
     - Test engagement metric computations
     - Test cohort comparison algorithms
     - _Requirements: 13.1, 13.2_
 
-- [ ] 17. System Administration and Data Management
-  - [ ] 17.1 Implement advanced admin functions
+- [ ] 18. System Administration and Data Management
+  - [ ] 18.1 Implement advanced admin functions
     - Configure learner reassignment with progress preservation
     - Set up program archiving with historical data access
     - Implement audit logging for all critical operations
     - _Requirements: 10.1, 10.4, 10.5_
 
-  - [ ] 17.2 Write property test for archive functionality
+  - [ ] 18.2 Write property test for archive functionality
     - **Property 15: Archive Functionality**
     - **Validates: Requirements 10.4**
 
-  - [ ] 17.3 Configure security and performance optimization
+  - [ ] 18.3 Configure security and performance optimization
     - Implement comprehensive role-based access controls
     - Configure performance optimization for large cohorts
     - Set up automated backup and recovery procedures
     - _Requirements: 11.4, 11.1, 11.2_
 
-- [ ] 18. Cloud Deployment Preparation
-  - [ ] 18.1 Prepare Docker containers for cloud deployment
+- [ ] 19. Cloud Deployment Preparation
+  - [ ] 19.1 Prepare Docker containers for cloud deployment
     - Optimize Docker images for Azure/AWS deployment
     - Configure environment variables for cloud services
     - Set up database migration scripts for cloud databases
     - _Requirements: 11.1, 11.3_
 
-  - [ ] 18.2 Configure cloud storage integration
+  - [ ] 19.2 Configure cloud storage integration
     - Set up S3/Azure Blob storage for Moodle file storage
     - Configure CDN integration for video content delivery
     - Implement backup strategies for cloud environments
     - _Requirements: 7.2, 11.1_
 
-  - [ ] 18.3 Write integration tests for cloud deployment
+  - [ ] 19.3 Write integration tests for cloud deployment
     - Test container deployment procedures
     - Test database migration and backup/restore
     - Test external service integrations in cloud environment
     - _Requirements: 11.1, 11.2_
 
-- [ ] 19. Final Integration and Testing
-  - [ ] 19.1 Comprehensive system integration testing
+- [ ] 20. Final Integration and Testing
+  - [ ] 20.1 Comprehensive system integration testing
     - Test end-to-end learner journey through competency completion
     - Verify trainer workflows and cohort management
     - Test admin analytics and reporting functionality
@@ -484,15 +535,15 @@ This implementation plan focuses on configuring and extending Moodle's existing 
     - Test ophthalmology fellowship workflows (logbooks, rosters, credentialing)
     - _Requirements: All requirements_
 
-  - [ ] 19.2 Write property test for automatic progress persistence
+  - [ ] 20.2 Write property test for automatic progress persistence
     - **Property 11: Automatic Progress Persistence**
     - **Validates: Requirements 5.2**
 
-  - [ ] 19.3 Write property test for learner dashboard accuracy
+  - [ ] 20.3 Write property test for learner dashboard accuracy
     - **Property 10: Learner Dashboard Accuracy**
     - **Validates: Requirements 5.1**
 
-- [ ] 20. Final Checkpoint - Complete System Validation
+- [ ] 21. Final Checkpoint - Complete System Validation
   - Ensure all requirements are met and tested
   - Verify cloud deployment readiness
   - Validate multilingual support and help systems
@@ -522,17 +573,18 @@ This implementation plan focuses on configuring and extending Moodle's existing 
 
 ## Custom Development Summary
 
-**Phase 1 - Must-Have Custom Development** (4-6 weeks):
+**Phase 1 - Must-Have Custom Development** (10-14 weeks):
 1. Database Activity Templates (Task 11.1) - 1 week (CONFIGURATION, not custom dev)
 2. Unified Rules Engine Plugin (Task 12) - 3-5 weeks
    - Attendance-based competency locking (cannot use core conditional access)
    - Automated roster-to-competency progression (requires custom event handling)
-3. Unified Kirkpatrick Dashboard (Task 10.6) - 2-3 weeks (builds on Task 10.4 reports)
+3. Unified Fellowship Admin Dashboard (Task 13) - 5-6 weeks
+4. Unified Kirkpatrick Dashboard (Task 10.6) - 2-3 weeks (builds on Task 10.4 reports)
 
 **Phase 2 - Nice-to-Have Custom Development** (4-7 weeks Moodle + 6-10 weeks AI):
 1. Kirkpatrick Level 4 external DB integration (Task 10.5) - 3-4 weeks
-2. AI Microservice Integration Plugin (Task 14.1) - 1-2 weeks
-3. AI Microservice Development (Task 14.2) - 6-10 weeks (separate parallel project)
+2. AI Microservice Integration Plugin (Task 15.1) - 1-2 weeks
+3. AI Microservice Development (Task 15.2) - 6-10 weeks (separate parallel project)
 
 **Architecture Principles**:
 1. **No Core Modifications**: All custom code as local plugins
@@ -540,11 +592,13 @@ This implementation plan focuses on configuring and extending Moodle's existing 
 3. **External AI**: Keep AI logic outside Moodle in microservices
 4. **Template-Based**: Use Database Activity templates to reduce configuration complexity
 5. **API-First**: Moodle as workflow + storage, external services for heavy processing
+6. **UX-First**: Unified admin dashboard simplifies interface and makes all admin work more efficient
 
 **Recommended Approach**: 
-1. Complete Phase 1 custom development alongside plugin configuration (weeks 1-8)
-2. Validate with users and gather feedback (weeks 9-10)
-3. Decide on Phase 2 features based on budget and user needs
-4. If AI features needed, develop microservice as separate parallel project (can start anytime)
+1. Implement admin dashboard first (Task 13) - immediate UX improvement, makes remaining work easier
+2. Complete Phase 1 custom development alongside plugin configuration (weeks 1-14)
+3. Validate with users and gather feedback (weeks 15-16)
+4. Decide on Phase 2 features based on budget and user needs
+5. If AI features needed, develop microservice as separate parallel project (can start anytime)
 
 **Note on Rules Engine Scope**: Multi-level badge progression and competency overrides can be achieved using Moodle's core conditional access and badge criteria features, so they are NOT included in the custom rules engine. The rules engine focuses only on features that truly require custom event handling beyond core capabilities.

@@ -11,7 +11,23 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/competency/classes/api.php');
 require_once($CFG->dirroot . '/competency/classes/template.php');
@@ -160,6 +176,86 @@ try {
     );
     $templates_created[] = $template5;
     echo "  ✓ Created: {$template5->get('shortname')}\n\n";
+
+    // Template 6: Blended Learning Path (same scope as comprehensive)
+    echo "Creating Template 6: Blended Learning Path\n";
+    $template6 = create_learning_plan_template(
+        'blended-learning-path',
+        'Blended Learning Path',
+        'Blended program path with all core competencies',
+        $framework,
+        [
+            'Clinical Skills' => ['order' => 1, 'is_core' => true],
+            'Patient Examination' => ['order' => 2, 'is_core' => true],
+            'Diagnosis and Assessment' => ['order' => 3, 'is_core' => true],
+            'Surgical Skills' => ['order' => 4, 'is_core' => true],
+            'Cataract Surgery' => ['order' => 5, 'is_core' => true],
+            'Diagnostic Technology' => ['order' => 6, 'is_core' => true],
+            'Professional Development' => ['order' => 7, 'is_core' => true],
+            'Patient Communication' => ['order' => 8, 'is_core' => true],
+            'Research Skills' => ['order' => 9, 'is_core' => false],
+        ],
+        $competency_map
+    );
+    $templates_created[] = $template6;
+    echo "  ✓ Created: {$template6->get('shortname')}\n\n";
+
+    // Template 7: Clinical Skills Path (alias to core clinical)
+    echo "Creating Template 7: Clinical Skills Path\n";
+    $template7 = create_learning_plan_template(
+        'clinical-skills-path',
+        'Clinical Skills Learning Path',
+        'Clinical skills path aligned to core clinical competencies',
+        $framework,
+        [
+            'Clinical Skills' => ['order' => 1, 'is_core' => true],
+            'Patient Examination' => ['order' => 2, 'is_core' => true],
+            'Diagnosis and Assessment' => ['order' => 3, 'is_core' => true],
+            'Treatment Management' => ['order' => 4, 'is_core' => true],
+        ],
+        $competency_map
+    );
+    $templates_created[] = $template7;
+    echo "  ✓ Created: {$template7->get('shortname')}\n\n";
+
+    // Template 8: Core Technical Skills Path (surgical + diagnostic)
+    echo "Creating Template 8: Core Technical Skills Path\n";
+    $template8 = create_learning_plan_template(
+        'core-technical-skills',
+        'Core Technical Skills Learning Path',
+        'Technical skills across surgical and diagnostic competencies',
+        $framework,
+        [
+            'Surgical Skills' => ['order' => 1, 'is_core' => true],
+            'Cataract Surgery' => ['order' => 2, 'is_core' => true],
+            'Retinal Surgery' => ['order' => 3, 'is_core' => true],
+            'Glaucoma Surgery' => ['order' => 4, 'is_core' => false],
+            'Diagnostic Technology' => ['order' => 5, 'is_core' => true],
+            'Ophthalmic Imaging' => ['order' => 6, 'is_core' => true],
+            'Visual Field Testing' => ['order' => 7, 'is_core' => true],
+        ],
+        $competency_map
+    );
+    $templates_created[] = $template8;
+    echo "  ✓ Created: {$template8->get('shortname')}\n\n";
+
+    // Template 9: Management Skills Path (alias to professional development)
+    echo "Creating Template 9: Management Skills Path\n";
+    $template9 = create_learning_plan_template(
+        'management-skills-path',
+        'Management Skills Learning Path',
+        'Management and professional development competencies',
+        $framework,
+        [
+            'Professional Development' => ['order' => 1, 'is_core' => true],
+            'Patient Communication' => ['order' => 2, 'is_core' => true],
+            'Medical Ethics' => ['order' => 3, 'is_core' => true],
+            'Research Skills' => ['order' => 4, 'is_core' => false],
+        ],
+        $competency_map
+    );
+    $templates_created[] = $template9;
+    echo "  ✓ Created: {$template9->get('shortname')}\n\n";
     
     echo "=== Summary ===\n";
     echo "Created " . count($templates_created) . " learning plan templates:\n";
@@ -226,16 +322,16 @@ function create_learning_plan_template($shortname, $name, $description, $framewo
         if (!$existing_link) {
             // Add competency to template
             api::add_competency_to_template($template->get('id'), $competency->get('id'));
-            
-            // Set sort order
-            $DB->set_field('competency_templatecomp', 'sortorder', $config['order'], [
-                'templateid' => $template->get('id'),
-                'competencyid' => $competency->get('id')
-            ]);
-            
-            echo "  Added: {$comp_shortname} (order: {$config['order']}, " . 
-                 ($config['is_core'] ? 'core' : 'allied') . ")\n";
         }
+
+        // Always set sort order to enforce consistent ordering
+        $DB->set_field('competency_templatecomp', 'sortorder', $config['order'], [
+            'templateid' => $template->get('id'),
+            'competencyid' => $competency->get('id')
+        ]);
+
+        echo "  " . ($existing_link ? 'Updated' : 'Added') . ": {$comp_shortname} (order: {$config['order']}, " .
+             ($config['is_core'] ? 'core' : 'allied') . ")\n";
     }
     
     return $template;

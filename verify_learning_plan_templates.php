@@ -63,22 +63,21 @@ try {
     // Test 3: Verify competency ordering
     echo "Test 3: Verify competency ordering in templates\n";
     foreach ($templates as $template) {
-        $competencies = api::list_competencies_in_template($template);
-        
-        if (empty($competencies)) {
+        $links = $DB->get_records('competency_templatecomp', ['templateid' => $template->get('id')], 'sortorder ASC', 'sortorder');
+
+        if (empty($links)) {
             continue;
         }
-        
-        $previous_order = 0;
+
         $ordering_correct = true;
-        
-        foreach ($competencies as $comp) {
-            $current_order = $comp->get('sortorder');
-            if ($current_order < $previous_order) {
+        $expected = 1;
+        foreach ($links as $link) {
+            $current_order = (int)$link->sortorder;
+            if ($current_order !== $expected) {
                 $ordering_correct = false;
                 break;
             }
-            $previous_order = $current_order;
+            $expected++;
         }
         
         if ($ordering_correct) {

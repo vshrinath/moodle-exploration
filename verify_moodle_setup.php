@@ -70,12 +70,17 @@ $required_plugins = [
     'block_configurable_reports' => 'Configurable Reports',
     'mod_customcert' => 'Custom Certificate',
     'mod_attendance' => 'Attendance',
-    'block_level_up' => 'Level Up! gamification',
-    'local_stash' => 'Stash plugin',
-    'mod_portfolio' => 'Portfolio module'
+    'block_xp' => 'Level Up! gamification',
+    'block_stash' => 'Stash plugin',
+    'core_portfolio' => 'Portfolio module'
 ];
 
 foreach ($required_plugins as $plugin => $name) {
+    if ($plugin === 'core_portfolio') {
+        $enabled = get_config('core', 'enableportfolios');
+        echo "  $name: " . ($enabled ? 'ENABLED' : 'DISABLED') . "\n";
+        continue;
+    }
     $plugin_info = core_plugin_manager::instance()->get_plugin_info($plugin);
     if ($plugin_info) {
         echo "  $name: INSTALLED (version " . $plugin_info->versiondb . ")\n";

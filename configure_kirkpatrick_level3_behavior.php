@@ -9,10 +9,33 @@
  * Requirements: 17.3
  */
 
-require_once(__DIR__ . '/config.php');
+define('CLI_SCRIPT', true);
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/adminlib.php');
 
-require_login();
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 require_capability('moodle/site:config', context_system::instance());
 
 echo "=== Kirkpatrick Level 3 (Behavior) Application Tracking Configuration ===\n\n";
@@ -198,6 +221,7 @@ function create_followup_survey_template() {
  * Configure workplace performance data integration
  */
 function configure_workplace_integration() {
+    global $DB;
     echo "\nConfiguring workplace performance data integration...\n";
     
     // Configure external data sources
@@ -255,6 +279,7 @@ function configure_workplace_integration() {
  * Configure longitudinal tracking capabilities
  */
 function configure_longitudinal_tracking() {
+    global $DB;
     echo "\nConfiguring longitudinal tracking capabilities...\n";
     
     // Configure tracking settings

@@ -367,3 +367,18 @@ This document defines the requirements for implementing a competency-based learn
 4. WHEN tracking progress, THE System SHALL monitor research milestones, submission status, and publication outcomes
 5. THE System SHALL generate research portfolios for individual trainees with publication lists and impact metrics
 6. WHEN generating reports, THE System SHALL provide institutional research analytics and publication trends
+
+### Requirement 26: Unified Fellowship Admin Dashboard
+
+**User Story:** As an Admin, I want a unified dashboard that consolidates all administrative functions in one interface, so that I can efficiently manage the fellowship program without navigating through multiple scattered admin pages.
+
+#### Acceptance Criteria
+
+1. WHEN an Admin accesses the dashboard, THE System SHALL display a unified interface with all administrative functions organized by frequency of use and cross-stream applicability
+2. WHEN performing common tasks, THE System SHALL provide Quick Actions section for frequently used operations including trainee enrollment, roster uploads, competency management, and report generation
+3. WHEN managing core functions, THE System SHALL provide sections for Competency & Learning, Trainee Management, Trainer & Mentor Management, Scheduling & Rosters, Reports & Analytics, User Roles & Permissions, and System Settings
+4. WHEN managing fellowship-specific functions, THE System SHALL provide sections for Case Logbook, Credentialing, Research, Badges, Content, and Advanced System Admin
+5. THE System SHALL ensure the dashboard is upgrade-safe by implementing it as a local plugin with no core modifications
+6. WHEN navigating between functions, THE System SHALL maintain context and provide breadcrumb navigation for easy orientation
+7. THE System SHALL provide role-based access control ensuring admins only see functions appropriate to their permissions
+8. WHEN accessing specialized functions, THE System SHALL provide direct links to existing Moodle admin pages and plugin interfaces where appropriate
