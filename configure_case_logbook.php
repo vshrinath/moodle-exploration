@@ -14,10 +14,34 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/clilib.php');
 require_once($CFG->dirroot . '/mod/data/lib.php');
 require_once($CFG->dirroot . '/lib/completionlib.php');
+
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 
 // Get CLI options
 list($options, $unrecognized) = cli_get_params(
@@ -222,7 +246,8 @@ if (!get_config('core_competency', 'enabled')) {
     echo "  Enable it at: Site administration > Competencies > Competencies settings\n";
 } else {
     // Link database activity to competencies
-    $modulecontext = context_module::instance($data->coursemodule);
+    $cm = get_coursemodule_from_instance('data', $data->id, $courseid, false, MUST_EXIST);
+    $modulecontext = context_module::instance($cm->id);
     
     // Get competencies in this course
     $competencies = \core_competency\api::list_course_competencies($courseid);

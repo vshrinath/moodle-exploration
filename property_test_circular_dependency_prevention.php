@@ -14,16 +14,37 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once('/opt/bitnami/moodle/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->dirroot.'/competency/classes/api.php');
 require_once($CFG->dirroot.'/competency/classes/competency.php');
+require_once($CFG->dirroot.'/competency/classes/related_competency.php');
 
 use core_competency\api;
 use core_competency\competency;
 
 // Set admin user
 $admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
 \core\session\manager::set_user($admin);
 
 echo "=== Property-Based Test: Circular Dependency Prevention ===\n";
@@ -58,23 +79,12 @@ function create_test_competency($framework_id, $name_suffix) {
  * Add prerequisite relationship
  */
 function add_prerequisite($competency_id, $prerequisite_id) {
-    global $DB, $USER;
-    
     try {
-        $relation = new stdClass();
-        $relation->competencyid = $competency_id;
-        $relation->relatedcompetencyid = $prerequisite_id;
-        $relation->timecreated = time();
-        $relation->timemodified = time();
-        $relation->usermodified = $USER->id;
-        
-        if (!$DB->record_exists('competency_relatedcomp', [
-            'competencyid' => $relation->competencyid,
-            'relatedcompetencyid' => $relation->relatedcompetencyid
-        ])) {
-            $DB->insert_record('competency_relatedcomp', $relation);
-            return true;
-        }
+        $relation = new \core_competency\related_competency(0, (object)[
+            'competencyid' => $competency_id,
+            'relatedcompetencyid' => $prerequisite_id
+        ]);
+        $relation->create();
         return true;
     } catch (Exception $e) {
         return false;

@@ -13,7 +13,23 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/competency/classes/api.php');
 
@@ -99,23 +115,13 @@ try {
         }
         
         // Property Test 1: Verify ordering is preserved
-        $retrieved_comps = api::list_competencies_in_template($template);
+        $links = $DB->get_records('competency_templatecomp', ['templateid' => $template->get('id')], 'sortorder ASC', 'competencyid,sortorder');
         $actual_order = [];
-        
-        foreach ($retrieved_comps as $comp) {
-            $actual_order[$comp->get('id')] = $comp->get('sortorder');
+        foreach ($links as $link) {
+            $actual_order[$link->competencyid] = (int)$link->sortorder;
         }
-        
-        $ordering_preserved = true;
-        $previous_order = 0;
-        foreach ($retrieved_comps as $comp) {
-            $current_order = $comp->get('sortorder');
-            if ($current_order < $previous_order) {
-                $ordering_preserved = false;
-                break;
-            }
-            $previous_order = $current_order;
-        }
+
+        $ordering_preserved = ($expected_order == $actual_order);
         
         if (!$ordering_preserved) {
             $failed++;

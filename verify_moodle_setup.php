@@ -96,8 +96,7 @@ $capabilities = [
     'moodle/competency:competencymanage',
     'moodle/competency:competencyview',
     'moodle/competency:planmanage',
-    'moodle/competency:planview',
-    'moodle/competency:evidencemanage'
+    'moodle/competency:planview'
 ];
 
 foreach ($capabilities as $capability) {

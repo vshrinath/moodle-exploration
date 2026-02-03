@@ -12,9 +12,33 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once('/opt/bitnami/moodle/config.php');
-require_once($CFG->libdir.'/clilib.php');
-require_once($CFG->dirroot.'/lib/repositorylib.php');
+$config_paths = [
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+    __DIR__ . '/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
+require_once($CFG->dirroot . '/lib/clilib.php');
+require_once($CFG->dirroot . '/repository/lib.php');
+
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 
 // Check if Eris is available for property-based testing
 if (!class_exists('Eris\TestTrait')) {
@@ -123,11 +147,11 @@ class VideoIntegrationPropertyTest {
         try {
             $url = $video_data['url'];
             $expected_platform = $video_data['platform'];
-            $expected_id = $video_data['id'];
+            $expected_id = (string) $video_data['id'];
             
             // Test URL parsing
             $parsed_platform = $this->identifyVideoPlatform($url);
-            $extracted_id = $this->extractVideoId($url, $parsed_platform);
+            $extracted_id = (string) $this->extractVideoId($url, $parsed_platform);
             
             // Property assertions
             $platform_correct = ($parsed_platform === $expected_platform);
@@ -348,7 +372,7 @@ class VideoIntegrationPropertyTest {
             $total_tests = $property_passed + $property_failed;
             $success_rate = ($total_tests > 0) ? ($property_passed / $total_tests) * 100 : 0;
             
-            echo "  Results: {$property_passed}/{$total_tests} passed ({$success_rate:.1f}%)\n";
+            echo "  Results: {$property_passed}/{$total_tests} passed (" . number_format($success_rate, 1) . "%)\n";
             
             if ($property_failed > 0) {
                 echo "  ✗ Property FAILED with {$property_failed} counterexamples\n";
@@ -479,7 +503,11 @@ if ($all_passed) {
             } elseif (isset($failure['validation_failed'])) {
                 echo "Repository validation failed";
             } elseif (isset($failure['platform_correct'])) {
-                echo "Platform detection: expected {$failure['expected_platform']}, got {$failure['actual_platform']}";
+                if (!$failure['platform_correct']) {
+                    echo "Platform detection: expected {$failure['expected_platform']}, got {$failure['actual_platform']}";
+                } else {
+                    echo "Video ID extraction: expected {$failure['expected_id']}, got {$failure['actual_id']}";
+                }
             }
             echo "\n";
         }

@@ -15,7 +15,23 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once('/opt/bitnami/moodle/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->libdir.'/badgeslib.php');
 require_once($CFG->dirroot.'/badges/lib.php');
@@ -24,6 +40,9 @@ require_once($CFG->dirroot.'/competency/classes/competency_framework.php');
 require_once($CFG->dirroot.'/competency/classes/competency.php');
 require_once($CFG->dirroot.'/competency/classes/user_competency.php');
 
+// Avoid email attempts during CLI testing.
+$CFG->noemailever = true;
+
 use core_competency\api;
 use core_competency\competency_framework;
 use core_competency\competency;
@@ -31,6 +50,10 @@ use core_competency\user_competency;
 
 // Set admin user
 $admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
 \core\session\manager::set_user($admin);
 
 echo "=== Property-Based Test: Automated Badge Awarding ===\n";
@@ -48,7 +71,7 @@ $failures = [];
  * Create a test user
  */
 function create_test_user($iteration) {
-    global $DB;
+    global $DB, $CFG;
     
     $user = new stdClass();
     $user->username = 'testuser_' . $iteration . '_' . time();
@@ -56,13 +79,25 @@ function create_test_user($iteration) {
     $user->lastname = 'User ' . $iteration;
     $user->email = 'testuser' . $iteration . '_' . time() . '@example.com';
     $user->password = hash_internal_user_password('TestPass123!');
+    $user->auth = 'manual';
+    $user->lang = 'en';
+    $user->timezone = 'UTC';
+    $user->mailformat = 1;
     $user->confirmed = 1;
     $user->mnethostid = $CFG->mnet_localhost_id;
     $user->timecreated = time();
     $user->timemodified = time();
     
-    $user_id = $DB->insert_record('user', $user);
-    return $user_id;
+    try {
+        $user_id = $DB->insert_record('user', $user);
+        return $user_id;
+    } catch (Exception $e) {
+        echo "✗ User create failed: " . $e->getMessage() . "\n";
+        if (!empty($e->debuginfo)) {
+            echo "  Debug info: {$e->debuginfo}\n";
+        }
+        return false;
+    }
 }
 
 /**
@@ -87,7 +122,7 @@ function create_test_competency($framework_id, $iteration) {
  * Create a test badge with competency criteria
  */
 function create_test_badge($competency_id, $iteration) {
-    global $DB, $USER;
+    global $DB, $USER, $CFG;
     
     $badge = new stdClass();
     $badge->name = 'Test Badge ' . $iteration . '_' . time();
@@ -115,8 +150,23 @@ function create_test_badge($competency_id, $iteration) {
     $badge->imageauthorurl = $CFG->wwwroot;
     $badge->imagecaption = 'Test Badge';
     
-    $badge_id = $DB->insert_record('badge', $badge);
+    try {
+        $badge_id = $DB->insert_record('badge', $badge);
+    } catch (Exception $e) {
+        echo "✗ Badge create failed: " . $e->getMessage() . "\n";
+        if (!empty($e->debuginfo)) {
+            echo "  Debug info: {$e->debuginfo}\n";
+        }
+        return false;
+    }
     
+    // Create overall criteria (required for aggregation checks)
+    $overall = new stdClass();
+    $overall->badgeid = $badge_id;
+    $overall->criteriatype = BADGE_CRITERIA_TYPE_OVERALL;
+    $overall->method = BADGE_CRITERIA_AGGREGATION_ALL;
+    $DB->insert_record('badge_criteria', $overall);
+
     // Create competency-based criteria
     $criteria = new stdClass();
     $criteria->badgeid = $badge_id;
@@ -140,13 +190,42 @@ function create_test_badge($competency_id, $iteration) {
  * Mark competency as completed for user
  */
 function complete_competency_for_user($user_id, $competency_id) {
+    global $DB;
     try {
-        // Create user competency record
-        $user_comp = api::create_user_competency($user_id, $competency_id);
-        
+        try {
+            $user_comp = api::get_user_competency($user_id, $competency_id);
+        } catch (Exception $e) {
+            $uc = new stdClass();
+            $uc->userid = $user_id;
+            $uc->competencyid = $competency_id;
+            $uc->status = \core_competency\user_competency::STATUS_IDLE;
+            $uc->reviewerid = get_admin()->id;
+            $uc->proficiency = null;
+            $uc->grade = null;
+            $user_comp = new \core_competency\user_competency(0, $uc);
+            $user_comp->create();
+        }
+
+        $frameworkid = $DB->get_field('competency', 'competencyframeworkid', ['id' => $competency_id]);
+        $proficientvalue = 1;
+        if ($frameworkid) {
+            $framework = $DB->get_record('competency_framework', ['id' => $frameworkid]);
+            if ($framework && !empty($framework->scaleconfiguration)) {
+                $config = json_decode($framework->scaleconfiguration, true);
+                if (is_array($config)) {
+                    foreach ($config as $item) {
+                        if (is_array($item) && !empty($item['proficient'])) {
+                            $proficientvalue = (int) $item['id'];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // Mark as proficient
-        api::grade_competency($user_id, $competency_id, 1, 'Completed for testing');
-        
+        api::grade_competency($user_id, $competency_id, $proficientvalue, 'Completed for testing');
+
         return true;
     } catch (Exception $e) {
         return false;
@@ -208,6 +287,10 @@ function test_automated_badge_awarding($iteration) {
         
         // Create test user
         $user_id = create_test_user($iteration);
+        if (!$user_id) {
+            echo "✗ User creation failed\n";
+            return false;
+        }
         
         // Create test competency
         $competency = create_test_competency($framework->id, $iteration);
@@ -215,6 +298,10 @@ function test_automated_badge_awarding($iteration) {
         
         // Create badge with competency criteria
         $badge_id = create_test_badge($competency_id, $iteration);
+        if (!$badge_id) {
+            echo "✗ Badge creation failed\n";
+            return false;
+        }
         
         // Verify: Badge should NOT be awarded yet
         if (check_badge_awarded($user_id, $badge_id)) {
@@ -285,7 +372,11 @@ function test_automated_badge_awarding($iteration) {
         
         // Cleanup
         $DB->delete_records('badge_issued', ['badgeid' => $badge_id]);
-        $DB->delete_records('badge_criteria_param', ['critid' => $DB->get_field('badge_criteria', 'id', ['badgeid' => $badge_id])]);
+        $criteria_records = $DB->get_records('badge_criteria', ['badgeid' => $badge_id]);
+        if ($criteria_records) {
+            $criteria_ids = array_keys($criteria_records);
+            $DB->delete_records_list('badge_criteria_param', 'critid', $criteria_ids);
+        }
         $DB->delete_records('badge_criteria', ['badgeid' => $badge_id]);
         $DB->delete_records('badge', ['id' => $badge_id]);
         $DB->delete_records('competency_usercomp', ['userid' => $user_id, 'competencyid' => $competency_id]);
@@ -319,6 +410,10 @@ function test_multi_level_badge_progression($iteration) {
         
         // Create test user
         $user_id = create_test_user($iteration . '_ml');
+        if (!$user_id) {
+            echo "✗ User creation failed\n";
+            return false;
+        }
         
         // Create multiple competencies for different badge levels
         $bronze_comp = create_test_competency($framework->id, $iteration . '_bronze');
@@ -329,6 +424,10 @@ function test_multi_level_badge_progression($iteration) {
         $bronze_badge = create_test_badge($bronze_comp->get('id'), $iteration . '_bronze');
         $silver_badge = create_test_badge($silver_comp->get('id'), $iteration . '_silver');
         $gold_badge = create_test_badge($gold_comp->get('id'), $iteration . '_gold');
+        if (!$bronze_badge || !$silver_badge || !$gold_badge) {
+            echo "✗ Badge creation failed\n";
+            return false;
+        }
         
         // Complete bronze competency
         complete_competency_for_user($user_id, $bronze_comp->get('id'));

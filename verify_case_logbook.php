@@ -14,8 +14,32 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir . '/clilib.php');
+
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    fwrite(STDERR, "ERROR: No admin user found\n");
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 
 // Get CLI options
 list($options, $unrecognized) = cli_get_params(
@@ -169,8 +193,12 @@ if ($teacherrole) {
     
     foreach ($teachercaps as $cap) {
         if ($DB->record_exists('capabilities', array('name' => $cap))) {
-            $hascap = has_capability($cap, $context, null, false, $teacherrole->id);
-            if ($hascap) {
+            $rc = $DB->get_record('role_capabilities', [
+                'roleid' => $teacherrole->id,
+                'capability' => $cap,
+                'contextid' => $context->id
+            ], 'permission');
+            if ($rc && (int)$rc->permission === CAP_ALLOW) {
                 echo "✓ Teacher capability: $cap\n";
                 $passed++;
             } else {
@@ -195,8 +223,12 @@ if ($studentrole) {
     
     foreach ($studentcaps as $cap) {
         if ($DB->record_exists('capabilities', array('name' => $cap))) {
-            $hascap = has_capability($cap, $context, null, false, $studentrole->id);
-            if ($hascap) {
+            $rc = $DB->get_record('role_capabilities', [
+                'roleid' => $studentrole->id,
+                'capability' => $cap,
+                'contextid' => $context->id
+            ], 'permission');
+            if ($rc && (int)$rc->permission === CAP_ALLOW) {
                 echo "✓ Student capability: $cap\n";
                 $passed++;
             } else {
@@ -208,8 +240,12 @@ if ($studentrole) {
     
     // Verify students cannot approve
     if ($DB->record_exists('capabilities', array('name' => 'mod/data:approve'))) {
-        $canapprove = has_capability('mod/data:approve', $context, null, false, $studentrole->id);
-        if (!$canapprove) {
+        $rc = $DB->get_record('role_capabilities', [
+            'roleid' => $studentrole->id,
+            'capability' => 'mod/data:approve',
+            'contextid' => $context->id
+        ], 'permission');
+        if (!$rc || (int)$rc->permission !== CAP_ALLOW) {
             echo "✓ Students cannot approve entries\n";
             $passed++;
         } else {

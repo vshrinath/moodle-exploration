@@ -88,7 +88,7 @@ try {
 
 // Check for learning plan templates
 try {
-    $plan_templates = $DB->get_records('competency_plan_template');
+    $plan_templates = $DB->get_records('competency_template');
     if (count($plan_templates) > 0) {
         log_result('Learning Path', 'Plan Templates Exist', 'pass', count($plan_templates) . ' template(s) found');
     } else {
@@ -401,15 +401,15 @@ if (file_exists($template_path)) {
 echo "\n--- 8. Gamification and Engagement ---\n";
 
 // Check for Level Up! plugin
-$levelup_path = $CFG->dirroot . '/local/xp';
-if (file_exists($levelup_path) || file_exists($CFG->dirroot . '/block/xp')) {
+$levelup_path = $CFG->dirroot . '/blocks/xp';
+if (file_exists($levelup_path)) {
     log_result('Gamification', 'Level Up! Plugin', 'pass', 'Level Up! plugin found');
 } else {
     log_result('Gamification', 'Level Up! Plugin', 'warn', 'Level Up! plugin not installed');
 }
 
 // Check for Stash plugin
-$stash_path = $CFG->dirroot . '/block/stash';
+$stash_path = $CFG->dirroot . '/blocks/stash';
 if (file_exists($stash_path)) {
     log_result('Gamification', 'Stash Plugin', 'pass', 'Stash plugin found');
 } else {

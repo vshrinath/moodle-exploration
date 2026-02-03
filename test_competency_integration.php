@@ -6,21 +6,46 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once('/opt/bitnami/moodle/config.php');
+$config_paths = [
+    __DIR__ . '/config.php',
+    '/bitnami/moodle/config.php',
+    '/opt/bitnami/moodle/config.php',
+];
+$config_path = null;
+foreach ($config_paths as $path) {
+    if (file_exists($path)) {
+        $config_path = $path;
+        break;
+    }
+}
+if (!$config_path) {
+    fwrite(STDERR, "ERROR: Moodle config.php not found\n");
+    exit(1);
+}
+require_once($config_path);
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->dirroot.'/competency/classes/competency_framework.php');
 require_once($CFG->dirroot.'/competency/classes/competency.php');
 require_once($CFG->dirroot.'/competency/classes/plan.php');
 require_once($CFG->dirroot.'/competency/classes/template.php');
+require_once($CFG->dirroot.'/competency/classes/api.php');
 
 use core_competency\competency_framework;
 use core_competency\competency;
 use core_competency\plan;
 use core_competency\template;
+use core_competency\api;
 
 echo "=== Competency Framework and Learning Plans Integration Tests ===\n\n";
 
 $test_results = [];
+// Ensure we're running as admin in CLI
+$admin = get_admin();
+if (!$admin) {
+    echo "ERROR: No admin user found\n";
+    exit(1);
+}
+\core\session\manager::set_user($admin);
 
 /**
  * Test 1: Create competency framework and verify it exists
@@ -32,13 +57,17 @@ function test_competency_framework_creation() {
     
     try {
         // Create a test competency framework
+        $existing = $DB->get_record('competency_framework', [], 'scaleid,scaleconfiguration', IGNORE_MULTIPLE);
+        $scale = $DB->get_record('scale', ['courseid' => 0], 'id', IGNORE_MULTIPLE);
         $framework_data = (object)[
             'shortname' => 'test_framework_' . time(),
             'idnumber' => 'TF' . time(),
             'description' => 'Test framework for integration testing',
             'descriptionformat' => FORMAT_HTML,
             'visible' => 1,
-            'contextid' => context_system::instance()->id
+            'contextid' => context_system::instance()->id,
+            'scaleid' => $existing ? $existing->scaleid : ($scale ? $scale->id : 1),
+            'scaleconfiguration' => $existing ? $existing->scaleconfiguration : ''
         ];
         
         $framework = new competency_framework(0, $framework_data);
@@ -127,7 +156,7 @@ function test_learning_plan_template($competencies) {
         
         // Add competencies to template
         foreach ($competencies as $competency) {
-            $template->add_competency($competency);
+            api::add_competency_to_template($template->get('id'), $competency->get('id'));
         }
         
         echo "  ✓ Learning plan template created (ID: " . $template->get('id') . ")\n";
