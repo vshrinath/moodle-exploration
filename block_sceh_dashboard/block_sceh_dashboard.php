@@ -112,6 +112,8 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_system_admin_cards() {
+        global $DB;
+        
         $systemcontext = context_system::instance();
         $cards = [];
         $attendanceurl = new moodle_url('/my/courses.php');
@@ -170,8 +172,13 @@ class block_sceh_dashboard extends block_base {
             'moodle/badges:configuredetails',
             'moodle/badges:deletebadge',
         ], $systemcontext)) {
+            // Count site badges
+            $badgecount = $DB->count_records('badge', ['type' => 1]);
+            $badgetitle = get_string('badgemanagement', 'block_sceh_dashboard') . 
+                          ' (' . $badgecount . ')';
+            
             $cards[] = [
-                'title' => get_string('badgemanagement', 'block_sceh_dashboard'),
+                'title' => $badgetitle,
                 'icon' => 'fa-award',
                 'color' => 'yellow',
                 'url' => new moodle_url('/badges/index.php', ['type' => 1]),
