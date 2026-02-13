@@ -116,6 +116,8 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_system_admin_cards() {
+        $systemcontext = context_system::instance();
+
         return [
             [
                 'title' => get_string('managecohorts', 'block_sceh_dashboard'),
@@ -127,7 +129,9 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('competencyframework', 'block_sceh_dashboard'),
                 'icon' => 'fa-sitemap',
                 'color' => 'green',
-                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php'),
+                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                    'pagecontextid' => $systemcontext->id,
+                ]),
             ],
             [
                 'title' => get_string('attendancereports', 'block_sceh_dashboard'),
@@ -175,12 +179,16 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_program_owner_cards($userid) {
+        $systemcontext = context_system::instance();
+
         $cards = [
             [
                 'title' => get_string('competencyframework', 'block_sceh_dashboard'),
                 'icon' => 'fa-sitemap',
                 'color' => 'green',
-                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php'),
+                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                    'pagecontextid' => $systemcontext->id,
+                ]),
             ],
             [
                 'title' => get_string('customreports', 'block_sceh_dashboard'),

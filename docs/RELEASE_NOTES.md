@@ -4,6 +4,23 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Fix competency framework dashboard link context
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Updated the dashboard `Competency Framework` card links to include `pagecontextid` for:
+- System Admin view in `get_system_admin_cards()`
+- Program Owner view in `get_program_owner_cards()`
+
+### Why
+Moodle competency framework page requires `pagecontextid` in this flow. Without it, users hit a `missingparam` error from `required_param('pagecontextid')`.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added system context parameter to competency framework URLs
+
+---
+
 ## [v1.3.0] — Week 1-2 Implementation: Role Separation & RBAC Foundation
 
 **Date**: 2026-02-13  
