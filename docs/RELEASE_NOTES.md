@@ -4,6 +4,25 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Fix Attendance Reports parity on MoodleHQ stack
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added the Attendance activity plugin to the new MoodleHQ stack so existing attendance URLs resolve.
+- Updated Sysadmin dashboard Attendance Reports card routing to open an enrolled course first.
+- Kept a safe fallback to `My courses` when no enrolled course is available.
+
+### Why
+After migration, Attendance Reports card navigation showed missing-file and enrollment issues on the new stack. This change restores behavior parity with the earlier environment and keeps card navigation usable for mock role testing.
+
+### Files touched
+- `mod/attendance` — Added attendance module used by existing dashboard links
+- `docker-compose.moodlehq.yml` — Mounted attendance module into Moodle web and cron containers
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Updated sysadmin attendance link selection to use enrolled courses
+
+---
+
 ## [2026-02-13] — Add maintained MoodleHQ dev stack (Moodle 5.1 + MySQL 8)
 
 **Commit**: `PENDING` on branch `front-end-explorations`

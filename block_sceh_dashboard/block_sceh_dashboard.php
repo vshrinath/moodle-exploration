@@ -119,12 +119,12 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_system_admin_cards() {
-        global $DB;
+        global $DB, $USER;
         
         $systemcontext = context_system::instance();
         $cards = [];
         $attendanceurl = new moodle_url('/my/courses.php');
-        $attendancecourseid = $this->get_first_regular_course_id();
+        $attendancecourseid = $this->get_first_enrolled_course_id($USER->id);
 
         if ($attendancecourseid) {
             $attendanceurl = new moodle_url('/mod/attendance/index.php', ['id' => $attendancecourseid]);
@@ -431,6 +431,26 @@ class block_sceh_dashboard extends block_base {
         }
 
         return (int)$courseid;
+    }
+
+    /**
+     * Get first enrolled course id for a user.
+     *
+     * @param int $userid
+     * @return int
+     */
+    private function get_first_enrolled_course_id($userid) {
+        $courses = enrol_get_users_courses($userid, true, 'id');
+        if (empty($courses)) {
+            return 0;
+        }
+
+        $courseids = array_map(function($course) {
+            return (int)$course->id;
+        }, $courses);
+        sort($courseids, SORT_NUMERIC);
+
+        return (int)reset($courseids);
     }
     
 
