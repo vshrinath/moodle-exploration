@@ -4,6 +4,164 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Operations Guide: Backup, Reporting, Grading & Audit
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Created comprehensive operations guide covering backup/disaster recovery, reporting/analytics, assessment/grading, audit logs, and scaling
+- Documented automated backup strategy (daily, weekly, monthly) with scripts and retention policies
+- Defined 6 essential reports: cohort performance, trainer effectiveness, program health, learner progress, competency achievement, attendance
+- Explained 3 grading scales (percentage, competency, pass/fail), rubric creation, and peer assessment workflow
+- Documented audit log access, important events, compliance reporting, and retention policies
+- Provided scaling guidance for 2000 users including performance optimization and capacity planning
+
+### Why
+Operational procedures are critical for system reliability and compliance. The guide addresses: (1) Backup & DR to prevent data loss with automated daily/weekly/monthly backups and recovery procedures, (2) Reporting to monitor program health and trainer effectiveness with 6 automated reports, (3) Grading to ensure consistent assessment with rubrics and peer review, (4) Audit logs for compliance and security monitoring with 180-day retention, (5) Scaling for 2000 users with caching, database optimization, and external video hosting.
+
+### Files touched
+- `docs/OPERATIONS_GUIDE.md` — Complete operational procedures for backup, reporting, grading, audit, and scaling (2000 users)
+
+---
+
+## [2026-02-13] — Category-Based Program Ownership
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Added Week 1.5 to pragmatic implementation guide: Category-Based Program Ownership
+- Documented how Program Owners can create programs autonomously in assigned categories
+- Added System Admin workflows for creating categories and assigning Program Owners
+- Added Program Owner workflows for creating programs in their category
+- Included dashboard code for showing only assigned categories
+- Explained benefits: Program Owners are autonomous, System Admin not a bottleneck
+
+### Why
+Without category-based permissions, System Admin must create every program, becoming a bottleneck. With categories, Program Owners can create programs in their assigned category (e.g., "Allied Health Programs") while remaining unable to see other categories (e.g., "Surgical Fellowships"). This enables autonomous program creation while maintaining clear separation between program areas. Critical for scalability.
+
+### Files touched
+- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Added Week 1.5 with category setup and dashboard code
+- `docs/USER_WORKFLOWS.md` — Added System Admin category workflows and Program Owner category-aware workflows
+
+---
+
+## [2026-02-13] — Program Structure with Weekly Organization
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Added comprehensive documentation for program structure with streams and weekly organization
+- Illustrated Allied Assist Program as complete example with 3 streams
+- Documented use of Labels for weekly organization within sections
+- Explained competency mapping per stream with concrete examples
+- Clarified when to use streams vs separate programs
+
+### Why
+Users needed clarity on how to structure programs with specializations (streams) and how to organize content by weeks. The Label-based approach (Option B) provides flexibility to move content between weeks without affecting other sections, while maintaining clear visual progression for learners. The Allied Assist Program example demonstrates the complete hierarchy: Program → Streams → Weeks → Activities → Competencies.
+
+### Files touched
+- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Enhanced Weeks 3-4 section with complete structure examples and weekly organization
+- `docs/USER_WORKFLOWS.md` — Added detailed structure workflow and complete Allied Assist Program example
+
+---
+
+## [2026-02-13] — Trainer Coach Capability Documentation
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Added optional Trainer Coach capability to pragmatic implementation guide (Week 6)
+- Updated user workflows with Trainer Coach setup and operational procedures
+- Documented cohort-based approach (no new role needed)
+- Added trainer performance monitoring views and metrics
+- Included Trainer Training Program (meta-course) concept
+
+### Why
+Trainer quality oversight is critical for program success. Rather than creating a 4th role, we enhance the existing Trainer role with an optional coaching capability. Trainers in the "Trainer Coaches" cohort see additional dashboard sections showing all trainers' performance metrics, enabling them to identify struggling trainers and provide targeted coaching. This approach is simpler than a separate role and allows coaches to also deliver training.
+
+### Files touched
+- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Added Week 6 (optional) with Trainer Coach implementation
+- `docs/USER_WORKFLOWS.md` — Added Trainer Coach workflows, setup procedures, and monitoring capabilities
+
+---
+
+## [2026-02-13] — User Workflows Documentation
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Created comprehensive user workflows documentation covering all four roles
+- Documented detailed step-by-step procedures for common tasks
+- Added missing pieces: badge system, trainer performance monitoring, automated reporting
+- Included critical dependencies and workflow sequences
+- Provided time estimates for each workflow
+
+### Why
+Users need a complete reference for understanding how to use the system. This document serves as both training material and operational reference, covering everything from initial setup to daily operations. It addresses the complete user journey including badge awarding (trainers), trainer performance monitoring (system admin), and automated reporting setup.
+
+### Files touched
+- `docs/USER_WORKFLOWS.md` — Complete workflows for System Admin, Program Owner, Trainer, and Learner roles with detailed steps
+
+---
+
+## [2026-02-13] — Pragmatic Implementation Guide
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Created comprehensive implementation guide for pragmatic approach
+- Documented 5-week plan with detailed tasks for each week
+- Provided code examples for role separation, cohort filtering, stream support, and dashboard polish
+- Explained Moodle core concepts for developers new to Moodle
+- Documented benefits, tradeoffs, and decision criteria
+
+### Why
+The pragmatic approach leverages Moodle's existing features (courses, sections, cohorts, roles) rather than building custom systems. This guide provides concrete implementation steps with code examples so developers can execute the 5-week plan. It explains what Moodle already provides and how to configure it correctly, making it accessible to developers unfamiliar with Moodle.
+
+### Files touched
+- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Complete implementation guide with code examples, tradeoffs, and decision criteria
+
+---
+
+## [2026-02-13] — Pragmatic Approach Analysis
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Created pragmatic analysis of requirements vs. Moodle capabilities
+- Identified what Moodle already provides (competency framework, cohorts, roles, courses)
+- Proposed 5-week pragmatic path vs. 24-week comprehensive rebuild
+- Defined 4 phases: Role Separation (1w), Trainer Filtering (1w), Stream Support (2w), Dashboard Polish (1w)
+
+### Why
+The comprehensive requirements propose building custom entities (Programs, Streams, Content Assets) that largely duplicate existing Moodle features. This analysis applies RULE 1 (Simplest Solution First) to identify what we can achieve by configuring and extending Moodle rather than rebuilding it. The pragmatic approach delivers 80% of the value in 20% of the time by using courses as programs, sections as streams, and custom roles for RBAC.
+
+### Files touched
+- `.kiro/specs/ux-simplification/pragmatic-approach.md` — Complete analysis with tradeoffs and recommendation
+
+---
+
+## [2026-02-13] — UX Simplification & RBAC Requirements Complete
+
+**Branch**: `front-end-explorations`
+
+### What changed
+- Completed comprehensive requirements document for UX simplification and RBAC enhancement
+- Aligned requirements with PRD (Role, architecture and more.md) and 40 user stories
+- Defined 5 custom roles: System Admin, Program Owner, Trainer, Trainer Coach, Learner
+- Specified Program/Stream/Learning Path architecture separate from Moodle courses
+- Defined Content Asset Library for reusable, versioned content
+- Created 12-sprint roadmap (24 weeks / 6 months)
+- Added traceability matrix mapping all 40 user stories to functional requirements
+
+### Why
+The current Moodle implementation has fundamental architectural misalignment with the required learning system. Generic LMS roles (Manager, Teacher, Student) don't support the 3-layer responsibility model (Learning Design Authority, Delivery & Enablement, Oversight & Insight). This requirements document provides a complete specification for rebuilding the system to support Programs with Focus Streams, role-based dashboards, and reusable content assets.
+
+### Files touched
+- `.kiro/specs/ux-simplification/requirements.md` — Completed all sections: roles, functional requirements, success metrics, timeline, traceability matrix
+
+---
+
 ## [2026-02-13] — Security Hardening and Code Quality Improvements
 
 **Branch**: `front-end-explorations`
