@@ -26,3 +26,4 @@ $string['customreports'] = 'Custom Reports';
 $string['rosterrules'] = 'Roster Rules';
 $string['streamcardprefix'] = 'Stream: {$a}';
 $string['streamcount'] = '{$a} streams';
+$string['streamsetupcheck'] = 'Stream Setup Check';

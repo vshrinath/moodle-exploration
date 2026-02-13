@@ -244,6 +244,12 @@ class block_sceh_dashboard extends block_base {
                 'color' => 'orange',
                 'url' => new moodle_url('/admin/category.php', ['category' => 'reports']),
             ],
+            [
+                'title' => get_string('streamsetupcheck', 'block_sceh_dashboard'),
+                'icon' => 'fa-tasks',
+                'color' => 'indigo',
+                'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php'),
+            ],
         ];
 
         $categories = $this->get_program_owner_categories($userid);

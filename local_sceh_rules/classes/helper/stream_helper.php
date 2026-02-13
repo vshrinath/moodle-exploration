@@ -202,4 +202,23 @@ class stream_helper {
         sort($sections);
         return array_values(array_unique($sections));
     }
+
+    /**
+     * Check whether a course has a named Common Foundation section.
+     *
+     * @param int $courseid
+     * @return bool
+     */
+    public static function has_named_common_foundation_section($courseid) {
+        global $DB;
+
+        return $DB->record_exists_select(
+            'course_sections',
+            'course = :courseid AND section > 0 AND LOWER(name) LIKE :commonname',
+            [
+                'courseid' => $courseid,
+                'commonname' => 'common%',
+            ]
+        );
+    }
 }

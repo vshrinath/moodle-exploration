@@ -4,6 +4,33 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Add stage 4 program-owner stream setup checklist
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a new Program Owner page: `Stream Setup Check`.
+- The page validates stream readiness for a selected course with pass/fail checks:
+  - named Common Foundation section exists
+  - at least one stream section exists (`STREAM - ...`)
+  - stream Choice activity exists with options
+- Added a Program Owner dashboard card to open this checklist directly.
+- Added labels/messages for checklist items, status, and details.
+
+### Why
+Stage 4 helps Program Owners verify stream configuration before delivery starts. A read-only checklist gives quick visibility into setup quality without making automatic changes to course structure.
+
+We reused `stream_helper` for shared section checks so setup validation stays consistent with trainer and learner stream behavior.
+
+### Files touched
+- `local_sceh_rules/stream_setup_check.php` — New read-only stream setup checklist page
+- `local_sceh_rules/classes/helper/stream_helper.php` — Added common-foundation presence check helper
+- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added checklist labels and status strings
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added Program Owner `Stream Setup Check` card
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added `streamsetupcheck` card label
+
+---
+
 ## [2026-02-13] — Add stage 3 stream-filtered learner progress view
 
 **Commit**: `PENDING` on branch `front-end-explorations`
