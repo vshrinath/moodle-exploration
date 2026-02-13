@@ -4,6 +4,30 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — PRD and User Stories Documentation
+
+**Commit**: `5e95c4e`  
+**Branch**: `front-end-explorations`  
+**Tag**: `v1.2.0-ux-operations-docs`
+
+### What changed
+- Added Product Requirements Document (PRD) covering role architecture, streams, and learning paths
+- Added 40 user stories with acceptance criteria across all roles
+- Documented 3-layer responsibility model: Learning Design Authority, Delivery & Enablement, Oversight & Insight
+- Defined 5 core roles with clear responsibilities and ownership mapping
+- Explained structural distinctions: Cohort, Focus Stream, Learning Path
+- Provided concrete examples across different program types (instructor-led, self-paced, hybrid)
+- Included use cases for middle management programs, policy rollouts, and domain-specific upskilling
+
+### Why
+The PRD establishes the foundational architecture for the entire system. The 3-layer responsibility model prevents role confusion (trainer ≠ curriculum designer) and enables scale without quality loss. The user stories translate conceptual models into testable behaviors, providing a basis for detailed requirements, estimation, and implementation. This documentation ensures all stakeholders understand what each role can do and why the system is structured this way.
+
+### Files touched
+- `docs/PRD - Role, architecture and more.md` — Complete role architecture, responsibility layers, and structural distinctions
+- `docs/User stories and acceptance criteria.md` — 40 user stories covering all roles with acceptance criteria
+
+---
+
 ## [2026-02-13] — Operations Guide: Backup, Reporting, Grading & Audit
 
 **Branch**: `front-end-explorations`
