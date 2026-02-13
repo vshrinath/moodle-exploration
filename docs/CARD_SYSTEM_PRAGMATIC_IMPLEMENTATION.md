@@ -65,19 +65,22 @@ class sceh_card {
 
 **Reuse what Moodle provides:**
 - ✅ `html_writer` for HTML generation
-- ✅ Bootstrap utility classes (`badge`, `btn`, `text-success`, etc.)
+- ✅ Bootstrap/Moodle utility classes (`badge`, `btn`, `text-success`, etc.)
 - ✅ Existing plugin styles (don't reinvent)
 - ❌ Don't introduce new frontend framework
 - ❌ Don't add build step (webpack, npm, etc.)
 
 **Example:**
 ```php
-// Good: Uses Moodle patterns
-return html_writer::tag('span', $text, ['class' => 'badge badge-success']);
+// Good: Uses Moodle-safe utility classes (Moodle 5 / Bootstrap 5 style)
+return html_writer::tag('span', $text, ['class' => 'badge text-bg-success']);
 
 // Bad: Custom HTML string concatenation
 return '<span class="custom-badge green">' . $text . '</span>';
 ```
+
+**Compatibility note:**
+- If the active theme overrides badge styling, keep `badge` and move color to local `sceh-*` helper classes instead of relying on deprecated Bootstrap 4 variants.
 
 ### Validation Criteria for "Done"
 
@@ -205,8 +208,9 @@ class sceh_card {
      * @return string HTML
      */
     private static function render_badge($text, $type = 'info') {
+        // Use text-bg-* to align with Moodle 5 / Bootstrap 5 patterns.
         return \html_writer::tag('span', $text, [
-            'class' => 'badge badge-' . $type
+            'class' => 'badge text-bg-' . $type
         ]);
     }
     

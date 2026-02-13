@@ -2,15 +2,14 @@
 
 ## Overview
 
-This document defines the atomic card component system for the SCEH Learning Platform. The system uses composable components (atoms → molecules → organisms) to build flexible, consistent UI cards.
+This document defines the pragmatic card component system for the SCEH Learning Platform. Phase 1 uses one renderer class with internal helper methods to build flexible, consistent UI cards.
 
 ## Design Philosophy
 
-**Atomic Design Approach:**
-- **Atoms**: Basic building blocks (icon, text, badge, button)
-- **Molecules**: Simple combinations (stat display, action bar, list item)
-- **Organisms**: Complete cards assembled from molecules
-- **Templates**: Page layouts using card grids
+**Pragmatic Composition Approach (Phase 1):**
+- **Helpers (private methods)**: Basic building blocks (icon, text, badge, button, stat)
+- **Template methods (public)**: Complete cards assembled from helper methods
+- **Card grid layouts**: Page-level composition
 
 **Key Principles:**
 1. **Composability**: Build complex cards from simple components
@@ -87,83 +86,27 @@ This document defines the atomic card component system for the SCEH Learning Pla
 
 ---
 
-## Atomic Components (Level 1: Atoms)
+## Phase 1 Renderer API (Single Class)
 
-### 1. Icon
+Phase 1 uses one renderer class (`local_sceh_rules/classes/output/sceh_card.php`) with private helper methods and four public templates. This is the implementation source of truth.
+
+**Helper methods (private):**
 ```php
-sceh_atom::icon($name, $color = null, $size = 'default')
-// Returns: <i class="fa fa-{$name} {$color} {$size}"></i>
+render_icon($name, $color = null, $size = 'default')
+render_badge($text, $type = 'info')
+render_button($text, $url, $style = 'primary')
+render_stat($value, $label, $icon = null)
+render_card_header($config)
+status_indicator($status, $text, $details = null)
 ```
 
-### 2. Badge
-```php
-sceh_atom::badge($text, $type = 'info')
-// Types: success, info, warning, danger, neutral
-// Returns: <span class="badge badge-{$type}">{$text}</span>
-```
-
-### 3. Button
-```php
-sceh_atom::button($text, $url, $style = 'primary')
-// Styles: primary, secondary, success, danger, link
-// Returns: <a href="{$url}" class="btn btn-{$style}">{$text}</a>
-```
-
-### 4. Progress Bar
-```php
-sceh_atom::progress($percentage, $color = 'info')
-// Returns: <div class="progress">...</div>
-```
-
-### 5. Stat Value
-```php
-sceh_atom::stat($value, $label, $icon = null)
-// Returns: <div class="sceh-stat">...</div>
-```
+**Moodle/Bootstrap compatibility note:**
+- Prefer Moodle-compatible utility classes (`btn`, `btn-primary`, `text-success`, etc.)
+- For badge styles, verify class names against the active Moodle theme before implementation.
 
 ---
 
-## Molecular Components (Level 2: Molecules)
-
-### 1. Card Header
-```php
-sceh_molecule::card_header($config)
-// Config: title, subtitle, icon, badges, actions
-// Returns: Complete card header HTML
-```
-
-### 2. Stat Grid
-```php
-sceh_molecule::stat_grid($stats)
-// Stats: array of [value, label, icon, color]
-// Returns: Grid of stat displays
-```
-
-### 3. List Item
-```php
-sceh_molecule::list_item($config)
-// Config: icon, text, subtext, actions, status
-// Returns: Single list item HTML
-```
-
-### 4. Action Bar
-```php
-sceh_molecule::action_bar($buttons)
-// Buttons: array of button configs
-// Returns: Row of action buttons
-```
-
-### 5. Status Indicator
-```php
-sceh_molecule::status_indicator($status, $text, $details = null)
-// Status: success, warning, danger, info
-// Returns: Colored status display with icon
-```
-
-
----
-
-## Card Templates (Level 3: Organisms)
+## Card Templates (Phase 1)
 
 ### Template 1: Simple Card (Navigation/Metrics)
 **Use for:** Dashboard navigation, quick metrics
@@ -280,7 +223,7 @@ sceh_card::detail([
         ],
         [
             'title' => 'Trend (30 days)',
-            'content' => sceh_atom::progress(80, 'success')
+            'content' => '80% completion in last 30 days'
         ]
     ],
     'actions' => [
@@ -309,70 +252,36 @@ sceh_card::detail([
 └─────────────────────────────────────────┘
 ```
 
-### Template 5: Chart Card (Visualizations)
-**Use for:** Trends, comparisons, analytics
+### Deferred Templates (Not in Phase 1)
+**Deferred:** Chart and Activity cards
 
-```php
-sceh_card::chart([
-    'size' => 'large',
-    'title' => 'Attendance Trend',
-    'chart_type' => 'line',
-    'data' => [...],
-    'footer' => 'Last 6 months'
-]);
-```
-
-### Template 6: Activity Card (Timeline/Feed)
-**Use for:** Recent activity, notifications, logs
-
-```php
-sceh_card::activity([
-    'size' => 'medium',
-    'title' => 'Recent Activity',
-    'items' => [
-        ['time' => '2 hours ago', 'icon' => 'check', 'text' => 'Dr. Patel submitted Case #45', 'status' => 'success'],
-        ['time' => '5 hours ago', 'icon' => 'warning', 'text' => 'Attendance below threshold', 'status' => 'warning']
-    ]
-]);
-```
+- `chart` template is intentionally deferred until a charting requirement and library decision are confirmed.
+- `activity` template is intentionally deferred until timeline/feed behavior is needed.
 
 ---
 
-## Simplest Implementation: Atomic Library
+## Simplest Implementation: Single Renderer Class
 
 ### Core Philosophy
-**Build complex from simple** - Every card is assembled from atoms and molecules.
+**Build complex from simple** - Every card is assembled from internal helper methods.
 
 ### Implementation Layers
 
-**Layer 1: Atoms (5 components)**
+**Layer 1: Helper Methods (private, in `sceh_card`)**
 ```php
-// local_sceh_rules/classes/output/sceh_atom.php
-class sceh_atom {
-    public static function icon($name, $color = null, $size = 'default') { }
-    public static function badge($text, $type = 'info') { }
-    public static function button($text, $url, $style = 'primary') { }
-    public static function progress($percentage, $color = 'info') { }
-    public static function stat($value, $label, $icon = null) { }
+// local_sceh_rules/classes/output/sceh_card.php
+class sceh_card {
+    private static function render_icon($name, $color = null, $size = 'default') { }
+    private static function render_badge($text, $type = 'info') { }
+    private static function render_button($text, $url, $style = 'primary') { }
+    private static function render_stat($value, $label, $icon = null) { }
+    private static function render_card_header($config) { }
+    private static function status_indicator($status, $text, $details = null) { }
 }
 ```
-**Complexity: LOW** - Simple HTML generation, no logic
+**Complexity: LOW** - Simple HTML generation, no extra class split
 
-**Layer 2: Molecules (5 components)**
-```php
-// local_sceh_rules/classes/output/sceh_molecule.php
-class sceh_molecule {
-    public static function card_header($config) { }
-    public static function stat_grid($stats) { }
-    public static function list_item($config) { }
-    public static function action_bar($buttons) { }
-    public static function status_indicator($status, $text, $details = null) { }
-}
-```
-**Complexity: LOW-MEDIUM** - Combines atoms, minimal logic
-
-
-**Layer 3: Card Templates (6 templates)**
+**Layer 2: Card Templates (4 templates in Phase 1)**
 ```php
 // local_sceh_rules/classes/output/sceh_card.php
 class sceh_card {
@@ -380,8 +289,6 @@ class sceh_card {
     public static function metric($config) { }      // KPIs with thresholds
     public static function list($config) { }        // Items with actions
     public static function detail($config) { }      // Rich content
-    public static function chart($config) { }       // Visualizations
-    public static function activity($config) { }    // Timeline/feed
     
     // Helper for rendering any card
     private static function render($config, $content) {
@@ -395,25 +302,23 @@ class sceh_card {
 ### Complexity Analysis
 
 **What's Simple:**
-1. ✅ **Atoms** - Just HTML wrappers (1-2 hours total)
-2. ✅ **Molecules** - Combine atoms (2-3 hours total)
-3. ✅ **Simple/Metric cards** - Straightforward assembly (1 hour)
-4. ✅ **CSS** - Grid + status colors (2 hours)
+1. ✅ **Helpers** - Just HTML wrappers (1-2 hours total)
+2. ✅ **Simple/Metric cards** - Straightforward assembly (1 hour)
+3. ✅ **CSS** - Grid + status colors (2 hours)
 
 **What's Moderate:**
-5. ⚠️ **List card** - Iteration logic (2 hours)
-6. ⚠️ **Detail card** - Multiple sections (2 hours)
-7. ⚠️ **Status logic** - Threshold calculations (1 hour)
+4. ⚠️ **List card** - Iteration logic (2 hours)
+5. ⚠️ **Detail card** - Multiple sections (2 hours)
+6. ⚠️ **Status logic** - Threshold calculations (1 hour)
 
 **What's Complex:**
-8. ❌ **Chart card** - Requires charting library (4-6 hours)
-9. ❌ **Activity card** - Time formatting, icons (2-3 hours)
+7. ❌ **Chart card** - Requires charting library (4-6 hours)
+8. ❌ **Activity card** - Time formatting, icons (2-3 hours)
 
 ### Recommended Phased Approach
 
 **Phase 1: Foundation (1 day)**
-- Atoms (5 components)
-- Molecules (5 components)
+- Helper methods (in `sceh_card`)
 - CSS system
 - Simple + Metric cards
 
@@ -613,15 +518,15 @@ $cards[] = sceh_card::detail([
     'sections' => [
         [
             'title' => 'Attendance',
-            'content' => sceh_atom::progress(82, 'success') . ' 82%'
+            'content' => '82% (last 30 days)'
         ],
         [
             'title' => 'Completion',
-            'content' => sceh_atom::progress(67, 'warning') . ' 67%'
+            'content' => '67% (last 30 days)'
         ],
         [
             'title' => 'Engagement',
-            'content' => sceh_atom::progress(89, 'success') . ' 89%'
+            'content' => '89% (last 30 days)'
         ]
     ],
     'actions' => [
@@ -660,60 +565,89 @@ echo html_writer::end_div();
 
 ---
 
-## Implementation Roadmap
+## Implementation Roadmap (REVISED - PRAGMATIC)
 
-### Week 5: Card System Foundation (2 days)
+### Phase 1: Minimum Viable Card System (2 days)
 
-**Day 1: Atomic Components + CSS**
-- Create `sceh_atom.php` (5 atoms)
-- Create `sceh_molecule.php` (5 molecules)
-- Create `sceh_card_system.css` (grid + status colors)
-- Create `sceh_card.php` (simple + metric templates)
+**SCOPE LOCK - Implement Only:**
+- **Helpers**: icon, badge, button, stat
+- **Molecules**: card_header, status_indicator
+- **Templates**: simple, metric, list, detail
+- **CSS**: Grid + status colors (Bootstrap-based)
+
+**DEFER COMPLETELY:**
+- ❌ Chart card (requires charting library)
+- ❌ Activity card (time formatting complexity)
+- ❌ Full atom/molecule class split (add only if duplication appears)
+
+**Day 1: Single Renderer Class + CSS**
+- Create `local_sceh_rules/classes/output/sceh_card.php` (ONE class)
+- Add helper methods: `render_icon()`, `render_badge()`, `render_button()`, `render_stat()`
+- Add card methods: `simple()`, `metric()`, `list()`, `detail()`
+- Create `local_sceh_rules/styles/sceh_card_system.css`
+- Use existing Moodle patterns: `html_writer`, Bootstrap classes
 - Test with sample data
 
-**Day 2: Core Templates + Rules Pages**
-- Add list template to `sceh_card.php`
-- Add detail template to `sceh_card.php`
+**Day 2: Convert Rules Pages**
 - Convert `attendance_rules.php` to use cards
 - Convert `roster_rules.php` to use cards
+- Preserve functionality 1:1 (no feature changes)
+- Test responsive behavior (desktop → tablet → mobile)
+- Test keyboard navigation (tab order, focus indicators)
 - Test with mock users
 
-### Week 6: Dashboard Enhancement (Optional, 1-2 days)
+**Validation Criteria for "Done":**
+1. ✅ Both rules pages use card layout
+2. ✅ All existing functionality preserved
+3. ✅ Responsive on mobile/tablet/desktop
+4. ✅ Keyboard accessible (tab navigation works)
+5. ✅ Status colors work (green/yellow/red based on data)
+6. ✅ No new dependencies added
+7. ✅ No console errors or warnings
 
-**Extend to dashboards:**
-- Trainer dashboard with cohort cards
-- System admin dashboard with program health cards
-- Add activity card template (if needed)
-- Add chart card template (if needed)
+### Future: Progressive Enhancement (As Needed)
 
-### Future: Progressive Enhancement
+**Only add when duplication appears:**
+- Split into atom/molecule classes if helper methods get duplicated
+- Add chart card if visualization becomes requirement
+- Add activity card if timeline/feed becomes requirement
 
-**As needed:**
+**Extend to other pages:**
+- Trainer dashboard cohort cards
+- System admin program health cards
 - Cohort management card view
 - Category/course drill-down cards
-- Badge gallery cards
-- Competency browser cards
-- Learner progress cards
 
 ---
 
-## File Structure
+## File Structure (REVISED - SINGLE OWNERSHIP)
 
 ```
 local_sceh_rules/
 ├── classes/
 │   └── output/
-│       ├── sceh_atom.php          # 5 atomic components
-│       ├── sceh_molecule.php      # 5 molecular components
-│       └── sceh_card.php          # 6 card templates
+│       └── sceh_card.php          # ONE class with all card logic
 ├── styles/
 │   └── sceh_card_system.css       # Card styling + grid
 └── tests/
     └── card_system_test.php       # Component tests
 
 block_sceh_dashboard/
-└── styles.css                      # Existing dashboard styles (keep)
+└── styles.css                      # Existing dashboard styles (keep, don't touch)
 ```
+
+**Ownership Decision:**
+- ✅ All card renderers in `local_sceh_rules/classes/output/sceh_card.php`
+- ✅ Single source of truth for card system
+- ✅ Dashboard block uses cards by calling `sceh_card::simple()` etc.
+- ❌ Don't split ownership across plugins
+- ❌ Don't create separate atom/molecule classes until duplication appears
+
+**Why local_sceh_rules?**
+- Rules pages are first use case
+- Central location for shared components
+- Dashboard block can depend on it
+- Other plugins can use it too
 
 ---
 
@@ -807,25 +741,24 @@ block_sceh_dashboard/
 
 ## Summary: Simplest Solution
 
-**Atomic library is the simplest approach because:**
+**Single renderer class is the simplest Phase 1 approach because:**
 
 1. ✅ **Small, focused components** - Each does one thing well
-2. ✅ **Easy to test** - Test atoms, molecules, then cards
-3. ✅ **Easy to extend** - Add new atoms/molecules as needed
-4. ✅ **Consistent output** - Same atoms = same look everywhere
+2. ✅ **Easy to test** - Test helper output, then card templates
+3. ✅ **Easy to extend** - Add helper methods as needed
+4. ✅ **Consistent output** - Same helper methods = same look everywhere
 5. ✅ **Low maintenance** - Fix once, works everywhere
 6. ✅ **Easy to learn** - Developers understand composition
-7. ✅ **Flexible** - Combine atoms differently for new cards
+7. ✅ **Flexible** - Reuse helpers across templates
 
 **Complexity breakdown:**
-- Atoms: SIMPLE (just HTML wrappers)
-- Molecules: SIMPLE (combine atoms)
+- Helpers: SIMPLE (just HTML wrappers)
 - Simple/Metric cards: SIMPLE (straightforward assembly)
 - List/Detail cards: MODERATE (iteration + sections)
 - Chart/Activity cards: COMPLEX (optional, add later)
 
 **Recommended start:**
-- Phase 1 (2 days): Atoms + Molecules + Simple/Metric/List/Detail cards
+- Phase 1 (2 days): Single `sceh_card` class + Simple/Metric/List/Detail cards
 - Apply to rules pages immediately
 - Extend to other pages as needed
 
@@ -834,4 +767,3 @@ block_sceh_dashboard/
 - ✅ Foundation for future cards
 - ✅ Consistent visual language
 - ✅ Easy to maintain and extend
-

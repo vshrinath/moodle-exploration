@@ -4,6 +4,25 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Align card system docs to one practical Phase 1 path
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Updated the card system specification and pragmatic guide so both describe the same Phase 1 implementation.
+- Standardized Phase 1 as one renderer class (`sceh_card`) with internal helper methods.
+- Marked advanced card types (chart and activity) as intentionally deferred, not part of Phase 1.
+- Updated badge styling guidance to match Moodle 5 / Bootstrap 5 examples.
+
+### Why
+The two documents had conflicting implementation guidance, which could lead to rework and inconsistent builds. This update gives one clear path for delivery and keeps implementation scope focused on what is needed now.
+
+### Files touched
+- `docs/CARD_SYSTEM_SPECIFICATION.md` — Aligned architecture, scope, and phased plan
+- `docs/CARD_SYSTEM_PRAGMATIC_IMPLEMENTATION.md` — Updated practical guidance and Moodle 5 badge examples
+
+---
+
 ## [2026-02-13] — Add stage 4 program-owner stream setup checklist
 
 **Commit**: `825e3cb` on branch `front-end-explorations`
