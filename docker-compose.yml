@@ -4,10 +4,10 @@ services:
     volumes:
       - 'mariadb_data:/bitnami/mariadb'
     environment:
-      - MARIADB_USER=bn_moodle
-      - MARIADB_DATABASE=bitnami_moodle
-      - MARIADB_PASSWORD=moodle_pass
-      - MARIADB_ROOT_PASSWORD=moodle_pass
+      - MARIADB_USER=${MARIADB_USER:-bn_moodle}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-bitnami_moodle}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
       - MARIADB_CHARACTER_SET=utf8mb4
       - MARIADB_COLLATE=utf8mb4_unicode_ci
   moodle:
@@ -21,12 +21,12 @@ services:
     depends_on:
       - mariadb
     environment:
-      - BITNAMI_DEBUG=true
+      - BITNAMI_DEBUG=${BITNAMI_DEBUG:-false}
       - MOODLE_DATABASE_HOST=mariadb
       - MOODLE_DATABASE_PORT_NUMBER=3306
-      - MOODLE_DATABASE_USER=bn_moodle
-      - MOODLE_DATABASE_NAME=bitnami_moodle
-      - MOODLE_DATABASE_PASSWORD=moodle_pass
+      - MOODLE_DATABASE_USER=${MARIADB_USER:-bn_moodle}
+      - MOODLE_DATABASE_NAME=${MARIADB_DATABASE:-bitnami_moodle}
+      - MOODLE_DATABASE_PASSWORD=${MARIADB_PASSWORD}
 volumes:
   mariadb_data:
     driver: local

@@ -1,0 +1,38 @@
+=== Program Structure Configuration ===
+
+Step 1: Creating program metadata table...
+✓ Table local_program_metadata already exists
+
+Step 2: Creating program category structure...
+✓ 'Programs' category already exists (ID: 2)
+  ✓ 'Technical Programs' subcategory already exists (ID: 3)
+  ✓ 'Management Programs' subcategory already exists (ID: 4)
+  ✓ 'Fellowship Programs' subcategory already exists (ID: 5)
+  ✓ 'Archived Programs' subcategory already exists (ID: 6)
+
+Step 3: Configuring Program Owner role...
+✓ Program Owner role already exists (ID: 9)
+  ✓ Assigned capability: moodle/course:create
+  ✓ Assigned capability: moodle/course:update
+  ✓ Assigned capability: moodle/course:view
+  ✓ Assigned capability: moodle/course:manageactivities
+  ✓ Assigned capability: moodle/competency:competencymanage
+  ✓ Assigned capability: moodle/competency:competencyview
+  ✓ Assigned capability: moodle/competency:planmanage
+  ✓ Assigned capability: moodle/competency:planview
+  ✓ Assigned capability: moodle/cohort:manage
+  ✓ Assigned capability: moodle/cohort:view
+  ✓ Assigned capability: moodle/backup:backupcourse
+  ✓ Assigned capability: moodle/restore:restorecourse
+
+Step 4: Creating sample program templates...
+✓ Program template 'TECH_PROG_001' already exists (ID: 33)
+✓ Program template 'FELLOW_OPHTHAL_001' already exists (ID: 34)
+
+=== Program Structure Configuration Complete ===
+
+Next steps:
+1. Assign users to Program Owner role for program management
+2. Create program-specific competency frameworks
+3. Use backup/restore for program versioning
+4. Configure cohorts for learner group management

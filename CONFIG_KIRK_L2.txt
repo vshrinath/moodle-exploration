@@ -1,0 +1,57 @@
+=== Kirkpatrick Level 2 (Learning) Assessment Framework Configuration ===
+
+Starting Level 2 (Learning) configuration...
+
+Creating Level 2 learning data table...
+✓ Created kirkpatrick_level2_learning table
+
+Creating assessment tracking table...
+✓ Created kirkpatrick_assessment_tracking table
+
+Configuring pre/post assessment comparison system...
+  - Configured: pre_assessment (Pre-training knowledge assessment)
+  - Configured: post_assessment (Post-training knowledge assessment)
+  - Configured: skill_demonstration (Practical skill demonstration)
+  - Configured: competency_evaluation (Competency-based evaluation)
+✓ Pre/post assessment system configured
+
+Configuring competency-based learning measurement...
+✓ Enabled competency framework
+✓ Enabled pushing course ratings to learning plans
+✓ Configured evidence collection
+  - Proficiency level: Not Yet Competent
+  - Proficiency level: Developing Competency
+  - Proficiency level: Competent
+  - Proficiency level: Proficient
+  - Proficiency level: Expert
+✓ Competency measurement configured
+
+Integrating badge system with learning verification...
+✓ Enabled badges system
+✓ Configured badge issuer settings
+  - Set auto_award_on_competency: 1
+  - Set require_all_competencies: 0
+  - Set badge_expiry_enabled: 0
+  - Set allow_external_backpack: 1
+✓ Badge-competency integration configured
+
+Creating learning analytics and progress visualization...
+✓ Enabled analytics engine
+  - Analytics model: students_at_risk (Identify learners at risk of not achieving competencies)
+  - Analytics model: no_teaching (Detect courses with insufficient teaching activity)
+  - Analytics model: no_recent_accesses (Identify learners with low engagement)
+✓ Learning analytics configured
+
+Configuring learning objectives tracking...
+✓ Enabled learning outcomes/objectives
+✓ Learning objectives tracking configured
+
+=== Level 2 (Learning) Configuration Complete ===
+
+Next Steps:
+1. Create pre-assessment quizzes for each training program
+2. Create corresponding post-assessments with similar content
+3. Map assessments to competencies in the competency framework
+4. Configure badge criteria based on competency achievement
+5. Test pre/post assessment comparison with sample learners
+6. Review learning analytics dashboards and adjust as needed

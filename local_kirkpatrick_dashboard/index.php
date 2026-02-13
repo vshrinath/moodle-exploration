@@ -60,6 +60,7 @@ echo html_writer::start_div('level-metrics row');
 $avg_satisfaction = $DB->get_field_sql(
     "SELECT AVG(satisfaction_score) FROM {kirkpatrick_level1_reaction}"
 );
+$avg_satisfaction = $avg_satisfaction !== false ? (float)$avg_satisfaction : 0.0;
 echo html_writer::start_div('metric-card col-md-3');
 echo html_writer::tag('h4', get_string('avgsatisfaction', 'local_kirkpatrick_dashboard'));
 echo html_writer::tag('div', number_format($avg_satisfaction, 1) . '/10', ['class' => 'metric-value']);
@@ -69,6 +70,7 @@ echo html_writer::end_div();
 $avg_engagement = $DB->get_field_sql(
     "SELECT AVG(engagement_rating) FROM {kirkpatrick_level1_reaction}"
 );
+$avg_engagement = $avg_engagement !== false ? (float)$avg_engagement : 0.0;
 echo html_writer::start_div('metric-card col-md-3');
 echo html_writer::tag('h4', get_string('avgengagement', 'local_kirkpatrick_dashboard'));
 echo html_writer::tag('div', number_format($avg_engagement, 1) . '/10', ['class' => 'metric-value']);
@@ -105,6 +107,7 @@ echo html_writer::start_div('level-metrics row');
 $avg_knowledge_gain = $DB->get_field_sql(
     "SELECT AVG(knowledge_gain) FROM {kirkpatrick_level2_learning}"
 );
+$avg_knowledge_gain = $avg_knowledge_gain !== false ? (float)$avg_knowledge_gain : 0.0;
 echo html_writer::start_div('metric-card col-md-3');
 echo html_writer::tag('h4', get_string('avgknowledgegain', 'local_kirkpatrick_dashboard'));
 echo html_writer::tag('div', number_format($avg_knowledge_gain, 1) . '%', ['class' => 'metric-value']);
@@ -148,6 +151,7 @@ echo html_writer::start_div('level-metrics row');
 $avg_performance = $DB->get_field_sql(
     "SELECT AVG(performance_rating) FROM {kirkpatrick_level3_behavior}"
 );
+$avg_performance = $avg_performance !== false ? (float)$avg_performance : 0.0;
 echo html_writer::start_div('metric-card col-md-3');
 echo html_writer::tag('h4', get_string('avgperformance', 'local_kirkpatrick_dashboard'));
 echo html_writer::tag('div', number_format($avg_performance, 1) . '/10', ['class' => 'metric-value']);
@@ -170,7 +174,7 @@ echo html_writer::end_div();
 // Follow-up completion rate
 $followup_scheduled = $DB->count_records('kirkpatrick_followup_schedule');
 $followup_completed = $DB->count_records('kirkpatrick_followup_schedule', ['status_30days' => 'completed']);
-$completion_rate = $followup_scheduled > 0 ? ($followup_completed / $followup_scheduled) * 100 : 0;
+$completion_rate = ($followup_scheduled > 0) ? (($followup_completed / $followup_scheduled) * 100) : 0.0;
 echo html_writer::start_div('metric-card col-md-3');
 echo html_writer::tag('h4', get_string('followupcompletion', 'local_kirkpatrick_dashboard'));
 echo html_writer::tag('div', number_format($completion_rate, 1) . '%', ['class' => 'metric-value']);
@@ -197,6 +201,7 @@ if ($level4_installed) {
     $total_savings = $DB->get_field_sql(
         "SELECT SUM(cost_savings) FROM {kirkpatrick_level4_results}"
     );
+    $total_savings = $total_savings !== false ? (float)$total_savings : 0.0;
     echo html_writer::start_div('metric-card col-md-3');
     echo html_writer::tag('h4', get_string('totalcostsavings', 'local_kirkpatrick_dashboard'));
     echo html_writer::tag('div', '$' . number_format($total_savings, 0), ['class' => 'metric-value']);
@@ -206,6 +211,7 @@ if ($level4_installed) {
     $avg_roi = $DB->get_field_sql(
         "SELECT AVG(roi_calculation) FROM {kirkpatrick_level4_results}"
     );
+    $avg_roi = $avg_roi !== false ? (float)$avg_roi : 0.0;
     echo html_writer::start_div('metric-card col-md-3');
     echo html_writer::tag('h4', get_string('avgroi', 'local_kirkpatrick_dashboard'));
     echo html_writer::tag('div', number_format($avg_roi, 1) . '%', ['class' => 'metric-value']);
@@ -215,6 +221,7 @@ if ($level4_installed) {
     $avg_productivity = $DB->get_field_sql(
         "SELECT AVG(productivity_improvement) FROM {kirkpatrick_level4_results}"
     );
+    $avg_productivity = $avg_productivity !== false ? (float)$avg_productivity : 0.0;
     echo html_writer::start_div('metric-card col-md-3');
     echo html_writer::tag('h4', get_string('avgproductivity', 'local_kirkpatrick_dashboard'));
     echo html_writer::tag('div', number_format($avg_productivity, 1) . '%', ['class' => 'metric-value']);

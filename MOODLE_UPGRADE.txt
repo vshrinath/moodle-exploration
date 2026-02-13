@@ -1,0 +1,72 @@
+-->mod_customcert
+++ Success (0.28 seconds) ++
+-->mod_scheduler
+++ Success (0.28 seconds) ++
+-->block_xp
+++ Success (0.03 seconds) ++
+-->customcertelement_bgimage
+++ Success (0.03 seconds) ++
+-->customcertelement_border
+++ Success (0.02 seconds) ++
+-->customcertelement_categoryname
+++ Success (0.02 seconds) ++
+-->customcertelement_code
+++ Success (0.02 seconds) ++
+-->customcertelement_coursefield
+++ Success (0.02 seconds) ++
+-->customcertelement_coursename
+++ Success (0.02 seconds) ++
+-->customcertelement_date
+++ Success (0.04 seconds) ++
+-->customcertelement_daterange
+++ Success (0.02 seconds) ++
+-->customcertelement_digitalsignature
+++ Success (0.02 seconds) ++
+-->customcertelement_expiry
+++ Success (0.02 seconds) ++
+-->customcertelement_grade
+++ Success (0.02 seconds) ++
+-->customcertelement_gradeitemname
+++ Success (0.03 seconds) ++
+-->customcertelement_image
+++ Success (0.02 seconds) ++
+-->customcertelement_qrcode
+++ Success (0.02 seconds) ++
+-->customcertelement_studentname
+++ Success (0.02 seconds) ++
+-->customcertelement_teachername
+++ Success (0.02 seconds) ++
+-->customcertelement_text
+++ Success (0.02 seconds) ++
+-->customcertelement_userfield
+++ Success (0.02 seconds) ++
+-->customcertelement_userpicture
+++ Success (0.02 seconds) ++
+== Setting new default values ==
+New setting: customcert/verifyallcertificates
+New setting: customcert/showposxy
+New setting: customcert/verifycertificate
+New setting: customcert/managetemplates
+New setting: customcert/uploadimage
+New setting: customcert/downloadallsitecerts
+New setting: customcert/certificatesperrun
+New setting: customcert/includeinnotvisiblecourses
+New setting: customcert/useadhoc
+New setting: customcert/certificateexecutionperiod
+New setting: customcert/returncourse
+New setting: customcert/codegenerationmethod
+New setting: customcert/emailstudents
+New setting: customcert/emailteachers
+New setting: customcert/emailothers
+New setting: customcert/verifyany
+New setting: customcert/requiredtime
+New setting: customcert/protection_print
+New setting: customcert/protection_modify
+New setting: customcert/protection_copy
+New setting: mod_scheduler/showemailplain
+New setting: mod_scheduler/groupscheduling
+New setting: mod_scheduler/mixindivgroup
+New setting: mod_scheduler/maxstudentlistsize
+New setting: mod_scheduler/uploadmaxfiles
+New setting: mod_scheduler/revealteachernotes
+Command line upgrade from 5.0.1 (Build: 20250609) (2025041401) to 5.0.1 (Build: 20250609) (2025041401) completed successfully.

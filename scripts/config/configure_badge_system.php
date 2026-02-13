@@ -100,61 +100,77 @@ $badge_templates = [
     ]
 ];
 
-$created_badges = [];
-foreach ($badge_templates as $template) {
-    $badge = new stdClass();
-    $badge->name = $template['name'];
-    $badge->description = $template['description'];
-    $badge->timecreated = time();
-    $badge->timemodified = time();
-    $badge->usercreated = $USER->id;
-    $badge->usermodified = $USER->id;
-    $badge->issuername = get_config('core', 'sitename');
-    $badge->issuerurl = $CFG->wwwroot;
-    $badge->issuercontact = get_config('core', 'supportemail');
-    $badge->expiredate = null; // No expiration
-    $badge->expireperiod = null;
-    $badge->type = $template['type'];
-    $badge->courseid = null; // Site-wide badges
-    $badge->messagesubject = 'Congratulations! You earned a badge';
-    $badge->message = 'You have earned the badge: ' . $template['name'];
-    $badge->attachment = 1; // Attach badge to notification
-    $badge->notification = 1; // Send notification
-    $badge->status = BADGE_STATUS_INACTIVE; // Start inactive, activate after criteria setup
-    $badge->version = '2.0'; // Open Badges 2.0
-    $badge->language = 'en';
-    $badge->imageauthorname = get_config('core', 'sitename');
-    $badge->imageauthoremail = get_config('core', 'supportemail');
-    $badge->imageauthorurl = $CFG->wwwroot;
-    $badge->imagecaption = $template['name'];
-    
-    $badge_id = $DB->insert_record('badge', $badge);
-    
-    $created_badges[] = [
-        'id' => $badge_id,
-        'name' => $template['name'],
-        'criteria_type' => $template['criteria_type'],
-        'level' => $template['level']
-    ];
-    
-    echo "  ✓ Created badge: {$template['name']} (ID: {$badge_id})\n";
-}
+// Start transaction for badge creation
+$transaction = $DB->start_delegated_transaction();
 
-echo "\n";
+try {
+    $created_badges = [];
+    foreach ($badge_templates as $template) {
+        $badge = new stdClass();
+        $badge->name = $template['name'];
+        $badge->description = $template['description'];
+        $badge->timecreated = time();
+        $badge->timemodified = time();
+        $badge->usercreated = $USER->id;
+        $badge->usermodified = $USER->id;
+        $badge->issuername = get_config('core', 'sitename');
+        $badge->issuerurl = $CFG->wwwroot;
+        $badge->issuercontact = get_config('core', 'supportemail');
+        $badge->expiredate = null; // No expiration
+        $badge->expireperiod = null;
+        $badge->type = $template['type'];
+        $badge->courseid = null; // Site-wide badges
+        $badge->messagesubject = 'Congratulations! You earned a badge';
+        $badge->message = 'You have earned the badge: ' . $template['name'];
+        $badge->attachment = 1; // Attach badge to notification
+        $badge->notification = 1; // Send notification
+        $badge->status = BADGE_STATUS_INACTIVE; // Start inactive, activate after criteria setup
+        $badge->version = '2.0'; // Open Badges 2.0
+        $badge->language = 'en';
+        $badge->imageauthorname = get_config('core', 'sitename');
+        $badge->imageauthoremail = get_config('core', 'supportemail');
+        $badge->imageauthorurl = $CFG->wwwroot;
+        $badge->imagecaption = $template['name'];
+        
+        $badge_id = $DB->insert_record('badge', $badge);
+        
+        $created_badges[] = [
+            'id' => $badge_id,
+            'name' => $template['name'],
+            'criteria_type' => $template['criteria_type'],
+            'level' => $template['level']
+        ];
+        
+        echo "  ✓ Created badge: {$template['name']} (ID: {$badge_id})\n";
+    }
 
-// Step 4: Configure badge criteria for competency-based awarding
-echo "Step 4: Configuring badge criteria...\n";
+    echo "\n";
 
-foreach ($created_badges as $badge_info) {
-    // Create criteria record
-    $criteria = new stdClass();
-    $criteria->badgeid = $badge_info['id'];
-    $criteria->criteriatype = BADGE_CRITERIA_TYPE_COMPETENCY; // Competency-based criteria
-    $criteria->method = BADGE_CRITERIA_AGGREGATION_ALL; // All competencies must be achieved
+    // Step 4: Configure badge criteria for competency-based awarding
+    echo "Step 4: Configuring badge criteria...\n";
+
+    foreach ($created_badges as $badge_info) {
+        // Create criteria record
+        $criteria = new stdClass();
+        $criteria->badgeid = $badge_info['id'];
+        $criteria->criteriatype = BADGE_CRITERIA_TYPE_COMPETENCY; // Competency-based criteria
+        $criteria->method = BADGE_CRITERIA_AGGREGATION_ALL; // All competencies must be achieved
+        
+        $criteria_id = $DB->insert_record('badge_criteria', $criteria);
+        
+        echo "  ✓ Configured {$badge_info['criteria_type']} criteria for: {$badge_info['name']}\n";
+    }
+
+    // Commit transaction
+    $transaction->allow_commit();
+    echo "\n✓ All badges and criteria created successfully (transaction committed)\n";
     
-    $criteria_id = $DB->insert_record('badge_criteria', $criteria);
-    
-    echo "  ✓ Configured {$badge_info['criteria_type']} criteria for: {$badge_info['name']}\n";
+} catch (Exception $e) {
+    // Rollback on error
+    $transaction->rollback($e);
+    echo "\n✗ Error creating badges: " . $e->getMessage() . "\n";
+    echo "✗ Transaction rolled back - no badges were created\n";
+    exit(1);
 }
 
 echo "\n";

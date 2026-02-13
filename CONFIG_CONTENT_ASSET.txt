@@ -1,0 +1,119 @@
+=== Configuring Content Asset Management ===
+
+Configuring content asset management system...
+
+--- Configuring Activity Templates ---
+✓ Enabled content bank for reusable content
+✓ Enabled relative dates for content reusability
+✓ Activity duplication enabled (core feature)
+  - Activities can be duplicated within courses
+  - Activities can be imported from other courses
+  - Activity settings preserved during duplication
+
+--- Configuring Content Sharing ---
+✓ Course import/export configured:
+  - Activities can be imported from other courses
+  - Content can be shared via course templates
+  - Backup files enable content portability
+
+✓ Content bank sharing configured:
+  - Content can be stored in content bank
+  - Content accessible across multiple courses
+  - Content organized by categories
+  - Content permissions managed by roles
+
+✓ Course template system configured:
+  - Courses can be designated as templates
+  - Templates contain reusable activities
+  - New courses can be created from templates
+  - Template updates don't affect existing courses
+
+--- Configuring Content Versioning ---
+✓ Enabled automated daily backups at 2:00 AM
+✓ Configured comprehensive backup settings
+✓ Configured backup retention (7 days)
+
+✓ Content versioning workflow:
+  - Automated daily backups create version snapshots
+  - Manual backups can be created anytime
+  - Backups include all activities and content
+  - Previous versions can be restored from backups
+  - Activity-level versioning via duplication
+
+--- Configuring Content Organization ---
+✓ Course categories configured:
+  - Content organized by program/subject
+  - Hierarchical category structure
+  - Category-level permissions
+
+✓ Content tagging enabled:
+  - Activities can be tagged for discovery
+  - Tags enable cross-program content search
+  - Tag collections for content organization
+
+✓ Custom fields configured:
+  - Course custom fields for metadata
+  - Activity custom fields for classification
+  - Custom fields aid content discovery
+
+--- Creating Content Templates ---
+! Test course not found, skipping template creation
+
+--- Content Asset Management Workflows ---
+
+1. Creating Reusable Content:
+   - Create activity in template course
+   - Configure activity with generic settings
+   - Add content to content bank if applicable
+   - Tag activity for easy discovery
+   - Document activity purpose and usage
+
+2. Sharing Content Across Programs:
+   - Method 1: Import activity from another course
+   - Method 2: Use course template with pre-built activities
+   - Method 3: Link to content bank items
+   - Method 4: Restore from backup file
+   - Content maintains competency mappings
+
+3. Content Versioning:
+   - Automated daily backups create snapshots
+   - Manual backup before major changes
+   - Duplicate activity to create new version
+   - Restore previous version from backup
+   - Version history tracked via backup logs
+
+4. Content Update Workflow:
+   - Update content in template course
+   - Create backup of updated version
+   - Existing courses retain old version
+   - New courses get updated version
+   - Manual update in existing courses if needed
+
+5. Content Discovery and Reuse:
+   - Search by tags and categories
+   - Browse content bank
+   - View course templates
+   - Import from backup library
+   - Filter by competency mappings
+
+--- Verifying Content Asset Management ---
+   ✓ Content bank: ENABLED
+   ✓ Automated backups: ENABLED
+   ✓ Content tagging: ENABLED
+   ✓ Capability moodle/backup:backupcourse: AVAILABLE
+   ✓ Capability moodle/restore:restorecourse: AVAILABLE
+   ✓ Capability moodle/course:manageactivities: AVAILABLE
+   ✓ Capability moodle/contentbank:access: AVAILABLE
+   ✓ Capability moodle/tag:manage: AVAILABLE
+   ✗ Backup directory: MISSING
+
+--- Testing Content Asset Management ---
+✓ Courses in system: 5
+✓ Total activities in system: 2
+✓ Backup records: 0
+✓ Content bank items: 0
+✓ Content asset management system is operational
+
+=== Configuration Summary ===
+✗ Some configuration steps failed
+Please review the output above for details

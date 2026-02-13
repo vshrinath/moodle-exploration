@@ -1,0 +1,108 @@
+=== Creating Learning Plan Templates ===
+
+Using competency framework: Ophthalmology Fellowship Competencies
+
+Found 15 competencies in framework
+
+Creating Template 1: Core Clinical Skills Path
+  Template 'core-clinical-skills' already exists, updating...
+  Updated: Clinical Skills (order: 1, core)
+  Updated: Patient Examination (order: 2, core)
+  Updated: Diagnosis and Assessment (order: 3, core)
+  Updated: Treatment Management (order: 4, core)
+  ✓ Created: core-clinical-skills
+
+Creating Template 2: Surgical Skills Path
+  Template 'surgical-skills-path' already exists, updating...
+  Updated: Surgical Skills (order: 1, core)
+  Updated: Cataract Surgery (order: 2, core)
+  Updated: Retinal Surgery (order: 3, core)
+  Updated: Glaucoma Surgery (order: 4, allied)
+  ✓ Created: surgical-skills-path
+
+Creating Template 3: Diagnostic Technology Path
+  Template 'diagnostic-technology-path' already exists, updating...
+  Updated: Diagnostic Technology (order: 1, core)
+  Updated: Ophthalmic Imaging (order: 2, core)
+  Updated: Visual Field Testing (order: 3, core)
+  ✓ Created: diagnostic-technology-path
+
+Creating Template 4: Professional Development Path
+  Template 'professional-development-path' already exists, updating...
+  Updated: Professional Development (order: 1, core)
+  Updated: Patient Communication (order: 2, core)
+  Updated: Medical Ethics (order: 3, core)
+  Updated: Research Skills (order: 4, allied)
+  ✓ Created: professional-development-path
+
+Creating Template 5: Comprehensive Fellowship Path
+  Template 'comprehensive-fellowship-path' already exists, updating...
+  Updated: Clinical Skills (order: 1, core)
+  Updated: Patient Examination (order: 2, core)
+  Updated: Diagnosis and Assessment (order: 3, core)
+  Updated: Surgical Skills (order: 4, core)
+  Updated: Cataract Surgery (order: 5, core)
+  Updated: Diagnostic Technology (order: 6, core)
+  Updated: Professional Development (order: 7, core)
+  Updated: Patient Communication (order: 8, core)
+  Updated: Research Skills (order: 9, allied)
+  ✓ Created: comprehensive-fellowship-path
+
+Creating Template 6: Blended Learning Path
+  Template 'blended-learning-path' already exists, updating...
+  Added: Clinical Skills (order: 1, core)
+  Added: Patient Examination (order: 2, core)
+  Added: Diagnosis and Assessment (order: 3, core)
+  Added: Surgical Skills (order: 4, core)
+  Added: Cataract Surgery (order: 5, core)
+  Added: Diagnostic Technology (order: 6, core)
+  Added: Professional Development (order: 7, core)
+  Added: Patient Communication (order: 8, core)
+  Added: Research Skills (order: 9, allied)
+  ✓ Created: blended-learning-path
+
+Creating Template 7: Clinical Skills Path
+  Template 'clinical-skills-path' already exists, updating...
+  Added: Clinical Skills (order: 1, core)
+  Added: Patient Examination (order: 2, core)
+  Added: Diagnosis and Assessment (order: 3, core)
+  Added: Treatment Management (order: 4, core)
+  ✓ Created: clinical-skills-path
+
+Creating Template 8: Core Technical Skills Path
+  Template 'core-technical-skills' already exists, updating...
+  Added: Surgical Skills (order: 1, core)
+  Added: Cataract Surgery (order: 2, core)
+  Added: Retinal Surgery (order: 3, core)
+  Added: Glaucoma Surgery (order: 4, allied)
+  Added: Diagnostic Technology (order: 5, core)
+  Added: Ophthalmic Imaging (order: 6, core)
+  Added: Visual Field Testing (order: 7, core)
+  ✓ Created: core-technical-skills
+
+Creating Template 9: Management Skills Path
+  Template 'management-skills-path' already exists, updating...
+  Added: Professional Development (order: 1, core)
+  Added: Patient Communication (order: 2, core)
+  Added: Medical Ethics (order: 3, core)
+  Added: Research Skills (order: 4, allied)
+  ✓ Created: management-skills-path
+
+=== Summary ===
+Created 9 learning plan templates:
+  - core-clinical-skills: 4 competencies
+  - surgical-skills-path: 4 competencies
+  - diagnostic-technology-path: 3 competencies
+  - professional-development-path: 4 competencies
+  - comprehensive-fellowship-path: 9 competencies
+  - blended-learning-path: 9 competencies
+  - clinical-skills-path: 4 competencies
+  - core-technical-skills: 7 competencies
+  - management-skills-path: 4 competencies
+
+✓ Learning plan templates created successfully!
+
+Next steps:
+1. Assign templates to cohorts for automatic learner assignment
+2. Configure prerequisite enforcement rules
+3. Set up progress tracking and completion criteria

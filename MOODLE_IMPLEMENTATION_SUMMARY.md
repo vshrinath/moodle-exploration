@@ -35,11 +35,6 @@ Comprehensive Moodle-based Learning Management System for medical fellowship tra
 - **Version**: Moodle 4.5 compatible (2024051300)
 - **Source**: `plugin-source/block_configurable_reports_moodle45_2024051300.zip`
 
-#### Block: Level Up XP (Gamification)
-- **Purpose**: Experience points and leveling system
-- **Location**: `/blocks/xp/`
-- **Features**: Student engagement through gamification
-
 #### Block: Stash (Gamification Items)
 - **Purpose**: Collectible items and rewards system
 - **Location**: `/blocks/stash/`
@@ -559,16 +554,15 @@ docker exec moodle-exploration-moodle-1 chmod -R 755 /bitnami/moodledata
 ### Custom Capabilities
 - `block/sceh_dashboard:addinstance` - Add dashboard block
 - `block/sceh_dashboard:myaddinstance` - Add to My page
-- `local/sceh_rules:manageattendancerules` - Manage attendance rules
-- `local/sceh_rules:managero sterrules` - Manage roster rules
+- `local/sceh_rules:managerules` - Manage rules
 - `local/sceh_rules:viewaudit` - View audit logs
 - `local/kirkpatrick_dashboard:view` - View Kirkpatrick dashboard
-- `local/kirkpatrick_level4:view` - View Level 4 data
+- `local/kirkpatrick_dashboard:export` - Export Kirkpatrick dashboard data
 
 ### Scheduled Tasks
-- `local_kirkpatrick_level4\task\calculate_roi` - Daily ROI calculation
-- `local_kirkpatrick_level4\task\correlate_learner_outcomes` - Weekly correlation
-- `local_kirkpatrick_level4\task\sync_external_data` - Hourly data sync
+- `local_kirkpatrick_level4\task\sync_external_data` - Daily at 02:00
+- `local_kirkpatrick_level4\task\calculate_roi` - Monthly on day 1 at 03:30
+- `local_kirkpatrick_level4\task\correlate_learner_outcomes` - Monthly on day 1 at 04:00
 
 ---
 

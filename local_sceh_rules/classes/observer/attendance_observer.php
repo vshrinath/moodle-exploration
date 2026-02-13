@@ -44,7 +44,7 @@ class attendance_observer extends event_handler {
      * @return void
      */
     public static function check_attendance_requirements(\core\event\base $event) {
-        global $DB;
+        global $DB, $SESSION;
         
         if (!get_config('local_sceh_rules', 'attendance_rules_enabled')) {
             return;
@@ -64,10 +64,15 @@ class attendance_observer extends event_handler {
         
         if (!$result['allowed']) {
             // Store the block message in session for display
-            global $SESSION;
             if (!isset($SESSION->local_sceh_rules_messages)) {
                 $SESSION->local_sceh_rules_messages = [];
             }
+            
+            // Limit to last 10 messages to prevent session bloat
+            if (count($SESSION->local_sceh_rules_messages) >= 10) {
+                array_shift($SESSION->local_sceh_rules_messages);
+            }
+            
             $SESSION->local_sceh_rules_messages[] = $result['message'];
         }
     }

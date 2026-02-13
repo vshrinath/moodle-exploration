@@ -1,0 +1,65 @@
+=== Kirkpatrick Level 3 (Behavior) Application Tracking Configuration ===
+
+Starting Level 3 (Behavior) configuration...
+
+Creating Level 3 behavior data table...
+✓ Table kirkpatrick_level3_behavior already exists
+
+Configuring Portfolio plugin for evidence collection...
+✓ Enabled portfolio functionality
+✓ Configured evidence types
+  - Set require_supervisor_verification: 1
+  - Set allow_multimedia_evidence: 1
+  - Set enable_evidence_tagging: 1
+  - Set require_reflection_notes: 1
+  - Set minimum_evidence_items: 3
+✓ Portfolio plugin configured
+
+Creating follow-up survey system...
+✓ Table kirkpatrick_followup_schedule already exists
+  - Set enable_automated_followups: 1
+  - Set followup_intervals: 30,60,90,180
+  - Set send_reminder_notifications: 1
+  - Set reminder_days_before: 3
+  - Set supervisor_notification: 1
+✓ Follow-up survey system created
+
+Creating follow-up survey template...
+  - Survey question: How frequently have you applied the skills learned in training?
+  - Survey question: What specific behaviors have changed as a result of the training?
+  - Survey question: How has the training impacted your workplace performance?
+  - Survey question: What barriers have you encountered in applying the training?
+  - Survey question: What support have you received from supervisors/colleagues?
+  - Survey question: What additional training or support would be helpful?
+  - Survey question: How confident are you in applying the learned skills?
+  - Survey question: Have you received feedback from peers about your performance?
+✓ Follow-up survey template created
+
+Configuring workplace performance data integration...
+  - Set enable_external_data: 1
+  - Set supervisor_assessment_enabled: 1
+  - Set peer_review_enabled: 1
+  - Set performance_metrics_enabled: 1
+  - Set clinical_outcomes_tracking: 1
+✓ Created kirkpatrick_workplace_performance table
+✓ Workplace performance integration configured
+
+Configuring longitudinal tracking capabilities...
+  - Set enable_longitudinal_tracking: 1
+  - Set tracking_duration_months: 12
+  - Set minimum_followup_points: 3
+  - Set track_behavior_sustainability: 1
+  - Set track_skill_retention: 1
+  - Set generate_trend_reports: 1
+✓ Created kirkpatrick_longitudinal_tracking table
+✓ Longitudinal tracking configured
+
+=== Level 3 (Behavior) Configuration Complete ===
+
+Next Steps:
+1. Enable Portfolio plugin and configure evidence collection templates
+2. Create follow-up survey activities for 30, 60, 90 day, and 6-month intervals
+3. Set up supervisor access for workplace performance assessments
+4. Configure automated follow-up notifications and reminders
+5. Test evidence submission and supervisor verification workflows
+6. Review longitudinal tracking reports and adjust tracking parameters

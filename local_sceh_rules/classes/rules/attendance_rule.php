@@ -35,32 +35,39 @@ class attendance_rule extends rule_evaluator {
     public function evaluate($userid, $rule) {
         global $DB;
         
-        // Check if attendance rules are enabled
-        if (!get_config('local_sceh_rules', 'attendance_rules_enabled')) {
-            return true; // Allow access if rules disabled
+        try {
+            // Check if attendance rules are enabled
+            if (!get_config('local_sceh_rules', 'attendance_rules_enabled')) {
+                return true; // Allow access if rules disabled
+            }
+            
+            // Get user's attendance percentage for this course
+            $attendance = $this->get_user_attendance_percentage($userid, $rule->courseid);
+            
+            // Check if attendance meets threshold
+            $passes = ($attendance >= $rule->threshold);
+            
+            // Log the evaluation
+            $this->log_audit(
+                'attendance',
+                $rule->id,
+                $userid,
+                $passes ? 'allowed' : 'blocked',
+                [
+                    'competencyid' => $rule->competencyid,
+                    'courseid' => $rule->courseid,
+                    'attendance' => $attendance,
+                    'threshold' => $rule->threshold
+                ]
+            );
+            
+            return $passes;
+            
+        } catch (\Exception $e) {
+            // Log error and allow access to avoid blocking on error
+            debugging('Error evaluating attendance rule: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return true;
         }
-        
-        // Get user's attendance percentage for this course
-        $attendance = $this->get_user_attendance_percentage($userid, $rule->courseid);
-        
-        // Check if attendance meets threshold
-        $passes = ($attendance >= $rule->threshold);
-        
-        // Log the evaluation
-        $this->log_audit(
-            'attendance',
-            $rule->id,
-            $userid,
-            $passes ? 'allowed' : 'blocked',
-            [
-                'competencyid' => $rule->competencyid,
-                'courseid' => $rule->courseid,
-                'attendance' => $attendance,
-                'threshold' => $rule->threshold
-            ]
-        );
-        
-        return $passes;
     }
     
     /**
@@ -97,52 +104,59 @@ class attendance_rule extends rule_evaluator {
     protected function get_user_attendance_percentage($userid, $courseid) {
         global $DB;
         
-        // Get all attendance instances in this course
-        $sql = "SELECT a.id
-                FROM {attendance} a
-                WHERE a.course = :courseid";
-        $attendances = $DB->get_records_sql($sql, ['courseid' => $courseid]);
-        
-        if (empty($attendances)) {
-            return 100; // No attendance tracking, allow access
-        }
-        
-        $totalSessions = 0;
-        $attendedSessions = 0;
-        
-        foreach ($attendances as $attendance) {
-            // Get all sessions for this attendance instance
-            $sessions = $DB->get_records('attendance_sessions', ['attendanceid' => $attendance->id]);
+        try {
+            // Get all attendance instances in this course
+            $sql = "SELECT a.id
+                    FROM {attendance} a
+                    WHERE a.course = :courseid";
+            $attendances = $DB->get_records_sql($sql, ['courseid' => $courseid]);
             
-            foreach ($sessions as $session) {
-                // Only count sessions that have already occurred
-                if ($session->sessdate > time()) {
-                    continue;
-                }
+            if (empty($attendances)) {
+                return 100; // No attendance tracking, allow access
+            }
+            
+            $totalSessions = 0;
+            $attendedSessions = 0;
+            
+            foreach ($attendances as $attendance) {
+                // Get all sessions for this attendance instance
+                $sessions = $DB->get_records('attendance_sessions', ['attendanceid' => $attendance->id]);
                 
-                $totalSessions++;
-                
-                // Check if user attended this session
-                $log = $DB->get_record('attendance_log', [
-                    'sessionid' => $session->id,
-                    'studentid' => $userid
-                ]);
-                
-                if ($log) {
-                    // Get the status to check if it counts as present
-                    $status = $DB->get_record('attendance_statuses', ['id' => $log->statusid]);
-                    if ($status && $status->grade > 0) {
-                        $attendedSessions++;
+                foreach ($sessions as $session) {
+                    // Only count sessions that have already occurred
+                    if ($session->sessdate > time()) {
+                        continue;
+                    }
+                    
+                    $totalSessions++;
+                    
+                    // Check if user attended this session
+                    $log = $DB->get_record('attendance_log', [
+                        'sessionid' => $session->id,
+                        'studentid' => $userid
+                    ]);
+                    
+                    if ($log) {
+                        // Get the status to check if it counts as present
+                        $status = $DB->get_record('attendance_statuses', ['id' => $log->statusid]);
+                        if ($status && $status->grade > 0) {
+                            $attendedSessions++;
+                        }
                     }
                 }
             }
+            
+            if ($totalSessions == 0) {
+                return 100; // No sessions yet, allow access
+            }
+            
+            return ($attendedSessions / $totalSessions) * 100;
+            
+        } catch (\Exception $e) {
+            // Log error and return 100 to avoid blocking access on error
+            debugging('Error calculating attendance percentage: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return 100;
         }
-        
-        if ($totalSessions == 0) {
-            return 100; // No sessions yet, allow access
-        }
-        
-        return ($attendedSessions / $totalSessions) * 100;
     }
     
     /**
@@ -153,25 +167,32 @@ class attendance_rule extends rule_evaluator {
      * @return array ['allowed' => bool, 'message' => string]
      */
     public function check_competency_access($userid, $competencyid) {
-        $rules = $this->get_rules_for_competency($competencyid);
-        
-        if (empty($rules)) {
+        try {
+            $rules = $this->get_rules_for_competency($competencyid);
+            
+            if (empty($rules)) {
+                return ['allowed' => true, 'message' => ''];
+            }
+            
+            foreach ($rules as $rule) {
+                if (!$this->evaluate($userid, $rule)) {
+                    $attendance = $this->get_user_attendance_percentage($userid, $rule->courseid);
+                    return [
+                        'allowed' => false,
+                        'message' => get_string('attendance_blocked', 'local_sceh_rules', [
+                            'current' => round($attendance, 1),
+                            'required' => $rule->threshold
+                        ])
+                    ];
+                }
+            }
+            
+            return ['allowed' => true, 'message' => ''];
+            
+        } catch (\Exception $e) {
+            // Log error and allow access to avoid blocking on error
+            debugging('Error checking competency access: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return ['allowed' => true, 'message' => ''];
         }
-        
-        foreach ($rules as $rule) {
-            if (!$this->evaluate($userid, $rule)) {
-                $attendance = $this->get_user_attendance_percentage($userid, $rule->courseid);
-                return [
-                    'allowed' => false,
-                    'message' => get_string('attendance_blocked', 'local_sceh_rules', [
-                        'current' => round($attendance, 1),
-                        'required' => $rule->threshold
-                    ])
-                ];
-            }
-        }
-        
-        return ['allowed' => true, 'message' => ''];
     }
 }

@@ -5,3 +5,15 @@ moodledata_data/
 
 # OS files
 .DS_Store
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# Ignore test output files
+*.txt
+!CONFIG_*.txt
+!CREATE_*.txt
+!LINK_*.txt
+!MOODLE_*.txt

@@ -75,7 +75,7 @@ if (empty($rules)) {
         
         $table->data[] = [
             get_string('roster_type_' . $rule->rostertype, 'local_sceh_rules'),
-            $competency ? $competency->shortname : 'N/A',
+            $competency ? format_string($competency->shortname) : get_string('notfound', 'core'),
             format_text($rule->evidencedesc, FORMAT_PLAIN),
             $rule->enabled ? get_string('yes') : get_string('no'),
             $actions

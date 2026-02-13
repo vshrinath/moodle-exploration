@@ -169,20 +169,7 @@ class block_sceh_dashboard extends block_base {
         return $html;
     }
     
-    private function get_activity_id($shortname) {
-        global $DB;
-        // Try to find the activity by shortname or name
-        $cm = $DB->get_record_sql(
-            "SELECT cm.id FROM {course_modules} cm
-             JOIN {modules} m ON m.id = cm.module
-             JOIN {data} d ON d.id = cm.instance
-             WHERE m.name = 'data' AND d.name LIKE ?
-             LIMIT 1",
-            ['%' . $shortname . '%']
-        );
-        return $cm ? $cm->id : 0;
-    }
-    
+
     public function applicable_formats() {
         return [
             'site-index' => true,

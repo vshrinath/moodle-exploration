@@ -1,0 +1,110 @@
+=== Configuring Learning Path Automation ===
+
+Found 9 learning plan templates
+
+Found 6 cohorts
+
+=== Configuring Automatic Learner Assignment ===
+
+  Template 'blended-learning-path' already linked to cohort 'Blended Learning Cohort'
+
+  Template 'clinical-skills-path' already linked to cohort 'Blended Learning Cohort'
+
+  Template 'comprehensive-fellowship-path' already linked to cohort 'Blended Learning Cohort'
+
+  Template 'core-clinical-skills' already linked to cohort 'Blended Learning Cohort'
+
+  Template 'core-technical-skills' already linked to cohort 'Technical Training - Self Paced'
+
+  Template 'diagnostic-technology-path' already linked to cohort 'Blended Learning Cohort'
+
+  Template 'management-skills-path' already linked to cohort 'Management Program - Trainer Led'
+
+  Template 'professional-development-path' already linked to cohort 'Blended Learning Cohort'
+
+  Template 'surgical-skills-path' already linked to cohort 'Blended Learning Cohort'
+
+
+=== Configuring Prerequisite Enforcement ===
+
+Template: blended-learning-path
+  No competencies in this template
+
+Template: clinical-skills-path
+  No competencies in this template
+
+Template: comprehensive-fellowship-path
+Competencies in learning path (9 total):
+  1. Clinical Skills - CLIN_SKILLS
+     Prerequisites: Surgical Skills
+  2. Patient Examination - CLIN_EXAM
+     Prerequisites: Diagnosis and Assessment
+  3. Diagnosis and Assessment - CLIN_DIAG
+     Prerequisites: Patient Examination, Treatment Management, Ophthalmic Imaging
+  4. Surgical Skills - SURG_SKILLS
+     Prerequisites: Clinical Skills
+  5. Cataract Surgery - SURG_CATARACT
+     Prerequisites: Retinal Surgery, Glaucoma Surgery
+  6. Diagnostic Technology - DIAG_TECH
+  7. Professional Development - PROF_DEV
+  8. Patient Communication - PROF_COMM
+  9. Research Skills - PROF_RESEARCH
+
+Template: core-clinical-skills
+Competencies in learning path (4 total):
+  1. Clinical Skills - CLIN_SKILLS
+     Prerequisites: Surgical Skills
+  2. Patient Examination - CLIN_EXAM
+     Prerequisites: Diagnosis and Assessment
+  3. Diagnosis and Assessment - CLIN_DIAG
+     Prerequisites: Patient Examination, Treatment Management, Ophthalmic Imaging
+  4. Treatment Management - CLIN_MGMT
+     Prerequisites: Diagnosis and Assessment
+
+Template: core-technical-skills
+  No competencies in this template
+
+Template: diagnostic-technology-path
+Competencies in learning path (3 total):
+  1. Diagnostic Technology - DIAG_TECH
+  2. Ophthalmic Imaging - DIAG_IMAGING
+     Prerequisites: Diagnosis and Assessment
+  3. Visual Field Testing - DIAG_FIELDS
+
+Template: management-skills-path
+  No competencies in this template
+
+Template: professional-development-path
+Competencies in learning path (4 total):
+  1. Professional Development - PROF_DEV
+  2. Patient Communication - PROF_COMM
+  3. Medical Ethics - PROF_ETHICS
+  4. Research Skills - PROF_RESEARCH
+
+Template: surgical-skills-path
+Competencies in learning path (4 total):
+  1. Surgical Skills - SURG_SKILLS
+     Prerequisites: Clinical Skills
+  2. Cataract Surgery - SURG_CATARACT
+     Prerequisites: Retinal Surgery, Glaucoma Surgery
+  3. Retinal Surgery - SURG_RETINA
+     Prerequisites: Cataract Surgery
+  4. Glaucoma Surgery - SURG_GLAUCOMA
+     Prerequisites: Cataract Surgery
+
+=== Configuring Competency Completion Rules ===
+
+✓ Competency framework enabled globally
+✓ Course ratings push to user plans enabled
+✓ Learning plan due date scheduling enabled
+
+=== Summary ===
+Configured automatic assignment for 0 template-cohort pairs:
+
+✓ Learning path automation configured successfully!
+
+How it works:
+1. When a user is added to a cohort, they automatically get the linked learning plan
+2. Competencies in the plan are ordered and prerequisites are enforced
+3. Progress is tracked automatically as users complete activities
+4. Users cannot progress to dependent competencies until prerequisites are met
