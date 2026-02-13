@@ -21,6 +21,9 @@ fi
 echo "🔐 Generating secure passwords..."
 MARIADB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 MARIADB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
+MOODLEHQ_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
+MOODLEHQ_DB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
+MOODLEHQ_ADMIN_PASS=$(openssl rand -base64 24 | tr -d "=+/" | cut -c1-20)
 
 # Create .env file
 cat > "$ENV_FILE" << EOF
@@ -36,6 +39,20 @@ MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
 
 # Moodle Configuration
 BITNAMI_DEBUG=false
+
+# MoodleHQ + MySQL Dev Stack (recommended moving forward)
+MOODLEHQ_DB_NAME=moodle
+MOODLEHQ_DB_USER=moodle
+MOODLEHQ_DB_PASSWORD=${MOODLEHQ_DB_PASSWORD}
+MOODLEHQ_DB_ROOT_PASSWORD=${MOODLEHQ_DB_ROOT_PASSWORD}
+MOODLEHQ_WEB_PORT=8081
+MOODLEHQ_WWWROOT=http://127.0.0.1:8081
+MOODLEHQ_ADMIN_USER=admin
+MOODLEHQ_ADMIN_PASS=${MOODLEHQ_ADMIN_PASS}
+MOODLEHQ_ADMIN_EMAIL=admin@example.com
+MOODLEHQ_SITE_FULLNAME=SCEH Fellowship Training
+MOODLEHQ_SITE_SHORTNAME=SCEH LMS
+MOODLEHQ_CRON_INTERVAL=60
 EOF
 
 # Set restrictive permissions
@@ -47,6 +64,7 @@ echo "📋 Configuration:"
 echo "   Database User: bn_moodle"
 echo "   Database Name: bitnami_moodle"
 echo "   Debug Mode: false"
+echo "   MoodleHQ Port: 8081"
 echo ""
 echo "🔒 Passwords have been generated and saved to .env"
 echo "   File permissions set to 600 (owner read/write only)"
@@ -57,3 +75,4 @@ echo "   2. Backup your passwords in a secure password manager"
 echo "   3. To view passwords: cat .env"
 echo ""
 echo "🚀 You can now start the containers with: docker-compose up -d"
+echo "   MoodleHQ stack: docker compose -f docker-compose.moodlehq.yml up -d"

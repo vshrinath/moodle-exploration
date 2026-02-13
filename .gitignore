@@ -2,6 +2,7 @@
 mariadb_data/
 moodle_data/
 moodledata_data/
+moodle-core/
 
 # OS files
 .DS_Store

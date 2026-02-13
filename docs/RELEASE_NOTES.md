@@ -4,6 +4,37 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Add maintained MoodleHQ dev stack (Moodle 5.1 + MySQL 8)
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a new Docker stack based on MoodleHQ images for ongoing development on Moodle 5.1.
+- Added startup scripts to bootstrap core, run install/upgrade safely, and run cron separately.
+- Added setup documentation for the new stack and updated repository docs/examples to use it.
+- Added `.gitignore` protection for local Moodle core checkout to avoid accidental commits.
+- Kept the previous stack available so development can continue while migration is validated.
+
+### Why
+The previous image path was not ideal for long-term updates. Moving to a maintained Moodle distribution now reduces upgrade risk later and keeps the project aligned with current Moodle releases while development is still in mock-data phase.
+
+This also keeps the path to Azure cleaner: the new setup is closer to a standard production-style split (web + DB + cron), which is easier to carry forward when infrastructure is moved.
+
+### Files touched
+- `docker-compose.moodlehq.yml` — New MoodleHQ-based development stack
+- `scripts/moodlehq/bootstrap-core.sh` — Core bootstrap script for Moodle source checkout
+- `scripts/moodlehq/start-web.sh` — Web container startup/install/upgrade flow
+- `scripts/moodlehq/start-cron.sh` — Dedicated cron container startup
+- `scripts/moodlehq/entrypoint.d/00-noop.sh` — Entrypoint placeholder hook
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Setup and usage guide for the new stack
+- `.env.example` — Added MoodleHQ environment variables and defaults
+- `scripts/generate-env.sh` — Added secure variable generation for MoodleHQ stack
+- `README.md` — Updated local run guidance for the new stack
+- `.gitignore` — Ignore local `moodle-core/` checkout
+- `docker-compose.yml` — Updated to align with current local development setup
+
+---
+
 ## [2026-02-13] — Align card system docs to one practical Phase 1 path
 
 **Commit**: `PENDING` on branch `front-end-explorations`

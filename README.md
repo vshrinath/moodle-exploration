@@ -2,13 +2,13 @@
 
 Comprehensive Moodle-based Learning Management System for medical fellowship training programs, implementing competency-based education with Kirkpatrick evaluation framework.
 
-## Quick Start
+## Quick Start (Recommended: MoodleHQ + MySQL)
 
 ### Prerequisites
 
 - Docker and Docker Compose installed
 - 4GB+ RAM available
-- Ports 8080 and 8443 available
+- Ports 8080 and 8081 available
 
 ### Setup
 
@@ -24,21 +24,34 @@ Comprehensive Moodle-based Learning Management System for medical fellowship tra
    ```
    This creates a `.env` file with secure random passwords.
 
-3. **Start the containers:**
+3. **Bootstrap Moodle core (one-time):**
    ```bash
-   docker-compose up -d
+   ./scripts/moodlehq/bootstrap-core.sh
    ```
 
-4. **Wait for initialization (first run takes 2-3 minutes):**
+4. **Start the MoodleHQ stack:**
    ```bash
-   docker-compose logs -f moodle
+   docker compose -f docker-compose.moodlehq.yml up -d
    ```
-   Wait for "Apache started" message.
 
-5. **Access Moodle:**
-   - URL: http://localhost:8080
-   - Admin username: `user`
-   - Admin password: Check your Moodle admin panel
+5. **Wait for initialization (first run takes 2-3 minutes):**
+   ```bash
+   docker compose -f docker-compose.moodlehq.yml logs -f moodle
+   ```
+   Wait for install/upgrade completion and Apache startup.
+
+6. **Access Moodle:**
+   - URL: http://127.0.0.1:8081
+   - Admin username: from `.env` (`MOODLEHQ_ADMIN_USER`, default `admin`)
+   - Admin password: from `.env` (`MOODLEHQ_ADMIN_PASS`)
+
+### Legacy Stack (Bitnami Legacy)
+
+The legacy stack is still available for compatibility:
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
 
 ### Configuration Scripts
 
@@ -74,6 +87,7 @@ moodle-exploration/
 ## Documentation
 
 - [Docker Security Configuration](docs/DOCKER_SECURITY.md) - Environment variables and security best practices
+- [MoodleHQ + MySQL Dev Stack](docs/MOODLEHQ_MYSQL_DEV_STACK.md) - Azure-friendly development stack
 - [Quick Start Guide](QUICK_START_GUIDE.md) - Getting started with the system
 - [Conventions](CONVENTIONS.md) - Coding standards and project conventions
 - [Implementation Summary](MOODLE_IMPLEMENTATION_SUMMARY.md) - Complete system overview
@@ -127,10 +141,8 @@ docker exec moodle-exploration-moodle-1 chown -R daemon:daemon /bitnami/moodleda
 
 ## Tech Stack
 
-- Moodle 5.0.1
-- PHP (Bitnami image)
-- MariaDB
-- Apache 2.4.64
+- Recommended dev stack: MoodleHQ Docker + MySQL 8.4
+- Legacy stack (still present): Bitnami Legacy Moodle + MariaDB
 - Docker & Docker Compose
 
 ## License

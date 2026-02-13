@@ -11,7 +11,7 @@ services:
       - MARIADB_CHARACTER_SET=utf8mb4
       - MARIADB_COLLATE=utf8mb4_unicode_ci
   moodle:
-    image: docker.io/bitnamilegacy/moodle:latest
+    image: docker.io/bitnamilegacy/moodle:5.0.2
     ports:
       - '8080:8080'
       - '8443:8443'
