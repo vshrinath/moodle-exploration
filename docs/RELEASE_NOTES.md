@@ -4,6 +4,22 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Store attendance plugin as normal repository files
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Replaced an accidental gitlink/submodule-style entry for `mod/attendance` with regular tracked files.
+- Ensured the attendance plugin is fully contained in this repository for local setup and future deployment.
+
+### Why
+The first attendance parity commit referenced the plugin as an embedded repository pointer, which can break fresh clones. This correction makes setup reproducible without extra submodule steps.
+
+### Files touched
+- `mod/attendance` — Added full plugin file tree as regular tracked files
+
+---
+
 ## [2026-02-13] — Fix Attendance Reports parity on MoodleHQ stack
 
 **Commit**: `PENDING` on branch `front-end-explorations`
