@@ -6,7 +6,7 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ## [2026-02-13] — Add stage 4 program-owner stream setup checklist
 
-**Commit**: `PENDING` on branch `front-end-explorations`
+**Commit**: `825e3cb` on branch `front-end-explorations`
 
 ### What changed
 - Added a new Program Owner page: `Stream Setup Check`.
@@ -33,7 +33,7 @@ We reused `stream_helper` for shared section checks so setup validation stays co
 
 ## [2026-02-13] — Add stage 3 stream-filtered learner progress view
 
-**Commit**: `PENDING` on branch `front-end-explorations`
+**Commit**: `fa1ba09` on branch `front-end-explorations`
 
 ### What changed
 - Added a new learner page: `Stream Progress`.
