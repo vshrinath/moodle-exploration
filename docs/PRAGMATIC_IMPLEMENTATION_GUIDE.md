@@ -137,6 +137,8 @@ Capabilities:
 
 Edit `block_sceh_dashboard/block_sceh_dashboard.php`:
 
+> Implementation note: the current dashboard code in this repository still uses core capability checks (`moodle/site:config`, `moodle/course:update`). The snippet below is target state and depends on Week 1 capability additions in `local_sceh_rules/db/access.php`.
+
 ```php
 // OLD (broken)
 $is_admin = has_capability('moodle/site:config', $context);
@@ -367,6 +369,14 @@ $capabilities = [
 ```
 
 Then assign this capability to your custom Trainer role (`sceh_trainer`) from the role permissions UI.
+
+Also define the role-detection capabilities used in Week 1 dashboard logic:
+
+```php
+'local/sceh_rules:systemadmin' => [...],
+'local/sceh_rules:programowner' => [...],
+'local/sceh_rules:trainer' => [...],
+```
 
 2. **Create Cohort Filter Helper**
 

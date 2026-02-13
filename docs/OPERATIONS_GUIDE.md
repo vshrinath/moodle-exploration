@@ -1343,7 +1343,7 @@ $CFG->session_redis_prefix = 'moodle_';
 
 #### 2. Database Optimization
 
-**Enable Query Cache:**
+**MariaDB only: Enable Query Cache**
 ```sql
 # Edit MariaDB config
 [mysqld]
@@ -1351,6 +1351,8 @@ query_cache_type = 1
 query_cache_size = 256M
 query_cache_limit = 2M
 ```
+
+If using PostgreSQL, skip this section and use PostgreSQL-specific tuning instead.
 
 **Optimize Tables Monthly:**
 ```bash
