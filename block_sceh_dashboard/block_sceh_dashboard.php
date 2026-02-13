@@ -60,7 +60,7 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_learner_cards($userid) {
-        return [
+        $cards = [
             [
                 'title' => get_string('caselogbook', 'block_sceh_dashboard'),
                 'icon' => 'fa-clipboard-list',
@@ -104,6 +104,13 @@ class block_sceh_dashboard extends block_base {
                 'url' => new moodle_url('/my/courses.php'),
             ],
         ];
+
+        $streamcard = $this->get_learner_stream_card($userid);
+        if ($streamcard) {
+            array_splice($cards, 2, 0, [$streamcard]);
+        }
+
+        return $cards;
     }
 
     /**
@@ -362,6 +369,41 @@ class block_sceh_dashboard extends block_base {
         $html .= html_writer::end_div();
         
         return $html;
+    }
+
+    /**
+     * Build learner stream card from Choice response if available.
+     *
+     * @param int $userid
+     * @return array|null
+     */
+    private function get_learner_stream_card($userid) {
+        $courses = enrol_get_users_courses($userid, true, 'id, fullname, visible');
+        if (empty($courses)) {
+            return null;
+        }
+
+        foreach ($courses as $course) {
+            $streamname = \local_sceh_rules\helper\stream_helper::get_user_selected_stream($course->id, $userid);
+            if (!$streamname) {
+                continue;
+            }
+
+            $section = \local_sceh_rules\helper\stream_helper::get_section_number_for_stream($course->id, $streamname);
+            $urlparams = ['id' => $course->id];
+            if ($section > 0) {
+                $urlparams['section'] = $section;
+            }
+
+            return [
+                'title' => get_string('yourstream', 'block_sceh_dashboard', format_string($streamname)),
+                'icon' => 'fa-code-branch',
+                'color' => 'indigo',
+                'url' => new moodle_url('/course/view.php', $urlparams),
+            ];
+        }
+
+        return null;
     }
 
     /**

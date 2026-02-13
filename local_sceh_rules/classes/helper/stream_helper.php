@@ -67,5 +67,78 @@ class stream_helper {
 
         return $name;
     }
-}
 
+    /**
+     * Resolve learner's selected stream name from a course Choice activity.
+     *
+     * Uses first Choice whose name includes "stream" or "specialization".
+     *
+     * @param int $courseid Moodle course id
+     * @param int $userid Moodle user id
+     * @return string|null
+     */
+    public static function get_user_selected_stream($courseid, $userid) {
+        global $DB;
+
+        $sql = "SELECT id, name
+                  FROM {choice}
+                 WHERE course = :courseid
+                   AND (LOWER(name) LIKE :streamname OR LOWER(name) LIKE :specializationname)
+              ORDER BY id ASC";
+
+        $choices = $DB->get_records_sql($sql, [
+            'courseid' => $courseid,
+            'streamname' => '%stream%',
+            'specializationname' => '%specialization%',
+        ], 0, 1);
+
+        if (empty($choices)) {
+            return null;
+        }
+
+        $choice = reset($choices);
+
+        $answer = $DB->get_record('choice_answers', [
+            'choiceid' => $choice->id,
+            'userid' => $userid,
+        ], 'id, optionid', IGNORE_MISSING);
+
+        if (!$answer) {
+            return null;
+        }
+
+        $option = $DB->get_record('choice_options', [
+            'id' => $answer->optionid,
+        ], 'id, text', IGNORE_MISSING);
+
+        if (!$option || trim((string)$option->text) === '') {
+            return null;
+        }
+
+        return trim((string)$option->text);
+    }
+
+    /**
+     * Find stream section number for a stream name in a course.
+     *
+     * @param int $courseid Moodle course id
+     * @param string $streamname
+     * @return int
+     */
+    public static function get_section_number_for_stream($courseid, $streamname) {
+        $target = \core_text::strtolower(trim((string)$streamname));
+        if ($target === '') {
+            return 0;
+        }
+
+        $sections = self::get_course_stream_sections($courseid);
+        foreach ($sections as $section) {
+            $current = \core_text::strtolower(trim((string)$section->streamname));
+            if ($current === $target) {
+                return (int)$section->section;
+            }
+        }
+
+        return 0;
+    }
+}

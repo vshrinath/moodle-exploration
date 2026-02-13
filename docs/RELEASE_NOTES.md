@@ -4,6 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Add stage 2 learner stream indicator from choice
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added helper methods to resolve learner stream selection from course Choice responses.
+- Added helper method to map selected stream name to its matching stream section number.
+- Extended learner dashboard cards to inject a dynamic `Your Stream: <name>` card when a stream is selected.
+- Stream learner card deep-links to selected stream section in the course.
+- Added learner stream language string.
+- Seeded mock stream-choice data for `MOCK-AAP-2026` and `mock.learner` to validate end-to-end behavior.
+
+### Why
+Stage 2 needs a clear learner-facing signal of selected specialization. Reusing Choice responses and section naming keeps stream support lightweight and consistent with the section-based stream model.
+
+### Files touched
+- `local_sceh_rules/classes/helper/stream_helper.php` — Added user stream lookup and stream-to-section mapping methods
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added dynamic learner stream card generation
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added `yourstream` string
+
+---
+
 ## [2026-02-13] — Add stage 1 stream support in trainer dashboard
 
 **Commit**: `PENDING` on branch `front-end-explorations`

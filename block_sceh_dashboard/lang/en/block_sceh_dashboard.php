@@ -13,6 +13,7 @@ $string['mybadges'] = 'My Badges';
 $string['credentialingsheet'] = 'Credentialing Sheet';
 $string['videolibrary'] = 'Video Library';
 $string['myprogress'] = 'My Progress';
+$string['yourstream'] = 'Your Stream: {$a}';
 
 // Admin/Mentor cards
 $string['managecohorts'] = 'Manage Cohorts';
