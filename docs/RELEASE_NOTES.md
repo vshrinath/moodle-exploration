@@ -4,45 +4,73 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
-## [2026-02-13] — Add stage 2 learner stream indicator from choice
+## [2026-02-13] — Standardize release notes writing style and policy source
 
 **Commit**: `PENDING` on branch `front-end-explorations`
 
 ### What changed
-- Added helper methods to resolve learner stream selection from course Choice responses.
-- Added helper method to map selected stream name to its matching stream section number.
-- Extended learner dashboard cards to inject a dynamic `Your Stream: <name>` card when a stream is selected.
-- Stream learner card deep-links to selected stream section in the course.
-- Added learner stream language string.
-- Seeded mock stream-choice data for `MOCK-AAP-2026` and `mock.learner` to validate end-to-end behavior.
+- Added a dedicated documentation-style standard in `CONVENTIONS.md` for release notes and commit messages.
+- Defined release notes as customer-facing, plain-language, and outcome-first.
+- Defined commit messages as technical and implementation-focused.
+- Updated `AGENTS.md` to enforce that release notes follow `CONVENTIONS.md`.
+- Clarified that helper/utility additions should be explained in non-jargon terms in release notes.
 
 ### Why
-Stage 2 needs a clear learner-facing signal of selected specialization. Reusing Choice responses and section naming keeps stream support lightweight and consistent with the section-based stream model.
+Recent release-note entries needed a more consistent tone for non-technical stakeholders. Centralizing style rules in one source (`CONVENTIONS.md`) and making `AGENTS.md` enforce it ensures future notes stay readable while commit history remains technically precise.
 
 ### Files touched
-- `local_sceh_rules/classes/helper/stream_helper.php` — Added user stream lookup and stream-to-section mapping methods
-- `block_sceh_dashboard/block_sceh_dashboard.php` — Added dynamic learner stream card generation
-- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added `yourstream` string
+- `CONVENTIONS.md` — Added release-notes and commit-message style standards
+- `AGENTS.md` — Added enforcement note that release notes must follow `CONVENTIONS.md`
+- `docs/RELEASE_NOTES.md` — Updated entries to match new plain-language format
+
+---
+
+## [2026-02-13] — Add stage 2 learner stream indicator from choice
+
+**Commit**: `748f10a` on branch `front-end-explorations`
+
+### What changed
+- Learners now see a new dashboard card: **“Your Stream: …”** once they choose a specialization.
+- Clicking that card takes the learner straight to the right section of their course.
+- We added backend logic to:
+  - read the learner’s stream choice,
+  - find the matching course section,
+  - build the correct link automatically.
+- We added one new text label (`yourstream`) for this card.
+- We also created mock test data so this could be verified end-to-end (`MOCK-AAP-2026`, `mock.learner`).
+
+### Why
+This makes the learner experience clearer: after choosing a stream, they can immediately see which stream they are in and go directly to it.
+
+To keep this reliable, stream-matching logic is centralized in one shared helper (`stream_helper`) instead of being duplicated in different places. That makes behavior consistent and easier to maintain.
+
+### Files touched
+- `local_sceh_rules/classes/helper/stream_helper.php` — Stream lookup and section mapping logic
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Learner “Your Stream” card
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Card label text (`yourstream`)
 
 ---
 
 ## [2026-02-13] — Add stage 1 stream support in trainer dashboard
 
-**Commit**: `PENDING` on branch `front-end-explorations`
+**Commit**: `7210b9f` on branch `front-end-explorations`
 
 ### What changed
-- Added stream section helper using naming convention `STREAM - <name>`.
-- Extended trainer dashboard cards to show stream count per assigned course.
-- Added stream-specific trainer cards that deep-link to each stream section.
-- Added new dashboard language strings for stream labels and stream counts.
+- Trainers now see stream information directly on their dashboard for assigned courses.
+- Each course card shows how many streams are configured.
+- Trainers also get direct cards for each stream (for example: `Stream: Front Desk Management`).
+- Clicking a stream card opens that exact stream section in the course.
+- We added small text labels for stream card titles and stream counts.
 
 ### Why
-Week 3-4 stream support starts with explicit section-based stream navigation. This keeps streams lightweight (sections, not new entities) while giving trainers direct access to stream sections in assigned courses.
+This helps trainers navigate faster. They can go directly to the stream they are teaching instead of opening the full course and searching manually.
+
+To keep behavior consistent, stream detection is handled in one shared helper (`stream_helper`) rather than repeated in multiple dashboard methods.
 
 ### Files touched
-- `local_sceh_rules/classes/helper/stream_helper.php` — New helper to discover and normalize stream sections
-- `block_sceh_dashboard/block_sceh_dashboard.php` — Trainer card generation now includes stream counts and stream section links
-- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added `streamcardprefix` and `streamcount` strings
+- `local_sceh_rules/classes/helper/stream_helper.php` — Detects stream sections and normalizes stream names
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Adds trainer stream cards and stream counts
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Adds stream-related card labels
 
 ---
 
@@ -51,29 +79,27 @@ Week 3-4 stream support starts with explicit section-based stream navigation. Th
 **Commit**: `PENDING` on branch `front-end-explorations`
 
 ### What changed
-- Hardened role dashboard cards to avoid broken links and invalid params:
-  - System Admin cards now capability-gated per card to avoid rendering inaccessible destinations
-  - Attendance card links now include a valid course `id` where required
-  - Badge Management links now include required `type=1` for site badges
-  - Badge Management card now shows badge count in title: "Badge Management (45)"
-  - Corrected invalid competency capability check from `tool/lp:competencymanage` to Moodle core competency capabilities
-- Fixed Kirkpatrick dashboard program filter query to use `get_records_select_menu(...)` with explicit SQL conditions
-- Removed brittle `admin_externalpage_setup('local_sceh_rules')` dependency from SCEH rule pages and replaced with `require_login()` + explicit capability checks
-- Added mock-user runbook note for re-syncing `sceh_system_admin` capabilities
+- Fixed multiple dashboard links that were failing due to missing required URL parameters.
+- Updated System Admin cards so users only see cards they can actually access.
+- Corrected competency capability checks to use valid Moodle capability names.
+- Fixed a Kirkpatrick dashboard query that was causing runtime exceptions.
+- Updated SCEH rules pages to use direct login + capability checks instead of fragile admin-section setup.
+- Added a badge count in the Badge Management card title so admins can quickly see badge setup status.
+- Added runbook notes for re-syncing mock sysadmin capabilities in local setup.
 
 ### Why
-Mock-role dashboard validation revealed runtime blockers: missing URL parameters (`id`, `type`), unknown capability namespace usage, and admin-tree section lookup failures for custom-role access paths. These changes keep cards functional, fail-safe by capability, and aligned with actual Moodle endpoint requirements.
+During role-based testing, users were hitting avoidable runtime errors (missing params, invalid capabilities, section setup failures). These changes make dashboard navigation safer and more predictable.
 
-Badge count in card title provides immediate visibility into badge system status. Shows "(0)" for fresh installs, helping admins understand they need to create badges. Eliminates confusion from "file not found" errors on badge images in fresh installations.
+The badge count improves clarity for new environments by showing whether badges are configured yet.
 
 ### Files touched
-- `block_sceh_dashboard/block_sceh_dashboard.php` — Card URL fixes, capability-gated system admin cards, badge count display, safer role routing
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Safer card routing, capability checks, badge count
 - `local_kirkpatrick_dashboard/index.php` — Program filter DB query fix (`get_records_select_menu`)
-- `local_sceh_rules/roster_rules.php` — Replace admin external page setup with direct auth/capability flow
-- `local_sceh_rules/edit_roster_rule.php` — Replace admin external page setup with direct auth/capability flow
-- `local_sceh_rules/attendance_rules.php` — Replace admin external page setup with direct auth/capability flow
-- `local_sceh_rules/edit_attendance_rule.php` — Replace admin external page setup with direct auth/capability flow
-- `docs/MOCK_USERS_SETUP.md` — Added sysadmin capability re-sync CLI snippet
+- `local_sceh_rules/roster_rules.php` — Replaced fragile admin setup flow
+- `local_sceh_rules/edit_roster_rule.php` — Replaced fragile admin setup flow
+- `local_sceh_rules/attendance_rules.php` — Replaced fragile admin setup flow
+- `local_sceh_rules/edit_attendance_rule.php` — Replaced fragile admin setup flow
+- `docs/MOCK_USERS_SETUP.md` — Added sysadmin capability re-sync instructions
 
 ---
 
@@ -101,68 +127,32 @@ Moodle competency framework page requires `pagecontextid` in this flow. Without 
 **Tag**: `v1.3.0-rbac-foundation`
 
 ### What changed
-
-**Week 1: Role Separation**
-- Added 6 custom capabilities in `local_sceh_rules/db/access.php`:
-  - `local/sceh_rules:systemadmin` - System admin dashboard view
-  - `local/sceh_rules:programowner` - Program owner dashboard view
-  - `local/sceh_rules:trainer` - Trainer dashboard view
-  - `local/sceh_rules:viewassignedcohortsonly` - Cohort-based filtering
-  - `local/sceh_rules:managerules` - Rules engine management
-  - `local/sceh_rules:viewaudit` - Audit log access
-- Created 3 custom roles with capability matrix:
-  - `sceh_system_admin` - Can manage users, CANNOT create courses
-  - `sceh_program_owner` - Can create/update courses, CANNOT manage users
-  - `sceh_trainer` - Can view assigned cohorts, CANNOT create courses or manage competencies
-- Refactored dashboard to role-specific rendering:
-  - `get_system_admin_cards()` - 8 admin tool cards
-  - `get_program_owner_cards()` - Dynamic category-based cards
-  - `get_trainer_cards()` - Dynamic cohort-based cards
-  - `get_learner_cards()` - 7 learner cards (existing)
-- Updated dashboard role detection to use custom capabilities instead of core Moodle capabilities
-- Added language strings for all capabilities
-- Bumped plugin version: `2026011700` → `2026021301`
-
-**Week 1.5: Category-Based Program Ownership**
-- Implemented `get_program_owner_categories()` SQL query
-- Program Owner dashboard shows only assigned categories
-- Each category card links to category management UI
-- Supports both `sceh_program_owner` and `programowner` role shortnames (fallback)
-
-**Week 2: Trainer Cohort Filtering**
-- Created `local_sceh_rules/classes/helper/cohort_filter.php` helper class
-- Implemented `get_trainer_courses()` method with SQL query:
-  - Joins: course → enrol → cohort → cohort_members
-  - Returns only courses where trainer is in enrolled cohort
-- Trainer dashboard uses cohort filtering when `viewassignedcohortsonly` capability present
-- Dynamically generates course cards for assigned cohorts
-
-**Mock Data for Testing**
-- Created Allied Health Programs category (`idnumber: allied-health`)
-- Created Mock Allied Assist Program course (`shortname: MOCK-AAP-2026`)
-- Created Mock Allied Cohort 2026 (`idnumber: mock-allied-2026`)
-- Created mock users: mock.programowner, mock.trainer, mock.learner
-- Set up cohort sync enrolment for testing
-- Documented in `docs/MOCK_USERS_SETUP.md`
+- Introduced three custom role paths for the dashboard:
+  - System Admin
+  - Program Owner
+  - Trainer
+- Added SCEH-specific capabilities to support explicit role detection and controlled access.
+- Updated dashboard behavior so each role sees relevant cards and actions.
+- Added category-based ownership support for Program Owners.
+- Added cohort-based course filtering for Trainers.
+- Created mock users and mock course/cohort data for repeatable local validation.
 
 ### Why
 
-This implements the foundational RBAC (Role-Based Access Control) architecture from the pragmatic implementation guide. The 3-layer responsibility model prevents role confusion:
-1. **System Admin** (Oversight & Insight) - Manages users and system, cannot create programs
-2. **Program Owner** (Learning Design Authority) - Creates programs and competencies, cannot manage users
-3. **Trainer** (Delivery & Enablement) - Delivers training to assigned cohorts, cannot modify curriculum
+The goal was to separate responsibilities clearly:
+1. **System Admin**: platform and user governance
+2. **Program Owner**: program/course design ownership
+3. **Trainer**: delivery for assigned cohorts
 
-Category-based program ownership enables Program Owners to create programs autonomously without System Admin becoming a bottleneck. Trainer cohort filtering ensures trainers see only their assigned cohorts, not all courses in the system.
-
-The capability matrix enforces separation of concerns at the database level, preventing privilege escalation and ensuring each role can only perform their designated functions.
+This reduces role overlap, prevents accidental over-permissioning, and aligns the product with the operating model in the implementation guide.
 
 ### Files touched
-- `block_sceh_dashboard/block_sceh_dashboard.php` — Refactored to role-specific rendering (+186 lines)
-- `local_sceh_rules/db/access.php` — Added 6 custom capabilities (+37 lines)
-- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added capability language strings (+4 lines)
-- `local_sceh_rules/version.php` — Bumped version to 2026021301
-- `local_sceh_rules/classes/helper/cohort_filter.php` — NEW: Cohort filtering helper class
-- `docs/MOCK_USERS_SETUP.md` — NEW: Mock user documentation
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Role-specific card routing and rendering
+- `local_sceh_rules/db/access.php` — Added SCEH capability definitions
+- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added capability labels
+- `local_sceh_rules/version.php` — Plugin version bump for capability updates
+- `local_sceh_rules/classes/helper/cohort_filter.php` — Trainer cohort-to-course filtering
+- `docs/MOCK_USERS_SETUP.md` — Mock user setup and verification runbook
 
 ### Testing completed
 - ✅ All 6 capabilities registered in database

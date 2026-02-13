@@ -62,6 +62,33 @@ define(['jquery', 'core/ajax'], function($, Ajax) {
 
 ---
 
+## Documentation Conventions
+
+### Release Notes Style (`docs/RELEASE_NOTES.md`)
+- Audience: customer-facing, cross-functional readers (not only engineers).
+- Tone: plain language, outcome-first, minimal internal jargon.
+- Structure (required):
+  - `### What changed`
+  - `### Why`
+  - `### Files touched`
+- Write user-visible impact first, then implementation detail.
+- When a helper/utility is added, explain:
+  - what it does in simple terms
+  - why centralizing that logic matters (consistency, maintainability)
+
+### Commit Message Style (`git log`)
+- Audience: engineering team.
+- Tone: technical and implementation-focused.
+- Use the standard format:
+  - `<type>: <specific summary>`
+  - blank line
+  - `1-2` sentences on technical reason/constraint
+- This deliberate split is expected:
+  - Release notes = explanatory/customer-facing
+  - Commit message = technical/engineering-facing
+
+---
+
 ## Project Structure
 
 ```

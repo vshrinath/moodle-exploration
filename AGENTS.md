@@ -241,6 +241,13 @@ Bad:
 
 **Every commit must append to `docs/RELEASE_NOTES.md`. This is non-negotiable.**
 
+Release notes style is defined in `CONVENTIONS.md` and must be followed:
+- customer-facing, plain language, outcome-first
+- required sections: `What changed`, `Why`, `Files touched`
+- explain helpers/utilities in non-jargon terms when introduced
+
+Commit messages may remain technical to balance this.
+
 Format:
 
 ```markdown
