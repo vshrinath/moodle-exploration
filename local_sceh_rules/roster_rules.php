@@ -15,9 +15,8 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->libdir . '/adminlib.php');
 
-admin_externalpage_setup('local_sceh_rules');
+require_login();
 
 $action = optional_param('action', '', PARAM_ALPHA);
 $id = optional_param('id', 0, PARAM_INT);
@@ -27,6 +26,7 @@ require_capability('local/sceh_rules:managerules', $context);
 
 $PAGE->set_url('/local/sceh_rules/roster_rules.php');
 $PAGE->set_context($context);
+$PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('roster_rules', 'local_sceh_rules'));
 $PAGE->set_heading(get_string('roster_rules', 'local_sceh_rules'));
 

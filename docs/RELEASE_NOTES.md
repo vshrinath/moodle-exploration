@@ -4,6 +4,34 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Fix dashboard runtime errors and role-link routing
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Hardened role dashboard cards to avoid broken links and invalid params:
+- System Admin cards now capability-gated per card to avoid rendering inaccessible destinations.
+- Attendance card links now include a valid course `id` where required.
+- Badge Management links now include required `type=1` for site badges.
+- Corrected invalid competency capability check from `tool/lp:competencymanage` to Moodle core competency capabilities.
+- Fixed Kirkpatrick dashboard program filter query to use `get_records_select_menu(...)` with explicit SQL conditions.
+- Removed brittle `admin_externalpage_setup('local_sceh_rules')` dependency from SCEH rule pages and replaced with `require_login()` + explicit capability checks.
+- Added mock-user runbook note for re-syncing `sceh_system_admin` capabilities.
+
+### Why
+Mock-role dashboard validation revealed runtime blockers: missing URL parameters (`id`, `type`), unknown capability namespace usage, and admin-tree section lookup failures for custom-role access paths. These changes keep cards functional, fail-safe by capability, and aligned with actual Moodle endpoint requirements.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Card URL fixes, capability-gated system admin cards, safer role routing
+- `local_kirkpatrick_dashboard/index.php` — Program filter DB query fix (`get_records_select_menu`)
+- `local_sceh_rules/roster_rules.php` — Replace admin external page setup with direct auth/capability flow
+- `local_sceh_rules/edit_roster_rule.php` — Replace admin external page setup with direct auth/capability flow
+- `local_sceh_rules/attendance_rules.php` — Replace admin external page setup with direct auth/capability flow
+- `local_sceh_rules/edit_attendance_rule.php` — Replace admin external page setup with direct auth/capability flow
+- `docs/MOCK_USERS_SETUP.md` — Added sysadmin capability re-sync CLI snippet
+
+---
+
 ## [2026-02-13] — Fix competency framework dashboard link context
 
 **Commit**: `PENDING` on branch `front-end-explorations`

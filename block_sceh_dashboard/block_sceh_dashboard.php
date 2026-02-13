@@ -65,7 +65,7 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('caselogbook', 'block_sceh_dashboard'),
                 'icon' => 'fa-clipboard-list',
                 'color' => 'blue',
-                'url' => new moodle_url('/mod/data/index.php'),
+                'url' => new moodle_url('/my/courses.php'),
             ],
             [
                 'title' => get_string('mycompetencies', 'block_sceh_dashboard'),
@@ -77,7 +77,7 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('attendance', 'block_sceh_dashboard'),
                 'icon' => 'fa-calendar-check',
                 'color' => 'red',
-                'url' => new moodle_url('/mod/attendance/index.php'),
+                'url' => new moodle_url('/my/courses.php'),
             ],
             [
                 'title' => get_string('mybadges', 'block_sceh_dashboard'),
@@ -89,7 +89,7 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('credentialingsheet', 'block_sceh_dashboard'),
                 'icon' => 'fa-certificate',
                 'color' => 'purple',
-                'url' => new moodle_url('/mod/data/index.php'),
+                'url' => new moodle_url('/my/courses.php'),
             ],
             [
                 'title' => get_string('videolibrary', 'block_sceh_dashboard'),
@@ -101,11 +101,7 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('myprogress', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-line',
                 'color' => 'orange',
-                'url' => new moodle_url('/report/outline/user.php', [
-                    'id' => $userid,
-                    'course' => 1,
-                    'mode' => 'outline',
-                ]),
+                'url' => new moodle_url('/my/courses.php'),
             ],
         ];
     }
@@ -117,59 +113,97 @@ class block_sceh_dashboard extends block_base {
      */
     private function get_system_admin_cards() {
         $systemcontext = context_system::instance();
+        $cards = [];
+        $attendanceurl = new moodle_url('/my/courses.php');
+        $attendancecourseid = $this->get_first_regular_course_id();
 
-        return [
-            [
+        if ($attendancecourseid) {
+            $attendanceurl = new moodle_url('/mod/attendance/index.php', ['id' => $attendancecourseid]);
+        }
+
+        if (has_capability('moodle/cohort:view', $systemcontext)) {
+            $cards[] = [
                 'title' => get_string('managecohorts', 'block_sceh_dashboard'),
                 'icon' => 'fa-users',
                 'color' => 'blue',
                 'url' => new moodle_url('/cohort/index.php'),
-            ],
-            [
+            ];
+        }
+
+        if (has_any_capability([
+            'moodle/competency:competencyview',
+            'moodle/competency:competencymanage',
+        ], $systemcontext)) {
+            $cards[] = [
                 'title' => get_string('competencyframework', 'block_sceh_dashboard'),
                 'icon' => 'fa-sitemap',
                 'color' => 'green',
                 'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
                     'pagecontextid' => $systemcontext->id,
                 ]),
-            ],
-            [
+            ];
+        }
+
+        $cards[] = [
                 'title' => get_string('attendancereports', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-bar',
                 'color' => 'red',
-                'url' => new moodle_url('/mod/attendance/index.php'),
-            ],
-            [
+                'url' => $attendanceurl,
+            ];
+
+        if (has_capability('local/kirkpatrick_dashboard:view', $systemcontext)) {
+            $cards[] = [
                 'title' => get_string('trainingevaluation', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-pie',
                 'color' => 'purple',
                 'url' => new moodle_url('/local/kirkpatrick_dashboard/index.php'),
-            ],
-            [
+            ];
+        }
+
+        if (has_any_capability([
+            'moodle/badges:viewbadges',
+            'moodle/badges:viewawarded',
+            'moodle/badges:createbadge',
+            'moodle/badges:awardbadge',
+            'moodle/badges:configurecriteria',
+            'moodle/badges:configuremessages',
+            'moodle/badges:configuredetails',
+            'moodle/badges:deletebadge',
+        ], $systemcontext)) {
+            $cards[] = [
                 'title' => get_string('badgemanagement', 'block_sceh_dashboard'),
                 'icon' => 'fa-award',
                 'color' => 'yellow',
-                'url' => new moodle_url('/badges/index.php'),
-            ],
-            [
+                'url' => new moodle_url('/badges/index.php', ['type' => 1]),
+            ];
+        }
+
+        $cards[] = [
                 'title' => get_string('programstructure', 'block_sceh_dashboard'),
                 'icon' => 'fa-graduation-cap',
                 'color' => 'teal',
                 'url' => new moodle_url('/course/index.php'),
-            ],
-            [
+            ];
+
+        if (has_capability('moodle/site:config', $systemcontext)) {
+            $cards[] = [
                 'title' => get_string('customreports', 'block_sceh_dashboard'),
                 'icon' => 'fa-file-alt',
                 'color' => 'orange',
                 'url' => new moodle_url('/admin/category.php', ['category' => 'reports']),
-            ],
-            [
+            ];
+        }
+
+        if (has_capability('local/sceh_rules:managerules', $systemcontext)) {
+            $cards[] = [
                 'title' => get_string('rosterrules', 'block_sceh_dashboard'),
                 'icon' => 'fa-cogs',
                 'color' => 'indigo',
                 'url' => new moodle_url('/local/sceh_rules/roster_rules.php'),
-            ],
-        ];
+            ];
+        }
+
+        return $cards;
     }
 
     /**
@@ -220,17 +254,27 @@ class block_sceh_dashboard extends block_base {
      */
     private function get_trainer_cards($userid) {
         $context = context_system::instance();
+        $courses = [];
+        $attendanceurl = new moodle_url('/mod/attendance/index.php');
+
+        if (has_capability('local/sceh_rules:viewassignedcohortsonly', $context)) {
+            $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
+            if (!empty($courses)) {
+                $firstcourse = reset($courses);
+                $attendanceurl = new moodle_url('/mod/attendance/index.php', ['id' => $firstcourse->id]);
+            }
+        }
+
         $cards = [
             [
                 'title' => get_string('attendancereports', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-bar',
                 'color' => 'red',
-                'url' => new moodle_url('/mod/attendance/index.php'),
+                'url' => $attendanceurl,
             ],
         ];
 
         if (has_capability('local/sceh_rules:viewassignedcohortsonly', $context)) {
-            $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
             foreach ($courses as $course) {
                 $cards[] = [
                     'title' => format_string($course->fullname),
@@ -292,6 +336,27 @@ class block_sceh_dashboard extends block_base {
         $html .= html_writer::end_div();
         
         return $html;
+    }
+
+    /**
+     * Get the first regular course id (excluding site course).
+     *
+     * @return int
+     */
+    private function get_first_regular_course_id() {
+        global $DB;
+
+        $courseid = $DB->get_field_sql(
+            'SELECT id FROM {course} WHERE id > :sitecourseid ORDER BY id ASC',
+            ['sitecourseid' => 1],
+            IGNORE_MULTIPLE
+        );
+
+        if (!$courseid) {
+            return 0;
+        }
+
+        return (int)$courseid;
     }
     
 

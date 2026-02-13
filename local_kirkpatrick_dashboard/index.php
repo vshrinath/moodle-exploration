@@ -30,8 +30,14 @@ echo $OUTPUT->header();
 echo html_writer::start_div('kirkpatrick-dashboard-filters');
 echo html_writer::tag('h3', get_string('filters', 'local_kirkpatrick_dashboard'));
 
-// Program filter
-$programs = $DB->get_records_menu('course', ['category' => ['>', 0]], 'fullname', 'id,fullname');
+// Program filter.
+$programs = $DB->get_records_select_menu(
+    'course',
+    'id <> :sitecourseid AND category > 0',
+    ['sitecourseid' => SITEID],
+    'fullname',
+    'id, fullname'
+);
 echo html_writer::label(get_string('selectprogram', 'local_kirkpatrick_dashboard'), 'program-filter');
 echo html_writer::select($programs, 'program', '', ['' => get_string('allprograms', 'local_kirkpatrick_dashboard')], 
     ['id' => 'program-filter', 'class' => 'form-control']);
