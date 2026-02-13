@@ -2,13 +2,13 @@
 
 Comprehensive Moodle-based Learning Management System for medical fellowship training programs, implementing competency-based education with Kirkpatrick evaluation framework.
 
-## Quick Start (Recommended: MoodleHQ + MySQL)
+## Quick Start (MoodleHQ + MySQL)
 
 ### Prerequisites
 
 - Docker and Docker Compose installed
 - 4GB+ RAM available
-- Ports 8080 and 8081 available
+- Port 8081 available
 
 ### Setup
 
@@ -45,24 +45,16 @@ Comprehensive Moodle-based Learning Management System for medical fellowship tra
    - Admin username: from `.env` (`MOODLEHQ_ADMIN_USER`, default `admin`)
    - Admin password: from `.env` (`MOODLEHQ_ADMIN_PASS`)
 
-### Legacy Stack (Bitnami Legacy)
-
-The legacy stack is still available for compatibility:
-
-```bash
-docker compose -f docker-compose.yml up -d
-```
-
 ### Configuration Scripts
 
 Run configuration scripts to set up features:
 
 ```bash
 # Configure competency framework
-docker exec moodle-exploration-moodle-1 php /bitnami/moodle/scripts/config/configure_badge_system.php
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_badge_system.php
 
 # Verify setup
-docker exec moodle-exploration-moodle-1 php /bitnami/moodle/scripts/verify/verify_competency_framework_structure.php
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/verify/verify_competency_framework_structure.php
 ```
 
 ## Project Structure
@@ -79,7 +71,7 @@ moodle-exploration/
 │   ├── verify/                    # Verification scripts
 │   └── test/                      # Test scripts
 ├── docs/                          # Documentation
-├── docker-compose.yml             # Docker configuration
+├── docker-compose.moodlehq.yml    # Docker configuration
 ├── .env.example                   # Environment template
 └── README.md                      # This file
 ```
@@ -88,7 +80,6 @@ moodle-exploration/
 
 - [Docker Security Configuration](docs/DOCKER_SECURITY.md) - Environment variables and security best practices
 - [MoodleHQ + MySQL Dev Stack](docs/MOODLEHQ_MYSQL_DEV_STACK.md) - Azure-friendly development stack
-- [Quick Start Guide](QUICK_START_GUIDE.md) - Getting started with the system
 - [Conventions](CONVENTIONS.md) - Coding standards and project conventions
 - [Implementation Summary](MOODLE_IMPLEMENTATION_SUMMARY.md) - Complete system overview
 
@@ -99,7 +90,6 @@ This project uses environment variables for sensitive configuration. See [docs/D
 **Important:**
 - Never commit `.env` file to version control
 - Use `./scripts/generate-env.sh` to create secure passwords
-- Set `BITNAMI_DEBUG=false` in production
 
 ## Development
 
@@ -107,26 +97,24 @@ This project uses environment variables for sensitive configuration. See [docs/D
 
 ```bash
 # PHPUnit tests
-docker exec moodle-exploration-moodle-1 vendor/bin/phpunit local/sceh_rules/tests/
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/admin/tool/phpunit/cli/init.php
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/vendor/bin/phpunit /var/www/html/public/local/sceh_rules/tests/
 
 # Property-based tests
-docker exec moodle-exploration-moodle-1 php /bitnami/moodle/scripts/test/property_test_competency_reusability.php
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/test/property_test_competency_reusability.php
 ```
 
 ### Common Commands
 
 ```bash
 # View logs
-docker-compose logs -f
+docker compose -f docker-compose.moodlehq.yml logs -f
 
 # Access Moodle container
-docker exec -it moodle-exploration-moodle-1 bash
+docker exec -it moodlehq-dev-moodle-1 bash
 
 # Purge caches
-docker exec moodle-exploration-moodle-1 php admin/cli/purge_caches.php
-
-# Fix permissions (if needed)
-docker exec moodle-exploration-moodle-1 chown -R daemon:daemon /bitnami/moodledata
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/admin/cli/purge_caches.php
 ```
 
 ## Features
@@ -141,8 +129,7 @@ docker exec moodle-exploration-moodle-1 chown -R daemon:daemon /bitnami/moodleda
 
 ## Tech Stack
 
-- Recommended dev stack: MoodleHQ Docker + MySQL 8.4
-- Legacy stack (still present): Bitnami Legacy Moodle + MariaDB
+- MoodleHQ Docker + MySQL 8.4
 - Docker & Docker Compose
 
 ## License
@@ -151,4 +138,4 @@ This project follows Moodle's GPL v3 license.
 
 ## Support
 
-For issues and questions, see the documentation in the `docs/` directory or check the task completion reports.
+For issues and questions, see the documentation in the `docs/` directory.

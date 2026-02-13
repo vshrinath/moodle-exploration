@@ -4,6 +4,29 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Standardize development on MoodleHQ 5.1 and scrub legacy stack paths
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Removed the legacy Bitnami compose stack from the repository entrypoint (`docker-compose.yml`).
+- Updated environment template and env-generation script to MoodleHQ-only variables.
+- Updated core setup and script docs to use the active MoodleHQ container names, paths, and URL (`127.0.0.1:8081`).
+- Kept runtime validation on the new stack after cleanup (restart + version + mock-user checks).
+
+### Why
+Having two parallel stack definitions was causing confusion about which environment is authoritative. This cleanup makes MoodleHQ 5.1 the single development baseline and removes legacy setup paths from the active workflow.
+
+### Files touched
+- `docker-compose.yml` — Removed legacy stack definition
+- `.env.example` — Removed legacy env keys, kept MoodleHQ-only configuration
+- `scripts/generate-env.sh` — Generates only MoodleHQ-related credentials/settings
+- `README.md` — Updated setup/run/test commands to MoodleHQ stack only
+- `scripts/README.md` — Updated script execution examples to new container/path
+- `docs/MOCK_USERS_SETUP.md` — Updated operational commands to new container/path
+
+---
+
 ## [2026-02-13] — Store attendance plugin as normal repository files
 
 **Commit**: `PENDING` on branch `front-end-explorations`

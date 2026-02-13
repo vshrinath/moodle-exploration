@@ -15,7 +15,7 @@ All scripts should be run from the project root or inside the Docker container:
 
 ```bash
 # From host
-docker exec moodle-exploration-moodle-1 php /bitnami/moodle/scripts/config/configure_badge_system.php
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_badge_system.php
 
 # Inside container
 php scripts/verify/verify_competency_framework_structure.php

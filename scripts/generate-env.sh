@@ -19,8 +19,6 @@ fi
 
 # Generate secure random passwords
 echo "🔐 Generating secure passwords..."
-MARIADB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
-MARIADB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 MOODLEHQ_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 MOODLEHQ_DB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 MOODLEHQ_ADMIN_PASS=$(openssl rand -base64 24 | tr -d "=+/" | cut -c1-20)
@@ -31,16 +29,7 @@ cat > "$ENV_FILE" << EOF
 # Generated on $(date)
 # NEVER commit this file to version control!
 
-# Database Configuration
-MARIADB_USER=bn_moodle
-MARIADB_DATABASE=bitnami_moodle
-MARIADB_PASSWORD=${MARIADB_PASSWORD}
-MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
-
-# Moodle Configuration
-BITNAMI_DEBUG=false
-
-# MoodleHQ + MySQL Dev Stack (recommended moving forward)
+# MoodleHQ + MySQL Dev Stack
 MOODLEHQ_DB_NAME=moodle
 MOODLEHQ_DB_USER=moodle
 MOODLEHQ_DB_PASSWORD=${MOODLEHQ_DB_PASSWORD}
@@ -61,9 +50,8 @@ chmod 600 "$ENV_FILE"
 echo "✅ .env file created successfully!"
 echo ""
 echo "📋 Configuration:"
-echo "   Database User: bn_moodle"
-echo "   Database Name: bitnami_moodle"
-echo "   Debug Mode: false"
+echo "   Database User: moodle"
+echo "   Database Name: moodle"
 echo "   MoodleHQ Port: 8081"
 echo ""
 echo "🔒 Passwords have been generated and saved to .env"
@@ -74,5 +62,5 @@ echo "   1. Keep .env file secure and never commit it to git"
 echo "   2. Backup your passwords in a secure password manager"
 echo "   3. To view passwords: cat .env"
 echo ""
-echo "🚀 You can now start the containers with: docker-compose up -d"
-echo "   MoodleHQ stack: docker compose -f docker-compose.moodlehq.yml up -d"
+echo "🚀 You can now start the stack with:"
+echo "   docker compose -f docker-compose.moodlehq.yml up -d"
