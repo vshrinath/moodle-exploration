@@ -74,6 +74,26 @@ To keep behavior consistent, stream detection is handled in one shared helper (`
 
 ---
 
+## [2026-02-13] — Card System Specification
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Created comprehensive card system specification using atomic design principles
+- Defined 3-layer component architecture: Atoms → Molecules → Organisms
+- Specified 4 card sizes: small, medium, large, full-width (all responsive)
+- Defined 6 card templates: simple, metric, list, detail, chart, activity
+- Documented implementation roadmap and complexity analysis
+- Added usage examples for rules pages, trainer dashboard, system admin dashboard
+
+### Why
+Consistent card-based UI across all pages improves usability and creates cohesive visual language. Atomic design approach makes system easy to build, test, and extend. Status-driven color coding (green/yellow/red) provides at-a-glance insights. Responsive grid ensures mobile compatibility.
+
+### Files touched
+- `docs/CARD_SYSTEM_SPECIFICATION.md` — Complete card system specification with atomic components, templates, and implementation guide
+
+---
+
 ## [2026-02-13] — Fix dashboard runtime errors and add badge count UX
 
 **Commit**: `PENDING` on branch `front-end-explorations`
