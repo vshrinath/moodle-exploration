@@ -283,12 +283,31 @@ class block_sceh_dashboard extends block_base {
 
         if (has_capability('local/sceh_rules:viewassignedcohortsonly', $context)) {
             foreach ($courses as $course) {
+                $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($course->id);
+                $streamcount = count($streamsections);
+                $coursetitle = format_string($course->fullname);
+                if ($streamcount > 0) {
+                    $coursetitle .= ' (' . get_string('streamcount', 'block_sceh_dashboard', $streamcount) . ')';
+                }
+
                 $cards[] = [
-                    'title' => format_string($course->fullname),
+                    'title' => $coursetitle,
                     'icon' => 'fa-users',
                     'color' => 'blue',
                     'url' => new moodle_url('/course/view.php', ['id' => $course->id]),
                 ];
+
+                foreach ($streamsections as $section) {
+                    $cards[] = [
+                        'title' => get_string('streamcardprefix', 'block_sceh_dashboard', format_string($section->streamname)),
+                        'icon' => 'fa-code-branch',
+                        'color' => 'indigo',
+                        'url' => new moodle_url('/course/view.php', [
+                            'id' => $course->id,
+                            'section' => $section->section,
+                        ]),
+                    ];
+                }
             }
         } else {
             $cards[] = [

@@ -4,6 +4,26 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Add stage 1 stream support in trainer dashboard
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added stream section helper using naming convention `STREAM - <name>`.
+- Extended trainer dashboard cards to show stream count per assigned course.
+- Added stream-specific trainer cards that deep-link to each stream section.
+- Added new dashboard language strings for stream labels and stream counts.
+
+### Why
+Week 3-4 stream support starts with explicit section-based stream navigation. This keeps streams lightweight (sections, not new entities) while giving trainers direct access to stream sections in assigned courses.
+
+### Files touched
+- `local_sceh_rules/classes/helper/stream_helper.php` — New helper to discover and normalize stream sections
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Trainer card generation now includes stream counts and stream section links
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added `streamcardprefix` and `streamcount` strings
+
+---
+
 ## [2026-02-13] — Fix dashboard runtime errors and add badge count UX
 
 **Commit**: `PENDING` on branch `front-end-explorations`

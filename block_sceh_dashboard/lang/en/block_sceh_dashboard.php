@@ -23,3 +23,5 @@ $string['badgemanagement'] = 'Badge Management';
 $string['programstructure'] = 'Program Structure';
 $string['customreports'] = 'Custom Reports';
 $string['rosterrules'] = 'Roster Rules';
+$string['streamcardprefix'] = 'Stream: {$a}';
+$string['streamcount'] = '{$a} streams';
