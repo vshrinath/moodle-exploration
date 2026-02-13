@@ -750,7 +750,7 @@ private function section_matches_stream($section, $stream) {
 
 ### Week 5: Dashboard Polish
 
-**Goal:** Hide Moodle complexity, improve terminology, mobile-responsive
+**Goal:** Hide Moodle complexity, improve terminology, add proactive alerts, mobile-responsive
 
 #### Tasks
 
@@ -762,7 +762,152 @@ Edit theme or use block visibility settings:
 - Hide "Latest announcements" (use custom dashboard cards instead)
 - Keep only: Custom dashboard block, Calendar, Upcoming events
 
-2. **Update Terminology**
+2. **Add Attendance Alerts for Trainers**
+
+Create proactive attendance monitoring card:
+
+```php
+// In block_sceh_dashboard/block_sceh_dashboard.php
+
+private function render_trainer_dashboard() {
+    $html = '';
+    
+    // Existing cards
+    $html .= $this->render_my_cohorts();
+    $html .= $this->render_pending_reviews();
+    $html .= $this->render_todays_sessions();
+    
+    // NEW: Attendance alerts
+    $html .= $this->render_attendance_alerts();
+    
+    return $html;
+}
+
+private function render_attendance_alerts() {
+    global $USER, $DB;
+    
+    // Get trainer's courses
+    $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($USER->id);
+    
+    $at_risk_learners = [];
+    $threshold = 75; // Configurable: learners below 75% attendance
+    
+    foreach ($courses as $course) {
+        // Get enrolled learners
+        $context = \context_course::instance($course->id);
+        $learners = get_enrolled_users($context, 'mod/attendance:canttakeattendances', 0, 'u.id, u.firstname, u.lastname');
+        
+        // Use existing attendance rule to calculate percentage
+        $attendance_rule = new \local_sceh_rules\rules\attendance_rule();
+        
+        foreach ($learners as $learner) {
+            // Reuse existing method from attendance_rule.php
+            $attendance = $this->get_user_attendance_percentage_for_dashboard($learner->id, $course->id, $attendance_rule);
+            
+            if ($attendance < $threshold) {
+                $at_risk_learners[] = [
+                    'name' => fullname($learner),
+                    'course' => $course->fullname,
+                    'attendance' => round($attendance, 1),
+                    'userid' => $learner->id,
+                    'courseid' => $course->id
+                ];
+            }
+        }
+    }
+    
+    if (empty($at_risk_learners)) {
+        return ''; // No alerts, don't show card
+    }
+    
+    // Render alert card
+    $html = html_writer::start_div('action-card alert-card');
+    $html .= html_writer::tag('i', '', ['class' => 'icon-alert']);
+    $html .= html_writer::tag('h4', 'Attendance Alerts');
+    $html .= html_writer::tag('p', count($at_risk_learners) . ' learners below ' . $threshold . '% attendance');
+    
+    // List at-risk learners (top 5)
+    $html .= html_writer::start_tag('ul', ['class' => 'at-risk-list']);
+    foreach (array_slice($at_risk_learners, 0, 5) as $learner) {
+        $html .= html_writer::start_tag('li');
+        $html .= html_writer::tag('strong', $learner['name']);
+        $html .= ' - ' . $learner['attendance'] . '% in ' . $learner['course'];
+        $html .= html_writer::end_tag('li');
+    }
+    $html .= html_writer::end_tag('ul');
+    
+    if (count($at_risk_learners) > 5) {
+        $html .= html_writer::tag('p', '+ ' . (count($at_risk_learners) - 5) . ' more', ['class' => 'more-count']);
+    }
+    
+    // Link to full attendance report
+    $url = new \moodle_url('/mod/attendance/index.php');
+    $html .= html_writer::link($url, 'View All →', ['class' => 'btn btn-primary']);
+    
+    $html .= html_writer::end_div();
+    
+    return $html;
+}
+
+private function get_user_attendance_percentage_for_dashboard($userid, $courseid, $attendance_rule) {
+    global $DB;
+    
+    // Use reflection to call protected method from attendance_rule
+    // Or make the method public in attendance_rule.php
+    $reflection = new \ReflectionClass($attendance_rule);
+    $method = $reflection->getMethod('get_user_attendance_percentage');
+    $method->setAccessible(true);
+    
+    return $method->invoke($attendance_rule, $userid, $courseid);
+}
+```
+
+**Alternative: Make method public in attendance_rule.php**
+
+Edit `local_sceh_rules/classes/rules/attendance_rule.php`:
+
+```php
+// Change from:
+protected function get_user_attendance_percentage($userid, $courseid)
+
+// To:
+public function get_user_attendance_percentage($userid, $courseid)
+```
+
+This allows dashboard to call it directly without reflection.
+
+**Optional: Add caching for performance**
+
+```php
+private function get_cached_attendance_alerts() {
+    global $USER;
+    
+    $cache = \cache::make('block_sceh_dashboard', 'attendance_alerts');
+    $cachekey = 'trainer_' . $USER->id;
+    
+    $alerts = $cache->get($cachekey);
+    
+    if ($alerts === false) {
+        // Cache miss, calculate
+        $alerts = $this->calculate_attendance_alerts();
+        
+        // Cache for 1 hour (3600 seconds)
+        $cache->set($cachekey, $alerts);
+    }
+    
+    return $alerts;
+}
+```
+
+**Why this matters:**
+- Trainers can proactively identify struggling learners
+- Prevents waiting for competency blocks (reactive)
+- Uses existing attendance infrastructure
+- Low effort, high value
+
+**Time:** 4 hours
+
+3. **Update Terminology**
 
 Create language customization file `local_sceh_rules/lang/en/local_sceh_rules.php`:
 
@@ -788,7 +933,9 @@ $string['courses'] = 'Programs';
 $string['mycourses'] = 'My Programs';
 ```
 
-3. **Add Task-Oriented Cards**
+**Time:** 4 hours
+
+4. **Add Task-Oriented Cards**
 
 Update dashboard to show actionable items:
 
@@ -840,7 +987,9 @@ private function render_action_card($title, $description, $url, $icon) {
 }
 ```
 
-4. **Mobile-Responsive CSS**
+**Time:** 6 hours
+
+5. **Mobile-Responsive CSS**
 
 Add to `block_sceh_dashboard/styles.css`:
 
@@ -895,7 +1044,9 @@ Add to `block_sceh_dashboard/styles.css`:
 }
 ```
 
-5. **Add Breadcrumb Context**
+**Time:** 4 hours
+
+6. **Add Breadcrumb Context**
 
 ```php
 private function set_page_context($role) {
@@ -925,6 +1076,7 @@ private function set_page_context($role) {
 
 #### Deliverables
 - Standard Moodle blocks hidden for non-admins
+- Attendance alerts card shows at-risk learners proactively
 - Terminology changed (Course → Program, etc.)
 - Task-oriented action cards
 - Mobile-responsive layout
@@ -933,10 +1085,14 @@ private function set_page_context($role) {
 
 #### Testing
 - Test on desktop, tablet, mobile
+- Verify attendance alerts show correct data
+- Test with learners at various attendance levels (100%, 80%, 60%)
 - Verify terminology changes throughout
 - Verify action cards are clickable
 - Verify touch targets are adequate (44px)
 - Test with screen reader for accessibility
+
+**Time:** 2.5 days (20 hours total)
 
 ---
 

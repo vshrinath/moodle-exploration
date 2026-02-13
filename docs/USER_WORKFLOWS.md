@@ -214,6 +214,7 @@
 - **What:** Configure attendance requirements
 - **When:** During program creation
 - **How:** Rules engine (local_sceh_rules)
+- **Status:** ✅ RESOLVED - Attendance alerts added to trainer dashboard (Week 5)
 
 ### 7. Competency Evidence Rules
 - **Who:** Program Owner
@@ -1118,6 +1119,38 @@ Medical Records Competencies:
 - If significantly lower, request support from Program Owner
 
 **Time:** 30 minutes per week
+
+---
+
+### TRAINER: Review Attendance Alerts
+
+**Goal:** Proactively identify learners with low attendance
+
+**Steps:**
+1. Dashboard shows: "Attendance Alerts" card (if any at-risk learners)
+2. Card displays:
+   - Number of learners below 75% attendance
+   - Top 5 at-risk learners with names and percentages
+3. Review each at-risk learner:
+   - Click learner name to view full attendance record
+   - Identify patterns (missing specific days? consecutive absences?)
+4. Take action:
+   - Send message to learner asking about absences
+   - Schedule check-in call if pattern continues
+   - Notify Program Owner if systemic issue
+5. Click "View All →" to see full attendance report
+
+**When to Act:**
+- Attendance <75%: Send friendly reminder
+- Attendance <60%: Schedule 1-on-1 meeting
+- Attendance <50%: Escalate to Program Owner
+
+**Why this matters:**
+- Attendance strongly correlates with completion
+- Early intervention prevents dropouts
+- Proactive vs. reactive (don't wait for competency blocks)
+
+**Time:** 10 minutes per week (if alerts exist)
 
 ---
 
