@@ -101,7 +101,7 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('myprogress', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-line',
                 'color' => 'orange',
-                'url' => new moodle_url('/my/courses.php'),
+                'url' => new moodle_url('/local/sceh_rules/stream_progress.php'),
             ],
         ];
 

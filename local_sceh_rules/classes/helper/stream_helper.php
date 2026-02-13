@@ -141,4 +141,65 @@ class stream_helper {
 
         return 0;
     }
+
+    /**
+     * Get common foundation section numbers for a course.
+     *
+     * By convention, section 1 is common foundation; named "Common..." sections
+     * are also included for flexibility.
+     *
+     * @param int $courseid
+     * @return int[]
+     */
+    public static function get_common_section_numbers($courseid) {
+        global $DB;
+
+        $sql = "SELECT section
+                  FROM {course_sections}
+                 WHERE course = :courseid
+                   AND section > 0
+                   AND (section = 1 OR LOWER(name) LIKE :commonname)
+              ORDER BY section ASC";
+
+        $records = $DB->get_records_sql($sql, [
+            'courseid' => $courseid,
+            'commonname' => 'common%',
+        ]);
+
+        $sections = [];
+        foreach ($records as $record) {
+            $sections[] = (int)$record->section;
+        }
+
+        if (!in_array(1, $sections, true)) {
+            $sections[] = 1;
+        }
+
+        sort($sections);
+        return array_values(array_unique($sections));
+    }
+
+    /**
+     * Get section numbers relevant to learner progress view.
+     *
+     * Includes common foundation sections and selected stream section (if any).
+     *
+     * @param int $courseid
+     * @param int $userid
+     * @return int[]
+     */
+    public static function get_relevant_section_numbers_for_user($courseid, $userid) {
+        $sections = self::get_common_section_numbers($courseid);
+
+        $streamname = self::get_user_selected_stream($courseid, $userid);
+        if ($streamname) {
+            $streamsection = self::get_section_number_for_stream($courseid, $streamname);
+            if ($streamsection > 0) {
+                $sections[] = $streamsection;
+            }
+        }
+
+        sort($sections);
+        return array_values(array_unique($sections));
+    }
 }

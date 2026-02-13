@@ -4,6 +4,32 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Add stage 3 stream-filtered learner progress view
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a new learner page: `Stream Progress`.
+- The page now shows progress only for:
+  - Common Foundation sections
+  - the learner’s selected stream section
+- Updated the learner `My Progress` card to open this new stream-filtered progress page.
+- Added user-facing labels/messages for stream progress status and empty-state handling.
+- Fixed section-title rendering so progress page does not depend on course format plugin lookup.
+
+### Why
+Stage 3 focuses on keeping learner progress relevant. Learners should see only shared foundation work plus their chosen specialization, not unrelated stream sections.
+
+We reused `stream_helper` to centralize section-selection logic, so trainer and learner stream behavior stays consistent across dashboard and progress pages.
+
+### Files touched
+- `local_sceh_rules/stream_progress.php` — New stream-filtered learner progress page
+- `local_sceh_rules/classes/helper/stream_helper.php` — Added common/relevant section resolution helpers
+- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added stream progress labels and status strings
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Routed learner `My Progress` card to stream progress page
+
+---
+
 ## [2026-02-13] — Standardize release notes writing style and policy source
 
 **Commit**: `PENDING` on branch `front-end-explorations`
