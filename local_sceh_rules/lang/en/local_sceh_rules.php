@@ -60,6 +60,10 @@ $string['audit_timestamp'] = 'Timestamp';
 $string['audit_details'] = 'Details';
 
 // Capabilities
+$string['sceh_rules:systemadmin'] = 'Use system admin dashboard view';
+$string['sceh_rules:programowner'] = 'Use program owner dashboard view';
+$string['sceh_rules:trainer'] = 'Use trainer dashboard view';
+$string['sceh_rules:viewassignedcohortsonly'] = 'View only assigned cohorts';
 $string['sceh_rules:managerules'] = 'Manage rules engine configuration';
 $string['sceh_rules:viewaudit'] = 'View rules engine audit log';
 

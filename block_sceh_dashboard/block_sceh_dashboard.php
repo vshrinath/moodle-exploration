@@ -33,127 +33,244 @@ class block_sceh_dashboard extends block_base {
     }
     
     private function get_dashboard_cards() {
-        global $USER, $DB;
+        global $USER;
         
         $context = context_system::instance();
-        $cards = [];
         
-        // Check user roles
-        $is_admin = has_capability('moodle/site:config', $context);
-        $is_teacher = has_capability('moodle/course:update', $context);
-        $is_student = !$is_admin && !$is_teacher;
-        
-        if ($is_student) {
-            // Trainee cards
-            $cards[] = [
+        // Check user roles via local_sceh_rules capability model.
+        $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
+        $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
+        $is_trainer = has_capability('local/sceh_rules:trainer', $context);
+
+        if ($is_system_admin) {
+            return $this->get_system_admin_cards();
+        } else if ($is_program_owner) {
+            return $this->get_program_owner_cards($USER->id);
+        } else if ($is_trainer) {
+            return $this->get_trainer_cards($USER->id);
+        }
+
+        return $this->get_learner_cards($USER->id);
+    }
+
+    /**
+     * Dashboard cards for learners.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_learner_cards($userid) {
+        return [
+            [
                 'title' => get_string('caselogbook', 'block_sceh_dashboard'),
                 'icon' => 'fa-clipboard-list',
                 'color' => 'blue',
-                'url' => new moodle_url('/mod/data/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/mod/data/index.php'),
+            ],
+            [
                 'title' => get_string('mycompetencies', 'block_sceh_dashboard'),
                 'icon' => 'fa-check-circle',
                 'color' => 'green',
-                'url' => new moodle_url('/admin/tool/lp/plans.php', ['userid' => $USER->id])
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/admin/tool/lp/plans.php', ['userid' => $userid]),
+            ],
+            [
                 'title' => get_string('attendance', 'block_sceh_dashboard'),
                 'icon' => 'fa-calendar-check',
                 'color' => 'red',
-                'url' => new moodle_url('/mod/attendance/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/mod/attendance/index.php'),
+            ],
+            [
                 'title' => get_string('mybadges', 'block_sceh_dashboard'),
                 'icon' => 'fa-trophy',
                 'color' => 'yellow',
-                'url' => new moodle_url('/badges/mybadges.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/badges/mybadges.php'),
+            ],
+            [
                 'title' => get_string('credentialingsheet', 'block_sceh_dashboard'),
                 'icon' => 'fa-certificate',
                 'color' => 'purple',
-                'url' => new moodle_url('/mod/data/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/mod/data/index.php'),
+            ],
+            [
                 'title' => get_string('videolibrary', 'block_sceh_dashboard'),
                 'icon' => 'fa-video',
                 'color' => 'teal',
-                'url' => new moodle_url('/course/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/course/index.php'),
+            ],
+            [
                 'title' => get_string('myprogress', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-line',
                 'color' => 'orange',
-                'url' => new moodle_url('/report/outline/user.php', ['id' => $USER->id, 'course' => 1, 'mode' => 'outline'])
-            ];
-            
-        } else if ($is_teacher || $is_admin) {
-            // Admin/Mentor cards
-            $cards[] = [
+                'url' => new moodle_url('/report/outline/user.php', [
+                    'id' => $userid,
+                    'course' => 1,
+                    'mode' => 'outline',
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * Dashboard cards for system admins.
+     *
+     * @return array
+     */
+    private function get_system_admin_cards() {
+        return [
+            [
                 'title' => get_string('managecohorts', 'block_sceh_dashboard'),
                 'icon' => 'fa-users',
                 'color' => 'blue',
-                'url' => new moodle_url('/cohort/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/cohort/index.php'),
+            ],
+            [
                 'title' => get_string('competencyframework', 'block_sceh_dashboard'),
                 'icon' => 'fa-sitemap',
                 'color' => 'green',
-                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php'),
+            ],
+            [
                 'title' => get_string('attendancereports', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-bar',
                 'color' => 'red',
-                'url' => new moodle_url('/mod/attendance/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/mod/attendance/index.php'),
+            ],
+            [
                 'title' => get_string('trainingevaluation', 'block_sceh_dashboard'),
                 'icon' => 'fa-chart-pie',
                 'color' => 'purple',
-                'url' => new moodle_url('/local/kirkpatrick_dashboard/index.php')
-            ];
-            
-            $cards[] = [
+                'url' => new moodle_url('/local/kirkpatrick_dashboard/index.php'),
+            ],
+            [
                 'title' => get_string('badgemanagement', 'block_sceh_dashboard'),
                 'icon' => 'fa-award',
                 'color' => 'yellow',
-                'url' => new moodle_url('/badges/index.php')
+                'url' => new moodle_url('/badges/index.php'),
+            ],
+            [
+                'title' => get_string('programstructure', 'block_sceh_dashboard'),
+                'icon' => 'fa-graduation-cap',
+                'color' => 'teal',
+                'url' => new moodle_url('/course/index.php'),
+            ],
+            [
+                'title' => get_string('customreports', 'block_sceh_dashboard'),
+                'icon' => 'fa-file-alt',
+                'color' => 'orange',
+                'url' => new moodle_url('/admin/category.php', ['category' => 'reports']),
+            ],
+            [
+                'title' => get_string('rosterrules', 'block_sceh_dashboard'),
+                'icon' => 'fa-cogs',
+                'color' => 'indigo',
+                'url' => new moodle_url('/local/sceh_rules/roster_rules.php'),
+            ],
+        ];
+    }
+
+    /**
+     * Dashboard cards for program owners, scoped to assigned categories.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_program_owner_cards($userid) {
+        $cards = [
+            [
+                'title' => get_string('competencyframework', 'block_sceh_dashboard'),
+                'icon' => 'fa-sitemap',
+                'color' => 'green',
+                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php'),
+            ],
+            [
+                'title' => get_string('customreports', 'block_sceh_dashboard'),
+                'icon' => 'fa-file-alt',
+                'color' => 'orange',
+                'url' => new moodle_url('/admin/category.php', ['category' => 'reports']),
+            ],
+        ];
+
+        $categories = $this->get_program_owner_categories($userid);
+
+        foreach ($categories as $category) {
+            $cards[] = [
+                'title' => format_string($category->name),
+                'icon' => 'fa-graduation-cap',
+                'color' => 'teal',
+                'url' => new moodle_url('/course/management.php', ['categoryid' => $category->id]),
             ];
-            
+        }
+
+        return $cards;
+    }
+
+    /**
+     * Dashboard cards for trainers, scoped to assigned cohort courses.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_trainer_cards($userid) {
+        $context = context_system::instance();
+        $cards = [
+            [
+                'title' => get_string('attendancereports', 'block_sceh_dashboard'),
+                'icon' => 'fa-chart-bar',
+                'color' => 'red',
+                'url' => new moodle_url('/mod/attendance/index.php'),
+            ],
+        ];
+
+        if (has_capability('local/sceh_rules:viewassignedcohortsonly', $context)) {
+            $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
+            foreach ($courses as $course) {
+                $cards[] = [
+                    'title' => format_string($course->fullname),
+                    'icon' => 'fa-users',
+                    'color' => 'blue',
+                    'url' => new moodle_url('/course/view.php', ['id' => $course->id]),
+                ];
+            }
+        } else {
             $cards[] = [
                 'title' => get_string('programstructure', 'block_sceh_dashboard'),
                 'icon' => 'fa-graduation-cap',
                 'color' => 'teal',
-                'url' => new moodle_url('/course/index.php')
-            ];
-            
-            $cards[] = [
-                'title' => get_string('customreports', 'block_sceh_dashboard'),
-                'icon' => 'fa-file-alt',
-                'color' => 'orange',
-                'url' => new moodle_url('/admin/category.php', ['category' => 'reports'])
-            ];
-            
-            $cards[] = [
-                'title' => get_string('rosterrules', 'block_sceh_dashboard'),
-                'icon' => 'fa-cogs',
-                'color' => 'indigo',
-                'url' => new moodle_url('/local/sceh_rules/roster_rules.php')
+                'url' => new moodle_url('/course/index.php'),
             ];
         }
-        
+
         return $cards;
+    }
+
+    /**
+     * Categories where user is assigned as sceh_program_owner.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_program_owner_categories($userid) {
+        global $DB;
+
+        $sql = "SELECT DISTINCT cc.id, cc.name
+                  FROM {course_categories} cc
+                  JOIN {context} ctx
+                    ON ctx.instanceid = cc.id
+                   AND ctx.contextlevel = :contextlevel
+                  JOIN {role_assignments} ra
+                    ON ra.contextid = ctx.id
+                  JOIN {role} r
+                    ON r.id = ra.roleid
+                 WHERE ra.userid = :userid
+                   AND r.shortname IN (:shortname, :fallbackshortname)
+              ORDER BY cc.name";
+
+        return $DB->get_records_sql($sql, [
+            'contextlevel' => CONTEXT_COURSECAT,
+            'userid' => $userid,
+            'shortname' => 'sceh_program_owner',
+            'fallbackshortname' => 'programowner',
+        ]);
     }
     
     private function render_card($card) {

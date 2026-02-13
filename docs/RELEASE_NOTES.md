@@ -4,6 +4,121 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [v1.3.0] — Week 1-2 Implementation: Role Separation & RBAC Foundation
+
+**Date**: 2026-02-13  
+**Branch**: `front-end-explorations`  
+**Tag**: `v1.3.0-rbac-foundation`
+
+### What changed
+
+**Week 1: Role Separation**
+- Added 6 custom capabilities in `local_sceh_rules/db/access.php`:
+  - `local/sceh_rules:systemadmin` - System admin dashboard view
+  - `local/sceh_rules:programowner` - Program owner dashboard view
+  - `local/sceh_rules:trainer` - Trainer dashboard view
+  - `local/sceh_rules:viewassignedcohortsonly` - Cohort-based filtering
+  - `local/sceh_rules:managerules` - Rules engine management
+  - `local/sceh_rules:viewaudit` - Audit log access
+- Created 3 custom roles with capability matrix:
+  - `sceh_system_admin` - Can manage users, CANNOT create courses
+  - `sceh_program_owner` - Can create/update courses, CANNOT manage users
+  - `sceh_trainer` - Can view assigned cohorts, CANNOT create courses or manage competencies
+- Refactored dashboard to role-specific rendering:
+  - `get_system_admin_cards()` - 8 admin tool cards
+  - `get_program_owner_cards()` - Dynamic category-based cards
+  - `get_trainer_cards()` - Dynamic cohort-based cards
+  - `get_learner_cards()` - 7 learner cards (existing)
+- Updated dashboard role detection to use custom capabilities instead of core Moodle capabilities
+- Added language strings for all capabilities
+- Bumped plugin version: `2026011700` → `2026021301`
+
+**Week 1.5: Category-Based Program Ownership**
+- Implemented `get_program_owner_categories()` SQL query
+- Program Owner dashboard shows only assigned categories
+- Each category card links to category management UI
+- Supports both `sceh_program_owner` and `programowner` role shortnames (fallback)
+
+**Week 2: Trainer Cohort Filtering**
+- Created `local_sceh_rules/classes/helper/cohort_filter.php` helper class
+- Implemented `get_trainer_courses()` method with SQL query:
+  - Joins: course → enrol → cohort → cohort_members
+  - Returns only courses where trainer is in enrolled cohort
+- Trainer dashboard uses cohort filtering when `viewassignedcohortsonly` capability present
+- Dynamically generates course cards for assigned cohorts
+
+**Mock Data for Testing**
+- Created Allied Health Programs category (`idnumber: allied-health`)
+- Created Mock Allied Assist Program course (`shortname: MOCK-AAP-2026`)
+- Created Mock Allied Cohort 2026 (`idnumber: mock-allied-2026`)
+- Created mock users: mock.programowner, mock.trainer, mock.learner
+- Set up cohort sync enrolment for testing
+- Documented in `docs/MOCK_USERS_SETUP.md`
+
+### Why
+
+This implements the foundational RBAC (Role-Based Access Control) architecture from the pragmatic implementation guide. The 3-layer responsibility model prevents role confusion:
+1. **System Admin** (Oversight & Insight) - Manages users and system, cannot create programs
+2. **Program Owner** (Learning Design Authority) - Creates programs and competencies, cannot manage users
+3. **Trainer** (Delivery & Enablement) - Delivers training to assigned cohorts, cannot modify curriculum
+
+Category-based program ownership enables Program Owners to create programs autonomously without System Admin becoming a bottleneck. Trainer cohort filtering ensures trainers see only their assigned cohorts, not all courses in the system.
+
+The capability matrix enforces separation of concerns at the database level, preventing privilege escalation and ensuring each role can only perform their designated functions.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Refactored to role-specific rendering (+186 lines)
+- `local_sceh_rules/db/access.php` — Added 6 custom capabilities (+37 lines)
+- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added capability language strings (+4 lines)
+- `local_sceh_rules/version.php` — Bumped version to 2026021301
+- `local_sceh_rules/classes/helper/cohort_filter.php` — NEW: Cohort filtering helper class
+- `docs/MOCK_USERS_SETUP.md` — NEW: Mock user documentation
+
+### Testing completed
+- ✅ All 6 capabilities registered in database
+- ✅ All 3 custom roles created with correct capability matrix
+- ✅ Dashboard role detection uses custom capabilities
+- ✅ Cohort filter returns correct courses for mock.trainer
+- ✅ Code synced to Docker container and caches purged
+- ✅ Mock data created and verified
+
+### Next steps
+- Week 3-4: Stream Support via Sections
+- Week 5: Dashboard Polish (terminology, mobile-responsive, attendance alerts)
+- Week 6 (Optional): Trainer Coach capability
+
+---
+
+## [v1.2.0] — UX Simplification & Operations Documentation
+
+**Date**: 2026-02-13  
+**Branch**: `front-end-explorations`  
+**Tag**: `v1.2.0-ux-operations-docs`
+
+### What changed
+- Created comprehensive UX simplification documentation
+- Added pragmatic implementation guide (5-week plan)
+- Added complete user workflows for all roles
+- Added operations guide (backup, reporting, grading, audit, scaling)
+- Added PRD with role architecture and 3-layer responsibility model
+- Added 40 user stories with acceptance criteria
+- Added attendance alerts to Week 5 implementation
+
+### Why
+Established complete documentation foundation for pragmatic UX simplification approach. Documents the 5-week implementation plan using Moodle's existing features rather than building custom systems. Provides step-by-step workflows, operations procedures, and clear role definitions.
+
+### Files touched
+- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Complete 5-week implementation plan
+- `docs/USER_WORKFLOWS.md` — Workflows for all roles
+- `docs/OPERATIONS_GUIDE.md` — Backup, reporting, grading, audit, scaling
+- `docs/PRD - Role, architecture and more.md` — Role architecture and responsibility layers
+- `docs/User stories and acceptance criteria.md` — 40 user stories
+- `.kiro/specs/ux-simplification/requirements.md` — Requirements specification
+- `.kiro/specs/ux-simplification/design.md` — Technical design
+- `.kiro/specs/ux-simplification/pragmatic-approach.md` — Pragmatic vs comprehensive analysis
+
+---
+
 ## [2026-02-13] — Attendance Alerts Documentation for Trainer Dashboard
 
 **Commit**: `df49823`  
