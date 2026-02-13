@@ -479,14 +479,14 @@ For each category:
 2. Click on category name (e.g., "Allied Health Programs")
 3. Click "Assign roles"
 4. Select "Program Owner" (sceh_program_owner)
-5. Search for user (e.g., Dr. Sarah)
+5. Search for user (e.g., Dr Parul)
 6. Click "Add"
 
 **Example Assignments:**
 ```
-Allied Health Programs → Dr. Sarah (Program Owner)
-Surgical Fellowships → Dr. Ahmed (Program Owner)
-Optometry Programs → Dr. Jones (Program Owner)
+Allied Health Programs → Dr Parul (Program Owner)
+Surgical Fellowships → Dr Sima Das (Program Owner)
+Optometry Programs → Dr Imtiyaz (Program Owner)
 Continuing Education → Dr. Patel (Program Owner)
 ```
 
@@ -500,8 +500,8 @@ For each Program Owner:
 5. Log out
 
 **Result:**
-- Dr. Sarah sees only "Allied Health Programs" and can create programs there
-- Dr. Ahmed sees only "Surgical Fellowships" and can create programs there
+- Dr Parul sees only "Allied Health Programs" and can create programs there
+- Dr Sima Das sees only "Surgical Fellowships" and can create programs there
 - They cannot see each other's categories or programs
 
 **Time:** 10 minutes setup + 5 minutes per Program Owner
@@ -519,7 +519,7 @@ For each Program Owner:
 2. Click on "Allied Health Programs"
 3. Click "Assign roles"
 4. Select "Program Owner"
-5. Add Dr. Sarah
+5. Add Dr Parul
 6. Add Dr. Lisa
 7. Add Dr. Michael
 
@@ -724,8 +724,8 @@ Dashboard: My Programs
 ```
 
 **You DO NOT see:**
-- Programs in "Surgical Fellowships" (Dr. Ahmed's category)
-- Programs in "Optometry Programs" (Dr. Jones's category)
+- Programs in "Surgical Fellowships" (Dr Sima Das's category)
+- Programs in "Optometry Programs" (Dr Imtiyaz's category)
 - Any other categories
 
 **Time:** Instant view
@@ -1211,18 +1211,6 @@ Medical Records Competencies:
 
 ---
 
-## Summary
-
-This document provides complete workflows for all user roles. Use it as a reference when:
-- Training new users
-- Troubleshooting issues
-- Understanding dependencies
-- Planning program launches
-- Monitoring system health
-
-For technical implementation details, see `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md`.
-
-
 ---
 
 ### TRAINER COACH: Setup (Optional - Week 6)
@@ -1246,7 +1234,7 @@ For technical implementation details, see `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.m
    - Description: "Trainers who coach and monitor other trainers"
 4. Click "Save changes"
 5. Click "Assign" next to cohort name
-6. Search for and add trainer coaches (e.g., Dr. Sarah, Dr. Ahmed)
+6. Search for and add trainer coaches (e.g., Dr Parul, Dr Sima Das)
 
 **Time:** 5 minutes
 
@@ -1725,4 +1713,3 @@ Cohort 3: "2025 Allied Assist - Trainer Dr. Smith"
 - Learners within a cohort can choose different streams
 
 ---
-

@@ -4,24 +4,24 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
-## [2026-02-13] — Attendance Alerts for Trainer Dashboard
+## [2026-02-13] — Attendance Alerts Documentation for Trainer Dashboard
 
 **Commit**: `df49823`  
 **Branch**: `front-end-explorations`
 
 ### What changed
-- Added attendance alerts card to trainer dashboard (Week 5 implementation)
-- Proactive monitoring of learners below 75% attendance threshold
-- Uses existing `local_sceh_rules/classes/rules/attendance_rule.php` infrastructure
+- Documented attendance alerts card design for trainer dashboard (Week 5 scope)
+- Defined proactive monitoring for learners below 75% attendance threshold
+- Mapped approach to existing `local_sceh_rules/classes/rules/attendance_rule.php` infrastructure
 - Added trainer workflow for reviewing attendance alerts
 - Updated Week 5 time estimate from 2 days to 2.5 days
 - Marked attendance rules as resolved in dependencies section
 
 ### Why
-Trainers need proactive visibility into attendance issues before they become critical. The existing attendance infrastructure tracks data and blocks competency access reactively, but trainers had no dashboard visibility. This addition surfaces at-risk learners (below 75% attendance) directly on the trainer dashboard, enabling early intervention. The implementation reuses existing attendance calculation methods, requiring only 4 hours of dashboard integration work.
+Trainers need proactive visibility into attendance issues before they become critical. The existing attendance infrastructure tracks data and blocks competency access reactively, but trainers had no documented dashboard pattern for intervention. This update captures the intended dashboard behavior and workflow so implementation can be completed consistently against a clear spec.
 
 ### Files touched
-- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Added attendance alerts implementation to Week 5 with code examples
+- `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md` — Added attendance alerts design and implementation guidance to Week 5
 - `docs/USER_WORKFLOWS.md` — Added "TRAINER: Review Attendance Alerts" workflow and marked dependency as resolved
 
 ---

@@ -302,7 +302,7 @@ As an Admin, I want role-appropriate access controls so that data visibility ali
 
 ---
 
-## **8\. Content and Assessment Management**
+## **5\. Content and Assessment Management**
 
 ### **Content as a Reusable Asset Library**
 
@@ -376,7 +376,7 @@ As a Learner, I want to receive immediate feedback on short assessments so that 
 
 ---
 
-## **9\. AI Enablement (Assistive)**
+## **6\. AI Enablement (Assistive)**
 
 **Story 35**
 
@@ -402,7 +402,7 @@ As a Program Owner, I want AI assistance to suggest additional assessments based
 
 ---
 
-## **10\. Channels and Distribution (WhatsApp)**
+## **7\. Channels and Distribution (WhatsApp)**
 
 **Story 37**
 
@@ -428,7 +428,7 @@ As a Learner, I want to receive reminders and simple prompts on WhatsApp so that
 
 ---
 
-## **11\. Insight Loops and Diagnosis**
+## **8\. Insight Loops and Diagnosis**
 
 **Story 39**
 
@@ -454,9 +454,9 @@ As an Admin, I want to compare learner outcomes across cohorts and trainers so t
 
 ---
 
-## **This set of user stories and acceptance criteria provides a complete, role-aligned functional foundation for translating the conceptual model into a formal requirements document.**
+## **The following sections capture cross-cutting and operational requirements that complement the role-based stories above.**
 
-## **5\. Non-Functional Requirements**
+## **9\. Non-Functional Requirements**
 
 ### **Performance**
 
@@ -506,7 +506,7 @@ As an Admin, I want key learning and administrative actions to be auditable so t
 
 ---
 
-## **6\. Reporting and Analytics**
+## **10\. Reporting and Analytics**
 
 **Story 24**
 
@@ -544,7 +544,7 @@ As a Program Owner, I want insight into where learners slow down or drop off so 
 
 ---
 
-## **7\. Edge Cases and Exception Handling**
+## **11\. Edge Cases and Exception Handling**
 
 **Story 27**
 
@@ -556,6 +556,8 @@ As an Admin, I want to reassign learners between cohorts without losing progress
 * Historical cohort data remains intact.
 
 ---
+
+## **This set of user stories and acceptance criteria provides a complete, role-aligned functional foundation for translating the conceptual model into a formal requirements document.**
 
 **Story 28**
 
@@ -578,4 +580,3 @@ As a Program Owner, I want to retire or archive programs and competencies so tha
 * Historical data remains accessible for reporting.
 
 ---
-

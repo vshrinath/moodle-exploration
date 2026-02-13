@@ -99,6 +99,10 @@ echo "Daily backup completed: ${DATE}"
 
 DATE=$(date +%Y%m%d)
 BACKUP_DIR="/backup/moodle/weekly"
+MOODLE_DATA="/opt/bitnami/moodledata"
+DB_NAME="bitnami_moodle"
+DB_USER="bn_moodle"
+DB_PASS="${MARIADB_PASSWORD}"
 
 # Create backup directory
 mkdir -p ${BACKUP_DIR}
@@ -149,6 +153,10 @@ echo "Weekly backup completed: ${DATE}"
 DATE=$(date +%Y%m)
 BACKUP_DIR="/backup/moodle/monthly"
 OFFSITE_DIR="/mnt/cloud-storage/moodle-backups"
+MOODLE_DATA="/opt/bitnami/moodledata"
+DB_NAME="bitnami_moodle"
+DB_USER="bn_moodle"
+DB_PASS="${MARIADB_PASSWORD}"
 
 # Create backup directory
 mkdir -p ${BACKUP_DIR}
@@ -188,14 +196,18 @@ echo "Monthly backup completed: ${DATE}"
 
 **Recovery Steps:**
 
-1. **Stop Moodle**
+1. **Stop web access (keep database running)**
 ```bash
 cd /opt/bitnami
 ./ctlscript.sh stop apache
-./ctlscript.sh stop mariadb
 ```
 
-2. **Restore Database from Backup**
+2. **Ensure MariaDB is running**
+```bash
+./ctlscript.sh start mariadb
+```
+
+3. **Restore Database from Backup**
 ```bash
 # Find latest backup
 ls -lh /backup/moodle/daily/
@@ -204,9 +216,8 @@ ls -lh /backup/moodle/daily/
 gunzip < /backup/moodle/daily/db_20260213.sql.gz | mysql -u bn_moodle -p bitnami_moodle
 ```
 
-3. **Restart Moodle**
+4. **Restart web server**
 ```bash
-./ctlscript.sh start mariadb
 ./ctlscript.sh start apache
 ```
 
@@ -317,8 +328,9 @@ cd /opt/bitnami
 
 1. **Test Database Restore**
 ```bash
-# Restore to test database
-gunzip < /backup/moodle/daily/db_latest.sql.gz | mysql -u bn_moodle -p test_moodle
+# Restore latest daily backup to test database
+LATEST_DB_BACKUP=$(ls -t /backup/moodle/daily/db_*.sql.gz | head -1)
+gunzip < "${LATEST_DB_BACKUP}" | mysql -u bn_moodle -p test_moodle
 
 # Verify tables
 mysql -u bn_moodle -p test_moodle -e "SHOW TABLES;"
@@ -329,8 +341,9 @@ mysql -u bn_moodle -p test_moodle -e "SELECT COUNT(*) FROM mdl_user;"
 
 2. **Test File Restore**
 ```bash
-# Extract to test directory
-tar -xzf /backup/moodle/daily/moodledata_latest.tar.gz -C /tmp/test_restore/
+# Extract latest daily moodledata backup to test directory
+LATEST_FILE_BACKUP=$(ls -t /backup/moodle/daily/moodledata_*.tar.gz | head -1)
+tar -xzf "${LATEST_FILE_BACKUP}" -C /tmp/test_restore/
 
 # Verify file count
 find /tmp/test_restore -type f | wc -l
@@ -1530,4 +1543,3 @@ This operations guide covers:
 
 For technical implementation, see `docs/PRAGMATIC_IMPLEMENTATION_GUIDE.md`.  
 For user workflows, see `docs/USER_WORKFLOWS.md`.
-

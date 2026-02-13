@@ -143,10 +143,10 @@ $is_admin = has_capability('moodle/site:config', $context);
 $is_teacher = has_capability('moodle/course:update', $context);
 $is_student = !$is_admin && !$is_teacher;
 
-// NEW (correct)
-$is_system_admin = has_capability('local/sceh:systemadmin', $context);
-$is_program_owner = has_capability('local/sceh:programowner', $context);
-$is_trainer = has_capability('local/sceh:trainer', $context);
+// NEW (correct, aligned to local_sceh_rules component)
+$is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
+$is_program_owner = has_capability('local/sceh_rules:programowner', $context);
+$is_trainer = has_capability('local/sceh_rules:trainer', $context);
 $is_learner = !$is_system_admin && !$is_program_owner && !$is_trainer;
 ```
 
@@ -195,9 +195,9 @@ if ($is_system_admin) {
 
 ```
 System Admin creates categories:
-├── Allied Health Programs (Dr. Sarah manages)
-├── Surgical Fellowships (Dr. Ahmed manages)
-└── Optometry Programs (Dr. Jones manages)
+├── Allied Health Programs (Dr Parul manages)
+├── Surgical Fellowships (Dr Sima Das manages)
+└── Optometry Programs (Dr Imtiyaz manages)
 
 Program Owners can:
 ✓ Create programs in their category
@@ -226,7 +226,7 @@ For each category:
 2. Click on category name (e.g., "Allied Health Programs")
 3. Click "Assign roles"
 4. Select "Program Owner" (sceh_program_owner)
-5. Search for user (e.g., Dr. Sarah)
+5. Search for user (e.g., Dr Parul)
 6. Click "Add"
 
 Repeat for each Program Owner and their category.
@@ -304,17 +304,17 @@ private function get_category_programs($categoryid) {
 ```
 Root
 │
-├── Allied Health Programs (Dr. Sarah)
+├── Allied Health Programs (Dr Parul)
 │   ├── Allied Assist Program
 │   ├── Medical Assistant Program
 │   └── Phlebotomy Program
 │
-├── Surgical Fellowships (Dr. Ahmed)
+├── Surgical Fellowships (Dr Sima Das)
 │   ├── Cataract Fellowship
 │   ├── Glaucoma Fellowship
 │   └── Retinal Fellowship
 │
-└── Optometry Programs (Dr. Jones)
+└── Optometry Programs (Dr Imtiyaz)
     ├── Pediatric Optometry
     ├── Geriatric Optometry
     └── Sports Vision
@@ -328,11 +328,11 @@ Root
 - Program Owners cannot see other categories
 
 #### Testing
-- Log in as Dr. Sarah (Allied Health)
+- Log in as Dr Parul (Allied Health)
 - Verify she sees only Allied Health programs
 - Create test program in her category
-- Log in as Dr. Ahmed (Surgical Fellowships)
-- Verify he does NOT see Dr. Sarah's programs
+- Log in as Dr Sima Das (Surgical Fellowships)
+- Verify they do NOT see Dr Parul's programs
 - Verify he can create programs in his category
 
 #### Benefits
@@ -356,15 +356,17 @@ Define in `local_sceh_rules/db/access.php`:
 
 ```php
 $capabilities = [
-    'local/sceh:viewassignedcohortsonly' => [
+    'local/sceh_rules:viewassignedcohortsonly' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => [
-            'sceh_trainer' => CAP_ALLOW
+            'manager' => CAP_ALLOW
         ]
     ]
 ];
 ```
+
+Then assign this capability to your custom Trainer role (`sceh_trainer`) from the role permissions UI.
 
 2. **Create Cohort Filter Helper**
 
@@ -1119,7 +1121,7 @@ Click "Add new cohort"
 - Name: "Trainer Coaches"
 - ID: "trainer-coaches"
 - Description: "Trainers who coach other trainers"
-Add members: Dr. Sarah, Dr. Ahmed (whoever coaches trainers)
+Add members: Dr Parul, Dr Sima Das (whoever coaches trainers)
 ```
 
 2. **Update Dashboard to Detect Trainer Coaches** (2 hours)
@@ -1601,4 +1603,3 @@ This pragmatic approach delivers:
 By working with Moodle instead of against it.
 
 **Next Step:** Review this guide with stakeholders and decide whether to proceed with pragmatic approach or comprehensive rebuild.
-
