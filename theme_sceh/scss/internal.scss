@@ -1,0 +1,28 @@
+// Light-touch internal page polish using shared tokens.
+
+body:not(.pagelayout-login) {
+  background: var(--sceh-color-bg);
+}
+
+body:not(.pagelayout-login) #page,
+body:not(.pagelayout-login) #page-wrapper {
+  background: transparent;
+}
+
+body:not(.pagelayout-login) .card {
+  border-radius: var(--sceh-radius-md);
+  border-color: var(--sceh-color-border);
+  box-shadow: var(--sceh-shadow-card);
+}
+
+body:not(.pagelayout-login) .page-context-header h1,
+body:not(.pagelayout-login) .page-header-headings h1 {
+  color: var(--sceh-color-text);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+body:not(.pagelayout-login) .nav-link.active {
+  font-weight: 600;
+}
+

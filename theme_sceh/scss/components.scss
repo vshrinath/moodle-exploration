@@ -1,0 +1,36 @@
+// Reusable UI primitives for theme_sceh.
+
+.sceh-ui-card {
+  background: var(--sceh-color-surface);
+  border: 1px solid var(--sceh-color-border);
+  border-radius: var(--sceh-radius-lg);
+  box-shadow: var(--sceh-shadow-card);
+}
+
+.sceh-ui-card--soft {
+  background: var(--sceh-color-surface-soft);
+}
+
+.sceh-ui-section-title {
+  color: var(--sceh-color-text);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sceh-ui-muted {
+  color: var(--sceh-color-text-muted);
+}
+
+.sceh-ui-btn-brand {
+  background: var(--sceh-color-brand);
+  border-color: var(--sceh-color-brand);
+  color: #fff;
+}
+
+.sceh-ui-btn-brand:hover,
+.sceh-ui-btn-brand:focus {
+  background: var(--sceh-color-brand-hover);
+  border-color: var(--sceh-color-brand-hover);
+  color: #fff;
+}
+

@@ -1,0 +1,243 @@
+.theme-sceh-login {
+  min-height: 100vh;
+  background: var(--sceh-color-bg);
+}
+
+#page.sceh-login-page {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sceh-login-header {
+  height: 80px;
+  background: var(--sceh-color-surface);
+  border-bottom: 1px solid var(--sceh-color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  gap: 1.2rem;
+}
+
+.sceh-login-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.sceh-brand-mark {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--sceh-color-brand);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sceh-brand-mark__dot {
+  width: 12px;
+  height: 12px;
+  background: var(--sceh-color-brand);
+  border-radius: 999px;
+}
+
+.sceh-brand-title {
+  color: var(--sceh-color-text);
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.sceh-brand-subtitle {
+  color: var(--sceh-color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.sceh-login-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sceh-login-header__actions a {
+  color: var(--sceh-color-text-muted);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.sceh-login-header__actions a:hover {
+  color: var(--sceh-color-text);
+}
+
+.sceh-header-login-btn {
+  background: var(--sceh-color-brand);
+  color: #fff !important;
+  padding: 0.62rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.sceh-header-login-btn:hover {
+  background: var(--sceh-color-brand-hover);
+}
+
+.sceh-login-hero {
+  position: relative;
+  flex: 1;
+  min-height: 600px;
+  background-image: url('https://images.unsplash.com/photo-1649614859327-7c6e68cc502a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1800');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.sceh-login-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(8, 20, 39, 0.85) 0%, var(--sceh-color-hero-overlay) 42%, rgba(8, 20, 39, 0.35) 100%);
+}
+
+.sceh-login-hero__content {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: grid;
+  grid-template-columns: 1.2fr minmax(360px, 470px);
+  align-items: center;
+  gap: 2rem;
+}
+
+.sceh-login-copy {
+  max-width: 720px;
+}
+
+.sceh-login-title {
+  margin: 0 0 1rem;
+  color: #fff;
+  font-size: clamp(2rem, 4.6vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.sceh-login-tagline {
+  margin: 0 0 1.3rem;
+  color: #dde7f5;
+  font-size: clamp(1rem, 1.2vw, 1.28rem);
+  line-height: 1.6;
+}
+
+.sceh-login-points {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.sceh-login-points li {
+  color: #eff4fb;
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+
+.sceh-login-panel {
+  justify-self: end;
+  width: 100%;
+}
+
+.sceh-login-panel__card {
+  width: 100%;
+  background: rgba(250, 252, 255, 0.96);
+  border-radius: var(--sceh-radius-lg);
+  box-shadow: var(--sceh-shadow-card-strong);
+  padding: 1.55rem;
+}
+
+.sceh-login-panel__card .loginform .login-heading {
+  font-size: 2.05rem;
+  margin-bottom: 1.2rem;
+}
+
+.sceh-login-panel__card .login-form .form-control {
+  border-radius: 10px;
+  min-height: 48px;
+}
+
+.sceh-login-panel__card .login-form-submit .btn-primary {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 10px;
+  background: var(--sceh-color-brand);
+  border-color: var(--sceh-color-brand);
+}
+
+.sceh-login-panel__card .login-form-submit .btn-primary:hover,
+.sceh-login-panel__card .login-form-submit .btn-primary:focus {
+  background: var(--sceh-color-brand-hover);
+  border-color: var(--sceh-color-brand-hover);
+}
+
+@media (max-width: 1180px) {
+  .sceh-login-hero__content {
+    grid-template-columns: 1fr 430px;
+    padding: 2.25rem 1.25rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .sceh-login-header {
+    height: auto;
+    padding: 0.9rem 1rem;
+    flex-wrap: wrap;
+  }
+
+  .sceh-login-hero {
+    min-height: auto;
+  }
+
+  .sceh-login-hero__content {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .sceh-login-panel {
+    justify-self: stretch;
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 575px) {
+  .sceh-brand-title {
+    font-size: 0.95rem;
+  }
+
+  .sceh-brand-subtitle {
+    font-size: 0.72rem;
+  }
+
+  .sceh-login-header__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .sceh-login-panel__card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .sceh-login-panel__card .loginform .login-heading {
+    font-size: 1.7rem;
+  }
+
+  .sceh-login-title {
+    font-size: clamp(1.65rem, 9vw, 2.5rem);
+  }
+}

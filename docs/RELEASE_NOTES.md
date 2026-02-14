@@ -4,6 +4,39 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Deliver branded SCEH login page and simplify sign-in actions
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a custom Moodle theme (`theme_sceh`) with a branded, responsive logged-out experience and a dedicated login layout.
+- Set logged-out `/` to route users to the login screen and logged-in users to their dashboard for a cleaner default journey.
+- Removed guest-access and cookies-action clutter from the login panel to keep sign-in focused on authenticated users.
+- Updated the login heading copy to “Log in to SCEH LMS”.
+- Added theme implementation notes and visual-library guidance docs for follow-on UI work.
+
+### Why
+The default Moodle login and home flow was noisy and did not reflect the product identity. This update creates a clearer first impression, reduces decision friction at sign-in, and establishes a maintainable base for future UI improvements.
+
+### Files touched
+- `theme_sceh/config.php` — Theme configuration, layouts, and navigation adjustments
+- `theme_sceh/layout/login.php` — Custom login layout wiring
+- `theme_sceh/templates/login.mustache` — Branded login page shell and content structure
+- `theme_sceh/templates/core/loginform.mustache` — Theme override of Moodle login form to simplify actions and heading
+- `theme_sceh/classes/output/core_renderer.php` — Logged-in/logged-out homepage redirect behavior
+- `theme_sceh/scss/login.scss` — Responsive login styling and component-level polish
+- `theme_sceh/scss/internal.scss` — Internal page visual adjustments
+- `theme_sceh/scss/components.scss` — Shared theme component styling
+- `theme_sceh/scss/tokens.scss` — Theme color/spacing/shadow tokens
+- `theme_sceh/lib.php` — Theme SCSS assembly hook
+- `theme_sceh/lang/en/theme_sceh.php` — Theme copy strings including login heading text
+- `theme_sceh/version.php` — Theme plugin metadata
+- `docker-compose.moodlehq.yml` — Theme mount for web/cron containers
+- `docs/LOGIN_BRANDING_THEME.md` — Operational guide for branded login theme
+- `docs/THEME_VISUAL_LIBRARY.md` — Visual system notes for consistent implementation
+
+---
+
 ## [2026-02-14] — Add workflow guardrails and automated card/page regression tests
 
 **Commit**: `PENDING` on branch `front-end-explorations`

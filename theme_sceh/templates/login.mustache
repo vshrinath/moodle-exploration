@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+}}
+{{> theme_boost/head }}
+
+<body {{{ bodyattributes }}}>
+{{> core/local/toast/wrapper}}
+
+<div id="page-wrapper" class="theme-sceh-login">
+    {{{ output.standard_top_of_body_html }}}
+
+    <main id="page" class="sceh-login-page">
+        <header class="sceh-login-header">
+            <div class="sceh-login-header__brand">
+                <div class="sceh-brand-mark" aria-hidden="true">
+                    <span class="sceh-brand-mark__dot"></span>
+                </div>
+                <div class="sceh-brand-text">
+                    <div class="sceh-brand-title">{{#str}}welcometitle, theme_sceh{{/str}}</div>
+                    <div class="sceh-brand-subtitle">{{#str}}welcomesubtitle, theme_sceh{{/str}}</div>
+                </div>
+            </div>
+            <nav class="sceh-login-header__actions" aria-label="Site links">
+                <a href="/help.php">Help</a>
+                <a href="/user/contactsitesupport.php">Contact</a>
+                <a href="/login/index.php" class="sceh-header-login-btn">{{#str}}login{{/str}}</a>
+            </nav>
+        </header>
+
+        <section class="sceh-login-hero" aria-label="{{#str}}welcometitle, theme_sceh{{/str}}">
+            <div class="sceh-login-hero__overlay"></div>
+            <div class="sceh-login-hero__content">
+                <div class="sceh-login-copy">
+                    <h1 class="sceh-login-title">{{#str}}welcometitle, theme_sceh{{/str}}</h1>
+                    <p class="sceh-login-tagline">{{#str}}welcometagline, theme_sceh{{/str}}</p>
+                    <ul class="sceh-login-points">
+                        <li>{{#str}}welcomebullet1, theme_sceh{{/str}}</li>
+                        <li>{{#str}}welcomebullet2, theme_sceh{{/str}}</li>
+                        <li>{{#str}}welcomebullet3, theme_sceh{{/str}}</li>
+                    </ul>
+                </div>
+                <div class="sceh-login-panel" aria-label="{{#str}}login{{/str}}">
+                    <div class="sceh-login-panel__card">
+                        {{{ output.main_content }}}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>
+{{#js}}
+M.util.js_pending('theme_sceh/loader');
+require(['theme_boost/loader'], function() {
+  M.util.js_complete('theme_sceh/loader');
+});
+{{/js}}

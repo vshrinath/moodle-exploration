@@ -50,6 +50,7 @@ services:
       - ./local_sceh_rules:/var/www/html/public/local/sceh_rules
       - ./local_kirkpatrick_dashboard:/var/www/html/public/local/kirkpatrick_dashboard
       - ./local_kirkpatrick_level4:/var/www/html/public/local/kirkpatrick_level4
+      - ./theme_sceh:/var/www/html/public/theme/sceh
       - ./mod/attendance:/var/www/html/public/mod/attendance
       - ./scripts:/var/www/html/public/scripts
       - ./scripts/moodlehq/start-web.sh:/opt/sceh/start-web.sh:ro
@@ -70,6 +71,7 @@ services:
       - ./local_sceh_rules:/var/www/html/public/local/sceh_rules
       - ./local_kirkpatrick_dashboard:/var/www/html/public/local/kirkpatrick_dashboard
       - ./local_kirkpatrick_level4:/var/www/html/public/local/kirkpatrick_level4
+      - ./theme_sceh:/var/www/html/public/theme/sceh
       - ./mod/attendance:/var/www/html/public/mod/attendance
       - ./scripts/moodlehq/start-cron.sh:/opt/sceh/start-cron.sh:ro
       - ./scripts/moodlehq/entrypoint.d:/docker-entrypoint.d:ro
