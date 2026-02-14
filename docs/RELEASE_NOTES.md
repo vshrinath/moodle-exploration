@@ -4,6 +4,24 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Standardize AI collaboration and release-note writing conventions
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Updated `AGENTS.md` to a cleaner, consolidated rule set for AI-assisted development behavior.
+- Updated `CONVENTIONS.md` to align project conventions with the agreed release-note style and collaboration expectations.
+- Preserved the customer-facing release-note structure as the default format for future entries.
+
+### Why
+We needed one consistent operating contract for AI tools and one consistent documentation style for release communication. This reduces ambiguity during implementation and keeps change history easier for non-technical stakeholders to follow.
+
+### Files touched
+- `AGENTS.md` — Reorganized and simplified agent operating rules
+- `CONVENTIONS.md` — Updated project conventions and release-note expectations
+
+---
+
 ## [2026-02-14] — Deliver branded SCEH login page and simplify sign-in actions
 
 **Commit**: `PENDING` on branch `front-end-explorations`
