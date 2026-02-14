@@ -16,6 +16,8 @@
 
 namespace local_sceh_rules\helper;
 
+use local_sceh_rules\output\sceh_card;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -32,47 +34,75 @@ class rules_table_renderer {
      * @return string HTML table
      */
     public static function render_attendance_rules_table($rules, $edit_page, $list_page) {
-        global $DB, $OUTPUT;
+        global $DB;
         
         if (empty($rules)) {
             return \html_writer::tag('p', get_string('norulesfound', 'local_sceh_rules'));
         }
-        
-        $table = new \html_table();
-        $table->head = [
-            get_string('attendance_rule_competency', 'local_sceh_rules'),
-            get_string('course'),
-            get_string('attendance_rule_threshold', 'local_sceh_rules'),
-            get_string('enabled', 'core'),
-            get_string('actions'),
-        ];
-        
+
+        $html = \html_writer::start_div('sceh-rules-grid');
         foreach ($rules as $rule) {
             $competency = $DB->get_record('competency', ['id' => $rule->competencyid]);
             $course = $DB->get_record('course', ['id' => $rule->courseid]);
-            
+
             $editurl = new \moodle_url('/local/sceh_rules/' . $edit_page, ['id' => $rule->id]);
             $deleteurl = new \moodle_url('/local/sceh_rules/' . $list_page, [
                 'action' => 'delete',
                 'id' => $rule->id,
                 'sesskey' => sesskey()
             ]);
-            
-            $actions = \html_writer::link($editurl, get_string('edit')) . ' | ' .
-                       \html_writer::link($deleteurl, get_string('delete'), [
-                           'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");'
-                       ]);
-            
-            $table->data[] = [
-                $competency ? format_string($competency->shortname) : get_string('notfound', 'core'),
-                $course ? format_string($course->fullname) : get_string('notfound', 'core'),
-                $rule->threshold . '%',
-                $rule->enabled ? get_string('yes') : get_string('no'),
-                $actions
-            ];
+
+            $enabled = !empty($rule->enabled);
+            $status = $enabled ? 'success' : 'warning';
+            $statuslabel = $enabled ? get_string('enabled', 'core') : get_string('disabled', 'core');
+            $competencyname = $competency ? format_string($competency->shortname) : get_string('notfound', 'core');
+            $coursename = $course ? format_string($course->fullname) : get_string('notfound', 'core');
+
+            $html .= sceh_card::detail([
+                'size' => 'medium',
+                'status' => $status,
+                'status_text' => $statuslabel,
+                'icon' => 'fa-calendar-check',
+                'title' => $competencyname,
+                'subtitle' => get_string('attendance_rule_competency', 'local_sceh_rules'),
+                'badges' => [
+                    [
+                        'text' => $statuslabel,
+                        'type' => $enabled ? 'success' : 'secondary',
+                    ],
+                ],
+                'stats' => [
+                    [
+                        'value' => format_float($rule->threshold, 0) . '%',
+                        'label' => get_string('attendance_rule_threshold', 'local_sceh_rules'),
+                    ],
+                ],
+                'sections' => [
+                    [
+                        'title' => get_string('course'),
+                        'content' => $coursename,
+                    ],
+                ],
+                'actions' => [
+                    [
+                        'text' => get_string('edit'),
+                        'url' => $editurl,
+                        'style' => 'secondary',
+                    ],
+                    [
+                        'text' => get_string('delete'),
+                        'url' => $deleteurl,
+                        'style' => 'danger',
+                        'attributes' => [
+                            'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");',
+                        ],
+                    ],
+                ],
+            ]);
         }
-        
-        return \html_writer::table($table);
+        $html .= \html_writer::end_div();
+
+        return $html;
     }
     
     /**
@@ -84,45 +114,73 @@ class rules_table_renderer {
      * @return string HTML table
      */
     public static function render_roster_rules_table($rules, $edit_page, $list_page) {
-        global $DB, $OUTPUT;
+        global $DB;
         
         if (empty($rules)) {
             return \html_writer::tag('p', get_string('norulesfound', 'local_sceh_rules'));
         }
-        
-        $table = new \html_table();
-        $table->head = [
-            get_string('roster_rule_name', 'local_sceh_rules'),
-            get_string('course'),
-            get_string('roster_rule_action', 'local_sceh_rules'),
-            get_string('enabled', 'core'),
-            get_string('actions'),
-        ];
-        
+
+        $html = \html_writer::start_div('sceh-rules-grid');
         foreach ($rules as $rule) {
-            $course = $DB->get_record('course', ['id' => $rule->courseid]);
-            
+            $competency = $DB->get_record('competency', ['id' => $rule->competencyid]);
             $editurl = new \moodle_url('/local/sceh_rules/' . $edit_page, ['id' => $rule->id]);
             $deleteurl = new \moodle_url('/local/sceh_rules/' . $list_page, [
                 'action' => 'delete',
                 'id' => $rule->id,
                 'sesskey' => sesskey()
             ]);
-            
-            $actions = \html_writer::link($editurl, get_string('edit')) . ' | ' .
-                       \html_writer::link($deleteurl, get_string('delete'), [
-                           'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");'
-                       ]);
-            
-            $table->data[] = [
-                format_string($rule->name),
-                $course ? format_string($course->fullname) : get_string('notfound', 'core'),
-                format_string($rule->action),
-                $rule->enabled ? get_string('yes') : get_string('no'),
-                $actions
-            ];
+
+            $enabled = !empty($rule->enabled);
+            $status = $enabled ? 'success' : 'warning';
+            $statuslabel = $enabled ? get_string('enabled', 'core') : get_string('disabled', 'core');
+            $typekey = 'roster_type_' . $rule->rostertype;
+            $rostertype = get_string_manager()->string_exists($typekey, 'local_sceh_rules')
+                ? get_string($typekey, 'local_sceh_rules')
+                : format_string($rule->rostertype);
+            $competencyname = $competency ? format_string($competency->shortname) : get_string('notfound', 'core');
+
+            $html .= sceh_card::detail([
+                'size' => 'medium',
+                'status' => $status,
+                'status_text' => $statuslabel,
+                'icon' => 'fa-users',
+                'title' => $rostertype,
+                'subtitle' => get_string('roster_rule_type', 'local_sceh_rules'),
+                'badges' => [
+                    [
+                        'text' => $statuslabel,
+                        'type' => $enabled ? 'success' : 'secondary',
+                    ],
+                ],
+                'sections' => [
+                    [
+                        'title' => get_string('roster_rule_competency', 'local_sceh_rules'),
+                        'content' => $competencyname,
+                    ],
+                    [
+                        'title' => get_string('roster_rule_evidence', 'local_sceh_rules'),
+                        'content' => format_text($rule->evidencedesc, FORMAT_PLAIN),
+                    ],
+                ],
+                'actions' => [
+                    [
+                        'text' => get_string('edit'),
+                        'url' => $editurl,
+                        'style' => 'secondary',
+                    ],
+                    [
+                        'text' => get_string('delete'),
+                        'url' => $deleteurl,
+                        'style' => 'danger',
+                        'attributes' => [
+                            'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");',
+                        ],
+                    ],
+                ],
+            ]);
         }
-        
-        return \html_writer::table($table);
+        $html .= \html_writer::end_div();
+
+        return $html;
     }
 }

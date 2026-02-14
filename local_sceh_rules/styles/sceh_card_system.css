@@ -1,0 +1,177 @@
+.sceh-rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.sceh-card.sceh-card-system {
+    background: #fff;
+    border: 1px solid #d9dee3;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    color: #1f2933;
+    padding: 16px;
+    min-height: 180px;
+}
+
+.sceh-card-small {
+    min-height: 140px;
+}
+
+.sceh-card-medium {
+    min-height: 220px;
+}
+
+.sceh-card-large {
+    min-height: 280px;
+}
+
+.sceh-card-full {
+    grid-column: 1 / -1;
+}
+
+.sceh-card-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.sceh-header-left {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.sceh-header-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.sceh-header-count,
+.sceh-card-subtitle,
+.sceh-stat-label,
+.sceh-list-item-subtext,
+.sceh-status-details {
+    color: #606b78;
+}
+
+.sceh-header-right {
+    display: flex;
+    gap: 6px;
+}
+
+.sceh-metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 4px 0;
+}
+
+.sceh-metric-trend {
+    color: #147a3f;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.sceh-stat-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    margin: 12px 0;
+}
+
+.sceh-stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.sceh-stat-label {
+    font-size: 0.85rem;
+}
+
+.sceh-list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sceh-list-item {
+    border: 1px solid #e4e7eb;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.sceh-list-item-main {
+    align-items: flex-start;
+    display: flex;
+    gap: 8px;
+}
+
+.sceh-list-item-text {
+    font-weight: 600;
+}
+
+.sceh-list-item-subtext {
+    font-size: 0.9rem;
+}
+
+.sceh-list-item-actions,
+.sceh-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.sceh-detail-section {
+    border-top: 1px solid #eef1f4;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.sceh-detail-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.sceh-status {
+    align-items: center;
+    border-radius: 8px;
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 10px;
+}
+
+.sceh-status-success {
+    background: #edf7ef;
+    border: 1px solid #c7e6ce;
+    color: #1e6d2c;
+}
+
+.sceh-status-warning {
+    background: #fff6e7;
+    border: 1px solid #ffe2af;
+    color: #8a5a00;
+}
+
+.sceh-status-danger {
+    background: #fdeeee;
+    border: 1px solid #f6c9c9;
+    color: #8c1d1d;
+}
+
+.sceh-status-info {
+    background: #eaf3fb;
+    border: 1px solid #cde1f3;
+    color: #17527a;
+}
+
+@media (max-width: 767px) {
+    .sceh-rules-grid {
+        grid-template-columns: 1fr;
+    }
+}

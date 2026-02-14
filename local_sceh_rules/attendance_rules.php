@@ -31,6 +31,7 @@ $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('attendance_rules', 'local_sceh_rules'));
 $PAGE->set_heading(get_string('attendance_rules', 'local_sceh_rules'));
+$PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
 
 // Handle actions
 if ($action === 'delete' && $id && confirm_sesskey()) {

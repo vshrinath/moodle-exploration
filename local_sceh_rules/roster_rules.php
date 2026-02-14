@@ -16,6 +16,8 @@
 
 require_once(__DIR__ . '/../../config.php');
 
+use local_sceh_rules\helper\rules_table_renderer;
+
 require_login();
 
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -29,6 +31,7 @@ $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('roster_rules', 'local_sceh_rules'));
 $PAGE->set_heading(get_string('roster_rules', 'local_sceh_rules'));
+$PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
 
 // Handle actions
 if ($action === 'delete' && $id && confirm_sesskey()) {
@@ -45,44 +48,6 @@ echo $OUTPUT->single_button($addurl, get_string('roster_rule_add', 'local_sceh_r
 
 // Display existing rules
 $rules = $DB->get_records('local_sceh_roster_rules', null, 'timecreated DESC');
-
-if (empty($rules)) {
-    echo html_writer::tag('p', get_string('norulesfound', 'local_sceh_rules'));
-} else {
-    $table = new html_table();
-    $table->head = [
-        get_string('roster_rule_type', 'local_sceh_rules'),
-        get_string('roster_rule_competency', 'local_sceh_rules'),
-        get_string('roster_rule_evidence', 'local_sceh_rules'),
-        get_string('enabled', 'core'),
-        get_string('actions'),
-    ];
-    
-    foreach ($rules as $rule) {
-        $competency = $DB->get_record('competency', ['id' => $rule->competencyid]);
-        
-        $editurl = new moodle_url('/local/sceh_rules/edit_roster_rule.php', ['id' => $rule->id]);
-        $deleteurl = new moodle_url('/local/sceh_rules/roster_rules.php', [
-            'action' => 'delete',
-            'id' => $rule->id,
-            'sesskey' => sesskey()
-        ]);
-        
-        $actions = html_writer::link($editurl, get_string('edit')) . ' | ' .
-                   html_writer::link($deleteurl, get_string('delete'), [
-                       'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");'
-                   ]);
-        
-        $table->data[] = [
-            get_string('roster_type_' . $rule->rostertype, 'local_sceh_rules'),
-            $competency ? format_string($competency->shortname) : get_string('notfound', 'core'),
-            format_text($rule->evidencedesc, FORMAT_PLAIN),
-            $rule->enabled ? get_string('yes') : get_string('no'),
-            $actions
-        ];
-    }
-    
-    echo html_writer::table($table);
-}
+echo rules_table_renderer::render_roster_rules_table($rules, 'edit_roster_rule.php', 'roster_rules.php');
 
 echo $OUTPUT->footer();

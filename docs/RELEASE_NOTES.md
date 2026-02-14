@@ -4,6 +4,30 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-13] — Implement Phase 1 card system and migrate rules pages
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Implemented shared Phase 1 card renderer (`simple`, `metric`, `list`, `detail`) in `local_sceh_rules`.
+- Added reusable card-system stylesheet for consistent card layouts, status states, stats, lists, and actions.
+- Migrated Attendance Rules and Roster Rules from table rendering to card-based rendering.
+- Updated roster rules page to use shared rules renderer (matching attendance rules behavior).
+- Wired dashboard card rendering to use shared `sceh_card::simple()` with fallback.
+
+### Why
+This creates one reusable card foundation for the platform and removes duplicated ad-hoc card/table rendering. It also aligns rules-management UI with the approved card-system direction while preserving existing actions and permissions.
+
+### Files touched
+- `local_sceh_rules/classes/output/sceh_card.php` — New shared card renderer with helper methods and Phase 1 templates
+- `local_sceh_rules/styles/sceh_card_system.css` — New shared card-system styles
+- `local_sceh_rules/classes/helper/rules_table_renderer.php` — Replaced table output with card output for attendance/roster rules
+- `local_sceh_rules/attendance_rules.php` — Added card-system stylesheet include
+- `local_sceh_rules/roster_rules.php` — Switched to shared renderer and added stylesheet include
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Uses shared simple card renderer with fallback
+
+---
+
 ## [2026-02-13] — Standardize development on MoodleHQ 5.1 and scrub legacy stack paths
 
 **Commit**: `PENDING` on branch `front-end-explorations`

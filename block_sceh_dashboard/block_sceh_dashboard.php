@@ -365,6 +365,10 @@ class block_sceh_dashboard extends block_base {
     }
     
     private function render_card($card) {
+        if (class_exists('\local_sceh_rules\output\sceh_card')) {
+            return \local_sceh_rules\output\sceh_card::simple($card);
+        }
+
         $html = html_writer::start_div('sceh-card sceh-card-' . $card['color']);
         $html .= html_writer::start_tag('a', ['href' => $card['url'], 'class' => 'sceh-card-link']);
         
