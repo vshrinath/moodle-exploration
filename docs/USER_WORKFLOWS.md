@@ -4,6 +4,10 @@
 **Audience:** Trainers, administrators, developers, and stakeholders  
 **Last Updated:** 2026-02-14
 
+Related quick reference:
+- `docs/SYSTEM_FAQ.md`
+- `docs/USER_FAQ.md`
+
 ---
 
 ## Table of Contents
@@ -14,10 +18,11 @@
 4. [Program Owner Workflows](#program-owner-workflows)
 5. [Trainer Workflows](#trainer-workflows)
 6. [Learner Workflows](#learner-workflows)
-7. [Missing Pieces & Dependencies](#missing-pieces--dependencies)
-8. [Critical Dependencies](#critical-dependencies)
-9. [Workflow Sequence](#workflow-sequence)
-10. [Detailed Workflows](#detailed-workflows)
+7. [Composite End-to-End Workflows](#composite-end-to-end-workflows)
+8. [Missing Pieces & Dependencies](#missing-pieces--dependencies)
+9. [Critical Dependencies](#critical-dependencies)
+10. [Workflow Sequence](#workflow-sequence)
+11. [Detailed Workflows](#detailed-workflows)
 
 ---
 
@@ -233,6 +238,78 @@ Replace dashboard Calendar with a role-based **Workflow Queue** that highlights 
 1. Continue learning in chosen stream
 2. Track progress and competencies
 3. Complete program and earn badges
+
+---
+
+## Composite End-to-End Workflows
+
+### 1. Program Lifecycle Composite (Create → Validate → Launch → Run → Improve)
+
+1. **Program Owner creates program**
+- Creates category/course structure.
+- Defines `Common Foundation` and `STREAM - ...` sections.
+- Configures stream choice, assessments, competencies, completion, badges.
+2. **System Admin validates launch readiness**
+- Confirms roles/capabilities and cohort setup.
+- Verifies stream integrity and reporting/scheduler setup.
+3. **Trainer starts delivery**
+- Reviews assigned cohorts and stream structure.
+- Starts attendance, grading, and learner communication.
+4. **Learner starts program**
+- Completes common foundation.
+- Selects stream and continues specialization.
+5. **Feedback and iteration**
+- Trainers report delivery friction.
+- Program Owner updates content/rules.
+- System Admin tunes operations/reporting.
+
+### 2. Learner Journey Composite (Onboard → Foundation → Stream Select → Specialize → Complete)
+
+1. Learner logs in and lands on role-based dashboard.
+2. Learner completes common foundation activities.
+3. Learner submits stream choice (permanent stream direction for current model).
+4. System resolves selected stream and guides learner into stream section.
+5. Learner completes assessments/evidence and tracks competency progress.
+6. Trainer grades and awards badges (manual/criteria-based).
+7. Learner reaches completion and sees final outcomes.
+
+### 3. Intervention Composite (Detect Risk → Assign Owner → Act → Recheck)
+
+1. **Detect**
+- Workflow Queue and reports surface overdue work, grading lag, stream/setup issues, or risk signals.
+2. **Assign**
+- Owner is role-specific:
+  - Sysadmin for access/config/scheduler issues
+  - Program Owner for design/content/stream setup issues
+  - Trainer for learner-level execution issues
+  - Trainer Coach for trainer performance coaching (optional)
+3. **Act**
+- Owner executes corrective action from linked workflow cards/pages.
+4. **Recheck**
+- Next workflow cycle verifies that risk signal has reduced or cleared.
+
+### 4. Feedback Composite (Delivery Data → Role Dashboards → Decisions)
+
+1. **Data generation**
+- Learner activity, attendance, submissions, grading, competency progression.
+2. **Dashboard surfacing**
+- Learners: timeline + workflow queue
+- Non-learners: workflow queue + role cards/reports
+3. **Decision loop**
+- Trainers improve facilitation and follow-up.
+- Program Owners improve structure/content/rules.
+- System Admin improves enrollment, permissions, and reporting reliability.
+4. **Outcome**
+- Faster issue resolution and tighter alignment between design and delivery.
+
+### Operational Note for Content Trials
+
+For upcoming real-content trials, run each composite workflow with:
+1. one named program instance,
+2. one cohort,
+3. one trainer,
+4. 3-5 learners across multiple streams,
+so feedback can be mapped to exact workflow steps and role handoffs.
 
 ---
 

@@ -4,6 +4,27 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Add user-facing FAQs and composite workflow guidance
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a new user-focused FAQ covering practical "How do I..." tasks across Program Owner, System Admin, Trainer, Trainer Coach, and Learner roles.
+- Added a system FAQ for architecture-level questions (competency mapping model, workflow queue data sources, stream behavior, and configuration boundaries).
+- Expanded workflow documentation with composite end-to-end lifecycle flows and role handoff guidance.
+- Linked workflow docs to the new FAQ references for faster onboarding and support handoffs.
+
+### Why
+As workflows became cross-role and more feature-rich, new users needed a clear operational reference that is easier to navigate than implementation notes. This improves onboarding speed, support consistency, and readiness for upcoming real-content trials.
+
+### Files touched
+- `docs/USER_FAQ.md` — New detailed role/task FAQ for everyday operations
+- `docs/SYSTEM_FAQ.md` — New architecture/system-behavior FAQ
+- `docs/USER_WORKFLOWS.md` — Added composite workflow guidance and FAQ cross-links
+- `docs/RELEASE_NOTES.md` — Added release entry for this documentation update
+
+---
+
 ## [2026-02-14] — Introduce role-based workflow queue and dashboard layout improvements
 
 **Commit**: `PENDING` on branch `front-end-explorations`
