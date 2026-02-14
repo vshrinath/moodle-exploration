@@ -26,3 +26,57 @@ body:not(.pagelayout-login) .nav-link.active {
   font-weight: 600;
 }
 
+/* Internal top navigation polish. */
+body:not(.pagelayout-login) .navbar.fixed-top {
+  background: linear-gradient(90deg, #0a2142 0%, #0f3564 55%, #18457f 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 24px rgba(10, 23, 44, 0.28);
+}
+
+body:not(.pagelayout-login) .navbar.fixed-top .navbar-brand,
+body:not(.pagelayout-login) .navbar.fixed-top .navbar-brand:hover,
+body:not(.pagelayout-login) .navbar.fixed-top .nav-link,
+body:not(.pagelayout-login) .navbar.fixed-top .nav-link:hover {
+  color: #f2f6ff;
+}
+
+body:not(.pagelayout-login) .navbar.fixed-top .navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+body:not(.pagelayout-login) .navbar.fixed-top .nav-link.active {
+  color: #ffffff;
+  border-bottom: 2px solid #dbe8ff;
+}
+
+/* Dashboard uses workflow queue instead of calendar blocks. */
+body#page-my-index .block_calendar_month,
+body#page-my-index .block_calendar_upcoming {
+  display: none !important;
+}
+
+/* Keep timeline for learners only; hide for ops/design/delivery roles. */
+body#page-my-index.sceh-role-systemadmin .block_timeline,
+body#page-my-index.sceh-role-programowner .block_timeline,
+body#page-my-index.sceh-role-trainer .block_timeline,
+body#page-my-index.sceh-role-trainercoach .block_timeline {
+  display: none !important;
+}
+
+/* Make dashboard content wider and readable on desktop, then adapt on smaller screens. */
+body#page-my-index #page.drawers .main-inner {
+  max-width: min(1680px, calc(100vw - 2rem));
+  width: 100%;
+}
+
+body#page-my-index #region-main-box,
+body#page-my-index #region-main {
+  max-width: 100%;
+}
+
+@media (max-width: 991px) {
+  body#page-my-index #page.drawers .main-inner {
+    max-width: calc(100vw - 1rem);
+  }
+}

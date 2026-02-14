@@ -3,16 +3,42 @@
   --sceh-color-bg: #f2f4f7;
   --sceh-color-surface: #ffffff;
   --sceh-color-surface-soft: #f8fafc;
+  --sceh-color-surface-muted: #f3f5f8;
   --sceh-color-border: #e3e8ef;
+  --sceh-color-border-strong: #d3dbe5;
   --sceh-color-text: #1f2632;
   --sceh-color-text-muted: #5f6b7c;
   --sceh-color-brand: #c02635;
   --sceh-color-brand-hover: #a51f2d;
   --sceh-color-hero-overlay: rgba(8, 20, 39, 0.7);
+
+  /* Semantic status tokens. */
+  --sceh-color-status-success-bg: #edf7ef;
+  --sceh-color-status-success-border: #c7e6ce;
+  --sceh-color-status-success-text: #1e6d2c;
+  --sceh-color-status-warning-bg: #fff6e7;
+  --sceh-color-status-warning-border: #ffe2af;
+  --sceh-color-status-warning-text: #8a5a00;
+  --sceh-color-status-danger-bg: #fdeeee;
+  --sceh-color-status-danger-border: #f6c9c9;
+  --sceh-color-status-danger-text: #8c1d1d;
+  --sceh-color-status-info-bg: #eaf3fb;
+  --sceh-color-status-info-border: #cde1f3;
+  --sceh-color-status-info-text: #17527a;
+
+  /* Dashboard card gradients. */
+  --sceh-card-blue-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --sceh-card-green-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --sceh-card-red-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+  --sceh-card-yellow-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --sceh-card-purple-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --sceh-card-teal-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --sceh-card-orange-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --sceh-card-indigo-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+
   --sceh-radius-sm: 8px;
   --sceh-radius-md: 12px;
   --sceh-radius-lg: 16px;
   --sceh-shadow-card: 0 10px 24px rgba(18, 28, 45, 0.08);
   --sceh-shadow-card-strong: 0 22px 42px rgba(0, 0, 0, 0.28);
 }
-

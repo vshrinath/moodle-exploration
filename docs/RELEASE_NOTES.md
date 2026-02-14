@@ -4,6 +4,37 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Introduce role-based workflow queue and dashboard layout improvements
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a dynamic, role-aware **Workflow Queue** on dashboard with three buckets: `Do Now`, `This Week`, and `Watchlist`.
+- Populated queue items from Moodle-native signals (events, tasks, cohorts, grading backlog, stream setup checks) with lightweight derived rules.
+- Added role-specific timeline visibility: kept Timeline for learners and hid it for system admin, program owner, trainer, and trainer coach.
+- Replaced dashboard calendar blocks with workflow-first layout in the SCEH theme.
+- Improved dashboard readability with wider responsive content area for `/my/`.
+- Polished workflow card alignment (left-aligned content, consistent icon placement, action button anchoring).
+- Centralized dashboard/status color usage through theme tokens and token-backed card styles.
+- Updated site naming defaults to `SCEH` for new stack installs and aligned current runtime name.
+- Documented workflow-queue model and data-source strategy in the workflow reference.
+
+### Why
+The dashboard needed to prioritize operational next actions over generic calendar widgets. This change makes the role journey clearer, improves scanability on desktop/mobile, and establishes a maintainable design-token foundation for future UI updates.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added dynamic workflow queue generation and rendering logic
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added workflow queue strings and labels
+- `block_sceh_dashboard/styles.css` — Refined dashboard/workflow presentation and token-based gradient usage
+- `theme_sceh/classes/output/core_renderer.php` — Added role body classes for role-based dashboard behavior
+- `theme_sceh/scss/internal.scss` — Added timeline/calendar visibility rules and dashboard width/header polish
+- `theme_sceh/scss/tokens.scss` — Added semantic status and gradient tokens
+- `local_sceh_rules/styles/sceh_card_system.css` — Improved workflow card/item alignment and tokenized status colors
+- `docs/USER_WORKFLOWS.md` — Added workflow queue model, role flows, and implementation scope
+- `docker-compose.moodlehq.yml` — Updated default site naming to `SCEH`
+
+---
+
 ## [2026-02-14] — Standardize AI collaboration and release-note writing conventions
 
 **Commit**: `PENDING` on branch `front-end-explorations`

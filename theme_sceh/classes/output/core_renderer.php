@@ -41,4 +41,34 @@ class core_renderer extends \theme_boost\output\core_renderer {
 
         return parent::header();
     }
+
+    /**
+     * Add role classes to body so dashboard blocks can be shown/hidden per role.
+     *
+     * @param array $additionalclasses
+     * @return string
+     */
+    public function body_attributes($additionalclasses = []) {
+        if (isloggedin() && !isguestuser()) {
+            $context = \context_system::instance();
+
+            if (has_capability('local/sceh_rules:systemadmin', $context)) {
+                $additionalclasses[] = 'sceh-role-systemadmin';
+            } else if (has_capability('local/sceh_rules:programowner', $context)) {
+                $additionalclasses[] = 'sceh-role-programowner';
+            } else if (has_capability('local/sceh_rules:trainer', $context)) {
+                $additionalclasses[] = 'sceh-role-trainer';
+                if (
+                    class_exists('\local_sceh_rules\helper\trainer_coach_helper') &&
+                    \local_sceh_rules\helper\trainer_coach_helper::is_trainer_coach($this->page->user->id)
+                ) {
+                    $additionalclasses[] = 'sceh-role-trainercoach';
+                }
+            } else {
+                $additionalclasses[] = 'sceh-role-learner';
+            }
+        }
+
+        return parent::body_attributes($additionalclasses);
+    }
 }

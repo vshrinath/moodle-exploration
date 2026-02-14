@@ -2,21 +2,22 @@
 
 **Purpose:** Complete reference for understanding how each role interacts with the system  
 **Audience:** Trainers, administrators, developers, and stakeholders  
-**Last Updated:** 2026-02-13
+**Last Updated:** 2026-02-14
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [System Admin Workflows](#system-admin-workflows)
-3. [Program Owner Workflows](#program-owner-workflows)
-4. [Trainer Workflows](#trainer-workflows)
-5. [Learner Workflows](#learner-workflows)
-6. [Missing Pieces & Dependencies](#missing-pieces--dependencies)
-7. [Critical Dependencies](#critical-dependencies)
-8. [Workflow Sequence](#workflow-sequence)
-9. [Detailed Workflows](#detailed-workflows)
+2. [Dashboard Workflow Queue (Calendar Replacement)](#dashboard-workflow-queue-calendar-replacement)
+3. [System Admin Workflows](#system-admin-workflows)
+4. [Program Owner Workflows](#program-owner-workflows)
+5. [Trainer Workflows](#trainer-workflows)
+6. [Learner Workflows](#learner-workflows)
+7. [Missing Pieces & Dependencies](#missing-pieces--dependencies)
+8. [Critical Dependencies](#critical-dependencies)
+9. [Workflow Sequence](#workflow-sequence)
+10. [Detailed Workflows](#detailed-workflows)
 
 ---
 
@@ -49,6 +50,65 @@
 - Completes learning activities
 - Achieves competencies
 - Chooses specialization streams
+
+---
+
+## Dashboard Workflow Queue (Calendar Replacement)
+
+### Decision
+Replace dashboard Calendar with a role-based **Workflow Queue** that highlights next actions.
+
+### Queue Structure (all roles)
+1. **Do Now** — urgent/overdue actions
+2. **This Week** — planned operational tasks
+3. **Watchlist** — risk/monitoring items
+
+### Role Flows (queue-first view)
+
+**System Admin**
+- Do Now: permission/access issues, failed scheduled tasks, urgent support
+- This Week: cohort and enrollment updates, user provisioning, report schedule checks
+- Watchlist: at-risk cohorts, trainer outliers, system health signals
+
+**Program Owner**
+- Do Now: stream setup issues, publish-ready changes, competency/framework corrections
+- This Week: content updates, assessment/badge criteria checks, cohort progress review
+- Watchlist: low-completion sections, competency gaps, stream imbalance
+
+**Trainer**
+- Do Now: grading backlog, attendance marking, learner follow-ups
+- This Week: facilitation checklist, badge awarding, intervention tasks
+- Watchlist: inactive learners, low competency progression, attendance drop-off
+
+**Trainer Coach** (optional enhanced trainer)
+- Do Now: red-flag trainer interventions
+- This Week: weekly trainer review and coaching actions
+- Watchlist: sustained low-performing cohorts/trainers
+
+**Learner**
+- Do Now: next required activity, due submissions, pending evidence/logbook entries
+- This Week: section targets, competency progress checks, upcoming sessions
+- Watchlist: overdue tasks, missed attendance, stalled competencies
+
+### Data Sources for Workflow Items
+
+**Available directly in Moodle/core plugins (can drive queue now)**
+- Due/overdue activities and completion states
+- Assignment submissions and grading backlog
+- Attendance sessions and attendance records
+- Cohorts, enrollments, and role/capability access
+- Competency progress and badges data
+- Scheduled task/report health
+
+**Derived via rules layer (lightweight custom logic)**
+- At-risk learner flags
+- Trainer grading lag metrics
+- Stream imbalance and program health indicators
+
+### Agreed Implementation Scope
+1. Use Moodle-native signals first (no additional storage).
+2. Add derived workflow rules in plugin logic (`local_sceh_rules` / dashboard helpers).
+3. Defer custom workflow-state storage (ack/snooze/ownership history) unless required later.
 
 ---
 

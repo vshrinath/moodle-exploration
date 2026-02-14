@@ -8,7 +8,7 @@ class block_sceh_dashboard extends block_base {
     }
     
     public function get_content() {
-        global $OUTPUT, $USER;
+        global $USER, $PAGE;
         
         if ($this->content !== null) {
             return $this->content;
@@ -16,6 +16,9 @@ class block_sceh_dashboard extends block_base {
         
         $this->content = new stdClass();
         $this->content->text = '';
+
+        // Reuse shared card styles for workflow queue rendering.
+        $PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
         
         // Get user role-based cards
         $cards = $this->get_dashboard_cards();
@@ -26,10 +29,589 @@ class block_sceh_dashboard extends block_base {
         foreach ($cards as $card) {
             $this->content->text .= $this->render_card($card);
         }
-        
+
         $this->content->text .= html_writer::end_div();
+        $this->content->text .= $this->render_workflow_queue($USER->id);
         
         return $this->content;
+    }
+
+    /**
+     * Render role-based workflow queue (Do Now / This Week / Watchlist).
+     *
+     * @param int $userid
+     * @return string
+     */
+    private function render_workflow_queue($userid) {
+        if (!class_exists('\local_sceh_rules\output\sceh_card')) {
+            return '';
+        }
+
+        $queue = $this->get_workflow_queue_items($userid);
+        if (empty($queue)) {
+            return '';
+        }
+
+        $html = html_writer::start_div('sceh-workflow-queue mt-4');
+        $html .= html_writer::tag('h4', get_string('workflowqueue', 'block_sceh_dashboard'));
+        $html .= html_writer::div(get_string('workflowqueuedesc', 'block_sceh_dashboard'), 'text-muted mb-3');
+        $html .= html_writer::start_div('row');
+
+        foreach ($queue as $bucket) {
+            $items = [];
+            foreach ($bucket['items'] as $item) {
+                $items[] = [
+                    'icon' => $item['icon'],
+                    'text' => $item['text'],
+                    'subtext' => $item['subtext'],
+                    'actions' => [
+                        [
+                            'text' => get_string('open', 'block_sceh_dashboard'),
+                            'url' => $item['url'],
+                            'style' => 'secondary',
+                        ],
+                    ],
+                ];
+            }
+
+            if (empty($items)) {
+                $items[] = [
+                    'icon' => 'fa-circle-check',
+                    'text' => get_string('workflowempty', 'block_sceh_dashboard'),
+                    'subtext' => get_string('workflowemptydesc', 'block_sceh_dashboard'),
+                ];
+            }
+
+            $html .= html_writer::start_div('col-12 col-xl-4 mb-3');
+            $html .= \local_sceh_rules\output\sceh_card::list([
+                'title' => $bucket['title'],
+                'icon' => $bucket['icon'],
+                'status' => $bucket['status'],
+                'status_text' => $bucket['statustext'],
+                'count' => count($bucket['items']),
+                'items' => $items,
+                'size' => 'medium',
+            ]);
+            $html .= html_writer::end_div();
+        }
+
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Build workflow queue buckets for current user role.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_workflow_queue_items($userid) {
+        $context = context_system::instance();
+        $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
+        $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
+        $is_trainer = has_capability('local/sceh_rules:trainer', $context);
+
+        if ($is_system_admin) {
+            return $this->build_system_admin_queue($userid);
+        } else if ($is_program_owner) {
+            return $this->build_program_owner_queue($userid);
+        } else if ($is_trainer) {
+            return $this->build_trainer_queue($userid);
+        }
+
+        return $this->build_learner_queue($userid);
+    }
+
+    /**
+     * Queue for system admin workflow.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function build_system_admin_queue($userid) {
+        $failedtasks = $this->count_failed_scheduled_tasks();
+        $overdueevents = $this->count_user_overdue_events($userid);
+        $upcomingevents = $this->count_user_upcoming_events($userid, 7);
+
+        return [
+            [
+                'title' => get_string('workflownow', 'block_sceh_dashboard'),
+                'icon' => 'fa-bolt',
+                'status' => ($failedtasks + $overdueevents) > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-gears',
+                        get_string('workflowfailedtasks', 'block_sceh_dashboard', $failedtasks),
+                        get_string('workflowfailedtasksdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/admin/tool/task/scheduledtasks.php'),
+                        $failedtasks > 0
+                    ),
+                    $this->workflow_item(
+                        'fa-triangle-exclamation',
+                        get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
+                        get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        $overdueevents > 0
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowweek', 'block_sceh_dashboard'),
+                'icon' => 'fa-calendar-week',
+                'status' => 'info',
+                'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-users',
+                        get_string('workflowmanagecohorts', 'block_sceh_dashboard'),
+                        get_string('workflowcohortcount', 'block_sceh_dashboard', $this->count_total_cohorts()),
+                        new moodle_url('/cohort/index.php'),
+                        true
+                    ),
+                    $this->workflow_item(
+                        'fa-calendar-day',
+                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
+                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        true
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowwatchlist', 'block_sceh_dashboard'),
+                'icon' => 'fa-binoculars',
+                'status' => $failedtasks > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-chart-pie',
+                        get_string('workflowevaluation', 'block_sceh_dashboard'),
+                        get_string('workflowevaluationdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/local/kirkpatrick_dashboard/index.php'),
+                        has_capability('local/kirkpatrick_dashboard:view', context_system::instance())
+                    ),
+                    $this->workflow_item(
+                        'fa-file-lines',
+                        get_string('workflowreports', 'block_sceh_dashboard'),
+                        get_string('workflowreportsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/admin/category.php', ['category' => 'reports']),
+                        true
+                    ),
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * Queue for program owner workflow.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function build_program_owner_queue($userid) {
+        $streamissues = $this->count_program_owner_stream_issues($userid);
+        $upcomingevents = $this->count_user_upcoming_events($userid, 7);
+        $categorycount = count($this->get_program_owner_categories($userid));
+
+        return [
+            [
+                'title' => get_string('workflownow', 'block_sceh_dashboard'),
+                'icon' => 'fa-bolt',
+                'status' => $streamissues > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-tasks',
+                        get_string('workflowstreamissues', 'block_sceh_dashboard', $streamissues),
+                        get_string('workflowstreamissuesdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/local/sceh_rules/stream_setup_check.php'),
+                        true
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowweek', 'block_sceh_dashboard'),
+                'icon' => 'fa-calendar-week',
+                'status' => 'info',
+                'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-folder-tree',
+                        get_string('workflowassignedcategories', 'block_sceh_dashboard', $categorycount),
+                        get_string('workflowassignedcategoriesdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/course/index.php'),
+                        true
+                    ),
+                    $this->workflow_item(
+                        'fa-calendar-day',
+                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
+                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        true
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowwatchlist', 'block_sceh_dashboard'),
+                'icon' => 'fa-binoculars',
+                'status' => $streamissues > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-sitemap',
+                        get_string('workflowcompetencyreview', 'block_sceh_dashboard'),
+                        get_string('workflowcompetencyreviewdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                            'pagecontextid' => context_system::instance()->id,
+                        ]),
+                        true
+                    ),
+                    $this->workflow_item(
+                        'fa-chart-column',
+                        get_string('workflowreviewreports', 'block_sceh_dashboard'),
+                        get_string('workflowreviewreportsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/admin/category.php', ['category' => 'reports']),
+                        true
+                    ),
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * Queue for trainer workflow.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function build_trainer_queue($userid) {
+        $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
+        $coursecount = count($courses);
+        $ungraded = $this->count_trainer_ungraded_submissions($userid);
+        $overdueevents = $this->count_user_overdue_events($userid);
+
+        return [
+            [
+                'title' => get_string('workflownow', 'block_sceh_dashboard'),
+                'icon' => 'fa-bolt',
+                'status' => ($ungraded + $overdueevents) > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-clipboard-check',
+                        get_string('workflowungraded', 'block_sceh_dashboard', $ungraded),
+                        get_string('workflowungradeddesc', 'block_sceh_dashboard'),
+                        new moodle_url('/my/courses.php'),
+                        true
+                    ),
+                    $this->workflow_item(
+                        'fa-calendar-check',
+                        get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
+                        get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        $overdueevents > 0
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowweek', 'block_sceh_dashboard'),
+                'icon' => 'fa-calendar-week',
+                'status' => 'info',
+                'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-users',
+                        get_string('workflowassignedcourses', 'block_sceh_dashboard', $coursecount),
+                        get_string('workflowassignedcoursesdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/my/courses.php'),
+                        true
+                    ),
+                    $this->workflow_item(
+                        'fa-calendar-day',
+                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $this->count_user_upcoming_events($userid, 7)),
+                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        true
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowwatchlist', 'block_sceh_dashboard'),
+                'icon' => 'fa-binoculars',
+                'status' => $ungraded > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-chart-line',
+                        get_string('workflowstreamprogress', 'block_sceh_dashboard'),
+                        get_string('workflowstreamprogressdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/local/sceh_rules/stream_progress.php'),
+                        true
+                    ),
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * Queue for learner workflow.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function build_learner_queue($userid) {
+        $pendingstream = $this->count_learner_pending_stream_selection($userid);
+        $overdueevents = $this->count_user_overdue_events($userid);
+        $upcomingevents = $this->count_user_upcoming_events($userid, 7);
+
+        return [
+            [
+                'title' => get_string('workflownow', 'block_sceh_dashboard'),
+                'icon' => 'fa-bolt',
+                'status' => ($overdueevents + $pendingstream) > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-calendar-xmark',
+                        get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
+                        get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        $overdueevents > 0
+                    ),
+                    $this->workflow_item(
+                        'fa-code-branch',
+                        get_string('workflowpendingstream', 'block_sceh_dashboard', $pendingstream),
+                        get_string('workflowpendingstreamdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/local/sceh_rules/stream_progress.php'),
+                        $pendingstream > 0
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowweek', 'block_sceh_dashboard'),
+                'icon' => 'fa-calendar-week',
+                'status' => 'info',
+                'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-calendar-day',
+                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
+                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/calendar/view.php'),
+                        true
+                    ),
+                    $this->workflow_item(
+                        'fa-chart-line',
+                        get_string('workflowtrackprogress', 'block_sceh_dashboard'),
+                        get_string('workflowtrackprogressdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/local/sceh_rules/stream_progress.php'),
+                        true
+                    ),
+                ]),
+            ],
+            [
+                'title' => get_string('workflowwatchlist', 'block_sceh_dashboard'),
+                'icon' => 'fa-binoculars',
+                'status' => $pendingstream > 0 ? 'warning' : 'success',
+                'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
+                'items' => array_filter([
+                    $this->workflow_item(
+                        'fa-award',
+                        get_string('workflowbadges', 'block_sceh_dashboard'),
+                        get_string('workflowbadgesdesc', 'block_sceh_dashboard'),
+                        new moodle_url('/badges/mybadges.php'),
+                        true
+                    ),
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * Build a workflow item payload.
+     *
+     * @param string $icon
+     * @param string $text
+     * @param string $subtext
+     * @param moodle_url $url
+     * @param bool $enabled
+     * @return array|null
+     */
+    private function workflow_item($icon, $text, $subtext, moodle_url $url, $enabled = true) {
+        if (!$enabled) {
+            return null;
+        }
+
+        return [
+            'icon' => $icon,
+            'text' => $text,
+            'subtext' => $subtext,
+            'url' => $url,
+        ];
+    }
+
+    /**
+     * Count failed scheduled tasks.
+     *
+     * @return int
+     */
+    private function count_failed_scheduled_tasks() {
+        global $DB;
+        return (int)$DB->count_records_select('task_scheduled', 'faildelay > 0');
+    }
+
+    /**
+     * Count overdue events for a user.
+     *
+     * @param int $userid
+     * @return int
+     */
+    private function count_user_overdue_events($userid) {
+        global $DB;
+        return (int)$DB->count_records_select(
+            'event',
+            'userid = :userid AND timestart > 0 AND timestart < :now',
+            ['userid' => $userid, 'now' => time()]
+        );
+    }
+
+    /**
+     * Count upcoming events for a user in N days.
+     *
+     * @param int $userid
+     * @param int $days
+     * @return int
+     */
+    private function count_user_upcoming_events($userid, $days = 7) {
+        global $DB;
+        $now = time();
+        $horizon = $now + ($days * DAYSECS);
+        return (int)$DB->count_records_select(
+            'event',
+            'userid = :userid AND timestart >= :now AND timestart <= :horizon',
+            ['userid' => $userid, 'now' => $now, 'horizon' => $horizon]
+        );
+    }
+
+    /**
+     * Count total cohorts.
+     *
+     * @return int
+     */
+    private function count_total_cohorts() {
+        global $DB;
+        return (int)$DB->count_records('cohort');
+    }
+
+    /**
+     * Count stream setup issues in program-owner categories.
+     *
+     * @param int $userid
+     * @return int
+     */
+    private function count_program_owner_stream_issues($userid) {
+        global $DB;
+
+        $categories = $this->get_program_owner_categories($userid);
+        if (empty($categories)) {
+            return 0;
+        }
+
+        $categoryids = array_map(function($category) {
+            return (int)$category->id;
+        }, $categories);
+        list($catsql, $catparams) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
+
+        $courses = $DB->get_records_select('course', 'category ' . $catsql, $catparams, '', 'id');
+        $issues = 0;
+
+        foreach ($courses as $course) {
+            $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($course->id);
+            $haschoiceoptions = (bool)$DB->get_field_sql(
+                "SELECT COUNT(co.id)
+                   FROM {choice_options} co
+                   JOIN {choice} c
+                     ON c.id = co.choiceid
+                  WHERE c.course = :courseid
+                    AND (LOWER(c.name) LIKE :streamname OR LOWER(c.name) LIKE :specializationname)",
+                [
+                    'courseid' => $course->id,
+                    'streamname' => '%stream%',
+                    'specializationname' => '%specialization%',
+                ]
+            );
+
+            if (empty($streamsections) || !$haschoiceoptions) {
+                $issues++;
+            }
+        }
+
+        return $issues;
+    }
+
+    /**
+     * Count ungraded trainer submissions in assigned courses.
+     *
+     * @param int $userid
+     * @return int
+     */
+    private function count_trainer_ungraded_submissions($userid) {
+        global $DB;
+
+        $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
+        if (empty($courses)) {
+            return 0;
+        }
+
+        $courseids = array_map(function($course) {
+            return (int)$course->id;
+        }, $courses);
+        list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
+
+        $sql = "SELECT COUNT(s.id)
+                  FROM {assign_submission} s
+                  JOIN {assign} a
+                    ON a.id = s.assignment
+             LEFT JOIN {assign_grades} g
+                    ON g.assignment = a.id
+                   AND g.userid = s.userid
+                 WHERE a.course {$insql}
+                   AND s.latest = 1
+                   AND s.status = :submitted
+                   AND g.id IS NULL";
+
+        $params['submitted'] = 'submitted';
+        return (int)$DB->count_records_sql($sql, $params);
+    }
+
+    /**
+     * Count learner courses with stream sections but no selected stream.
+     *
+     * @param int $userid
+     * @return int
+     */
+    private function count_learner_pending_stream_selection($userid) {
+        $courses = enrol_get_users_courses($userid, true, 'id');
+        if (empty($courses)) {
+            return 0;
+        }
+
+        $pending = 0;
+        foreach ($courses as $course) {
+            $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($course->id);
+            if (empty($streamsections)) {
+                continue;
+            }
+
+            $selected = \local_sceh_rules\helper\stream_helper::get_user_selected_stream($course->id, $userid);
+            if (!$selected) {
+                $pending++;
+            }
+        }
+
+        return $pending;
     }
     
     private function get_dashboard_cards() {
