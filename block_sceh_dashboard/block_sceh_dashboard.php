@@ -275,7 +275,8 @@ class block_sceh_dashboard extends block_base {
     private function get_trainer_cards($userid) {
         $context = context_system::instance();
         $courses = [];
-        $attendanceurl = new moodle_url('/mod/attendance/index.php');
+        $attendanceurl = new moodle_url('/my/courses.php');
+        $istrainercoach = \local_sceh_rules\helper\trainer_coach_helper::is_trainer_coach($userid);
 
         if (has_capability('local/sceh_rules:viewassignedcohortsonly', $context)) {
             $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
@@ -328,6 +329,15 @@ class block_sceh_dashboard extends block_base {
                 'icon' => 'fa-graduation-cap',
                 'color' => 'teal',
                 'url' => new moodle_url('/course/index.php'),
+            ];
+        }
+
+        if ($istrainercoach) {
+            $cards[] = [
+                'title' => get_string('trainingevaluation', 'block_sceh_dashboard'),
+                'icon' => 'fa-chart-pie',
+                'color' => 'purple',
+                'url' => new moodle_url('/local/kirkpatrick_dashboard/index.php'),
             ];
         }
 

@@ -4,6 +4,36 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Add workflow guardrails and automated card/page regression tests
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added automated PHPUnit coverage for shared card rendering (`simple`, `metric`, `list`, `detail`) and rules page card output.
+- Added dashboard card-link regression tests to prevent known broken routes (missing required URL params).
+- Added Trainer Coach cohort helper and enabled Trainer Coach-specific access path:
+  - Trainer users in the `trainer-coaches` cohort now get a Training Evaluation card.
+  - Trainer Coach path can open Kirkpatrick dashboard without granting broad access to all trainers.
+- Hardened trainer attendance fallback link to a safe route (`My courses`) when no assigned cohort course is available.
+- Fixed rules renderer string usage to plugin-local strings to avoid debugging notices in tests/runtime.
+- Updated workflow status notes to reflect implemented Trainer Coach support and reporting setup expectations.
+
+### Why
+We had repeated UI regressions caused by invalid links and role-path drift. This update adds a reliable automated safety net for card/page behavior and closes the main remaining code-backed workflow gap (optional Trainer Coach flow) while keeping access scoped and explicit.
+
+### Files touched
+- `local_sceh_rules/tests/sceh_card_test.php` — New renderer unit tests for card templates
+- `local_sceh_rules/tests/rules_table_renderer_test.php` — New rules page card output tests
+- `block_sceh_dashboard/tests/card_links_test.php` — New dashboard link regression tests and Trainer Coach card test
+- `local_sceh_rules/classes/helper/trainer_coach_helper.php` — New cohort-based Trainer Coach detection helper
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Safe trainer attendance fallback and Trainer Coach evaluation card injection
+- `local_kirkpatrick_dashboard/index.php` — Trainer Coach cohort access path for evaluation dashboard
+- `local_sceh_rules/classes/helper/rules_table_renderer.php` — Replaced invalid core string keys with plugin-local strings
+- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added `disabled` and rule-deletion confirmation strings
+- `docs/USER_WORKFLOWS.md` — Updated status markers for Trainer Coach and reporting dependencies
+
+---
+
 ## [2026-02-14] — Migrate stream and Kirkpatrick summary pages to shared card system
 
 **Commit**: `PENDING` on branch `front-end-explorations`

@@ -232,6 +232,7 @@
   - Attendance patterns
 - **Reports:** Weekly/monthly automated
 - **How:** Custom reports + scheduled tasks
+- **Status:** ✅ RESOLVED - Trainer Coaches can now access evaluation dashboard via cohort-based enhanced trainer view.
 
 ### 9. Automated Reporting
 - **Who sets up:** System Admin
@@ -242,6 +243,7 @@
   - At-risk learner alerts (to trainers)
 - **Delivery:** Email or dashboard notifications
 - **How:** Scheduled tasks + email notifications
+- **Status:** 🟡 SUPPORTED VIA MOODLE CORE - configure via Report builder schedules; no custom reporting plugin required.
 
 ### 10. Trainer Coach Capability (Optional)
 - **Who:** Trainers in "Trainer Coaches" cohort
@@ -253,6 +255,7 @@
   - Cross-cohort performance visibility (read-only)
   - Coaching queue and alerts
   - Comparative trainer analytics
+- **Status:** ✅ RESOLVED - Implemented cohort-based detection (`trainer-coaches`) with enhanced trainer dashboard card and access path.
 
 ---
 

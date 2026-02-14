@@ -54,7 +54,7 @@ class rules_table_renderer {
 
             $enabled = !empty($rule->enabled);
             $status = $enabled ? 'success' : 'warning';
-            $statuslabel = $enabled ? get_string('enabled', 'core') : get_string('disabled', 'core');
+            $statuslabel = $enabled ? get_string('enabled', 'local_sceh_rules') : get_string('disabled', 'local_sceh_rules');
             $competencyname = $competency ? format_string($competency->shortname) : get_string('notfound', 'core');
             $coursename = $course ? format_string($course->fullname) : get_string('notfound', 'core');
 
@@ -94,7 +94,7 @@ class rules_table_renderer {
                         'url' => $deleteurl,
                         'style' => 'danger',
                         'attributes' => [
-                            'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");',
+                            'onclick' => 'return confirm("' . get_string('confirmruledeletion', 'local_sceh_rules') . '");',
                         ],
                     ],
                 ],
@@ -132,7 +132,7 @@ class rules_table_renderer {
 
             $enabled = !empty($rule->enabled);
             $status = $enabled ? 'success' : 'warning';
-            $statuslabel = $enabled ? get_string('enabled', 'core') : get_string('disabled', 'core');
+            $statuslabel = $enabled ? get_string('enabled', 'local_sceh_rules') : get_string('disabled', 'local_sceh_rules');
             $typekey = 'roster_type_' . $rule->rostertype;
             $rostertype = get_string_manager()->string_exists($typekey, 'local_sceh_rules')
                 ? get_string($typekey, 'local_sceh_rules')
@@ -173,7 +173,7 @@ class rules_table_renderer {
                         'url' => $deleteurl,
                         'style' => 'danger',
                         'attributes' => [
-                            'onclick' => 'return confirm("' . get_string('confirmdeletion', 'core') . '");',
+                            'onclick' => 'return confirm("' . get_string('confirmruledeletion', 'local_sceh_rules') . '");',
                         ],
                     ],
                 ],

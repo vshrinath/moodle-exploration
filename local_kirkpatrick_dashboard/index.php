@@ -15,7 +15,17 @@ use local_sceh_rules\output\sceh_card;
 require_login();
 
 $context = context_system::instance();
-require_capability('local/kirkpatrick_dashboard:view', $context);
+$canviewdashboard = has_capability('local/kirkpatrick_dashboard:view', $context);
+
+if (!$canviewdashboard) {
+    $istrainer = has_capability('local/sceh_rules:trainer', $context);
+    $istrainercoach = class_exists('\local_sceh_rules\helper\trainer_coach_helper') &&
+        \local_sceh_rules\helper\trainer_coach_helper::is_trainer_coach((int)$USER->id);
+
+    if (!($istrainer && $istrainercoach)) {
+        require_capability('local/kirkpatrick_dashboard:view', $context);
+    }
+}
 
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/kirkpatrick_dashboard/index.php'));
