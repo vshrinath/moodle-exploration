@@ -16,6 +16,8 @@
 
 require_once(__DIR__ . '/../../config.php');
 
+use local_sceh_rules\output\sceh_card;
+
 $courseid = optional_param('id', 0, PARAM_INT);
 
 require_login();
@@ -34,6 +36,7 @@ $PAGE->set_url('/local/sceh_rules/stream_setup_check.php', ['id' => $courseid]);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('streamsetupcheck', 'local_sceh_rules'));
 $PAGE->set_heading(get_string('streamsetupcheck', 'local_sceh_rules'));
+$PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
 
 // Resolve program-owner-accessible courses.
 if (has_capability('moodle/site:config', $systemcontext)) {
@@ -92,14 +95,14 @@ echo html_writer::select(
     ]
 );
 
-$rows = [];
+$checks = [];
 
 // Check 1: Common Foundation section.
 $hascommon = \local_sceh_rules\helper\stream_helper::has_named_common_foundation_section($selectedcourseid);
-$rows[] = [
-    get_string('streamsetupcheck_common', 'local_sceh_rules'),
-    $hascommon ? get_string('streamsetupcheck_pass', 'local_sceh_rules') : get_string('streamsetupcheck_fail', 'local_sceh_rules'),
-    $hascommon
+$checks[] = [
+    'title' => get_string('streamsetupcheck_common', 'local_sceh_rules'),
+    'pass' => $hascommon,
+    'detail' => $hascommon
         ? get_string('streamsetupcheck_detail_common_pass', 'local_sceh_rules')
         : get_string('streamsetupcheck_detail_common_fail', 'local_sceh_rules'),
 ];
@@ -107,10 +110,10 @@ $rows[] = [
 // Check 2: Stream sections.
 $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($selectedcourseid);
 $hasstreams = !empty($streamsections);
-$rows[] = [
-    get_string('streamsetupcheck_streamsections', 'local_sceh_rules'),
-    $hasstreams ? get_string('streamsetupcheck_pass', 'local_sceh_rules') : get_string('streamsetupcheck_fail', 'local_sceh_rules'),
-    $hasstreams
+$checks[] = [
+    'title' => get_string('streamsetupcheck_streamsections', 'local_sceh_rules'),
+    'pass' => $hasstreams,
+    'detail' => $hasstreams
         ? get_string('streamsetupcheck_detail_stream_pass', 'local_sceh_rules', count($streamsections))
         : get_string('streamsetupcheck_detail_stream_fail', 'local_sceh_rules'),
 ];
@@ -138,10 +141,10 @@ foreach ($choices as $choice) {
 }
 
 $haschoice = !empty($validchoice);
-$rows[] = [
-    get_string('streamsetupcheck_choice', 'local_sceh_rules'),
-    $haschoice ? get_string('streamsetupcheck_pass', 'local_sceh_rules') : get_string('streamsetupcheck_fail', 'local_sceh_rules'),
-    $haschoice
+$checks[] = [
+    'title' => get_string('streamsetupcheck_choice', 'local_sceh_rules'),
+    'pass' => $haschoice,
+    'detail' => $haschoice
         ? get_string('streamsetupcheck_detail_choice_pass', 'local_sceh_rules', [
             'name' => format_string($validchoice->name),
             'count' => (int)$validchoice->optioncount,
@@ -149,14 +152,30 @@ $rows[] = [
         : get_string('streamsetupcheck_detail_choice_fail', 'local_sceh_rules'),
 ];
 
-$table = new html_table();
-$table->head = [
-    get_string('streamsetupcheck_item', 'local_sceh_rules'),
-    get_string('streamsetupcheck_result', 'local_sceh_rules'),
-    get_string('streamsetupcheck_details', 'local_sceh_rules'),
-];
-$table->data = $rows;
+echo html_writer::start_div('sceh-rules-grid');
+foreach ($checks as $check) {
+    $pass = !empty($check['pass']);
+    $status = $pass ? 'success' : 'danger';
+    $resulttext = $pass
+        ? get_string('streamsetupcheck_pass', 'local_sceh_rules')
+        : get_string('streamsetupcheck_fail', 'local_sceh_rules');
 
-echo html_writer::table($table);
+    echo sceh_card::detail([
+        'size' => 'medium',
+        'status' => $status,
+        'status_text' => $resulttext,
+        'icon' => 'fa-tasks',
+        'title' => $check['title'],
+        'badges' => [[
+            'text' => $resulttext,
+            'type' => $pass ? 'success' : 'danger',
+        ]],
+        'sections' => [[
+            'title' => get_string('streamsetupcheck_details', 'local_sceh_rules'),
+            'content' => $check['detail'],
+        ]],
+    ]);
+}
+echo html_writer::end_div();
+
 echo $OUTPUT->footer();
-

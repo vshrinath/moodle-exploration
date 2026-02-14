@@ -4,6 +4,26 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Migrate stream and Kirkpatrick summary pages to shared card system
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Migrated **Stream Setup Check** from checklist table to card-based status tiles.
+- Migrated **Stream Progress** from section tables to card-based section/activity views.
+- Migrated **Kirkpatrick dashboard summary metrics** (Levels 1-4) to shared metric cards.
+- Kept filters, chart placeholders, permissions, and export actions unchanged.
+
+### Why
+This completes the planned Phase 2 usage rollout so major program-owner, learner, and sysadmin evaluation surfaces all use the same card foundation. The result is a more consistent UI model and lower maintenance cost for future layout changes.
+
+### Files touched
+- `local_sceh_rules/stream_setup_check.php` — Replaced checklist table rendering with shared detail cards
+- `local_sceh_rules/stream_progress.php` — Replaced section tables with shared list/detail cards
+- `local_kirkpatrick_dashboard/index.php` — Replaced metric tiles with shared metric cards
+
+---
+
 ## [2026-02-13] — Implement Phase 1 card system and migrate rules pages
 
 **Commit**: `PENDING` on branch `front-end-explorations`
