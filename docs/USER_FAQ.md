@@ -273,9 +273,26 @@ A: Verify plugin/module is installed/mounted in current MoodleHQ stack and cache
 
 ---
 
+## 11) Course Package Import (Folder + Manifest)
+
+### Q: Can we create courses by uploading content packages instead of full UI authoring?
+A: Yes. The planned model is:
+1. upload `.zip`,
+2. auto-generate draft manifest,
+3. guided edit,
+4. validate + preview,
+5. import.
+
+### Q: Where is that model documented?
+A: See:
+- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
+
+---
+
 ## Related Docs
 
 - `docs/USER_WORKFLOWS.md`
 - `docs/SYSTEM_FAQ.md`
+- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
 - `docs/OPERATIONS_GUIDE.md`
 - `docs/MOCK_USERS_SETUP.md`

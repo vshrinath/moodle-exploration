@@ -4,6 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-14] — Define course package import blueprint and non-technical authoring path
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a dedicated blueprint for folder + manifest course imports, covering intent, process, role ownership, schema structure, import modes, and phased rollout.
+- Added non-technical quiz authoring guidance (spreadsheet/form intake with automatic conversion to import-ready quiz payloads).
+- Added required quality-gate policy for package imports, including critical blockers and warning-level checks.
+- Added required rollback strategy by import job with scoped rollback and safety constraints for learner data.
+- Cross-linked the blueprint from user and system FAQs.
+
+### Why
+Course creators are often non-technical, while the platform still needs strict import governance. This blueprint aligns both needs by defining a creator-friendly intake flow with strong validation, auditability, and recovery controls before implementation starts.
+
+### Files touched
+- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md` — New implementation reference for package import architecture and policy
+- `docs/USER_FAQ.md` — Added user-facing pointer and FAQ coverage for package import path
+- `docs/SYSTEM_FAQ.md` — Added system-level pointer to blueprint and implementation context
+- `docs/RELEASE_NOTES.md` — Added release entry for this documentation update
+
+---
+
 ## [2026-02-14] — Add user-facing FAQs and composite workflow guidance
 
 **Commit**: `PENDING` on branch `front-end-explorations`

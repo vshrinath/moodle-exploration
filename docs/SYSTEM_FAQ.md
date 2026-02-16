@@ -58,3 +58,9 @@ Add short, decision-focused Q&A entries:
 - where it is configured,
 - who owns it,
 - and where to change it.
+
+## 11) Where is the folder + manifest import approach documented?
+See:
+- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
+
+This document is the implementation reference for import intent, schema, roles, validation, and phased rollout.
