@@ -48,6 +48,7 @@ services:
       - ./moodle-core:/var/www/html
       - ./block_sceh_dashboard:/var/www/html/public/blocks/sceh_dashboard
       - ./local_sceh_rules:/var/www/html/public/local/sceh_rules
+      - ./local_sceh_importer:/var/www/html/public/local/sceh_importer
       - ./local_kirkpatrick_dashboard:/var/www/html/public/local/kirkpatrick_dashboard
       - ./local_kirkpatrick_level4:/var/www/html/public/local/kirkpatrick_level4
       - ./theme_sceh:/var/www/html/public/theme/sceh
@@ -69,6 +70,7 @@ services:
       - ./moodle-core:/var/www/html
       - ./block_sceh_dashboard:/var/www/html/public/blocks/sceh_dashboard
       - ./local_sceh_rules:/var/www/html/public/local/sceh_rules
+      - ./local_sceh_importer:/var/www/html/public/local/sceh_importer
       - ./local_kirkpatrick_dashboard:/var/www/html/public/local/kirkpatrick_dashboard
       - ./local_kirkpatrick_level4:/var/www/html/public/local/kirkpatrick_level4
       - ./theme_sceh:/var/www/html/public/theme/sceh

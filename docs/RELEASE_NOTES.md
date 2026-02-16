@@ -4,6 +4,40 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-16] — Add package-importer intake MVP (zip + spreadsheet to validated manifest preview)
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a new local plugin, `local_sceh_importer`, as the first runnable slice of the package-import workflow.
+- Added an upload page for Program Manager/Program Owner roles to submit a package zip and optional quiz spreadsheet CSV.
+- Implemented package scanning to auto-draft sections and activities from folder structure for:
+  - resources (`assets/common`, `assets/streams/...`)
+  - assignments (`assignments/`)
+  - quizzes (`quizzes/*.xml`, `quizzes/*.gift`, optional inline rows from CSV)
+  - trainer-only lesson plans (`lesson_plans/`)
+  - trainer-only roleplay guidance/assets (`roleplay/`)
+- Implemented validation and preview with explicit errors/warnings and generated manifest YAML output.
+- Mounted the new importer plugin in both Moodle web and cron containers so it is available in the active MoodleHQ stack.
+
+### Why
+Before building full import execution, we need a safe intake and validation stage that non-technical content creators can use. This MVP verifies package structure early, surfaces issues clearly, and gives a deterministic manifest preview before any write operations happen.
+
+### Files touched
+- `local_sceh_importer/version.php` — Plugin metadata/version for Moodle 5.1 stack
+- `local_sceh_importer/db/access.php` — Added manage capability (`local/sceh_importer:manage`)
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — UI strings and validation error messages
+- `local_sceh_importer/settings.php` — Added admin entry/link under local plugins
+- `local_sceh_importer/index.php` — Upload + validate + preview controller page
+- `local_sceh_importer/classes/form/upload_form.php` — Upload form for zip, optional quiz CSV, import mode, and dry-run
+- `local_sceh_importer/classes/local/package_scanner.php` — Package extraction and folder-to-activity scan logic
+- `local_sceh_importer/classes/local/quiz_sheet_parser.php` — Non-technical quiz CSV parser
+- `local_sceh_importer/classes/local/manifest_builder.php` — Draft manifest build, validation, and YAML rendering
+- `docker-compose.moodlehq.yml` — Mounted `local_sceh_importer` for web and cron services
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-14] — Define course package import blueprint and non-technical authoring path
 
 **Commit**: `PENDING` on branch `front-end-explorations`
