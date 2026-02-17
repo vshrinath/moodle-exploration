@@ -4,6 +4,27 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-17] — Fix inline quiz import to attach usable questions and recompute grades
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Fixed inline quiz backfill in `upsert` mode so existing quiz activities with matching idnumber can receive questions when currently empty.
+- Fixed a warnings-collection bug in the existing-quiz path so execution feedback is recorded consistently.
+- Tightened generated GIFT output for inline MCQ rows to improve Moodle parser compatibility.
+- Fixed question attach accounting logic to match Moodle 5.1 behavior (`quiz_add_quiz_question` does not return success boolean).
+- Added quiz grade recomputation after question slot insert so `sumgrades` is updated and attempts are not blocked.
+- Added repair path: when quiz already has slots but `sumgrades` is `0`, recompute is triggered during import run.
+
+### Why
+Imported quizzes were appearing with no attemptable grade state in some flows because questions were added but quiz totals were not recalculated. This change ensures inline-imported quizzes are both populated and immediately usable by learners.
+
+### Files touched
+- `local_sceh_importer/classes/local/import_executor.php` — Fixed inline quiz backfill, GIFT generation, question attach logic, and sumgrades recomputation
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-16] — Add package-importer intake MVP (zip + spreadsheet to validated manifest preview)
 
 **Commit**: `PENDING` on branch `front-end-explorations`
