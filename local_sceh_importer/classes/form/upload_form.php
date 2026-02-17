@@ -29,6 +29,42 @@ class upload_form extends \moodleform {
      */
     public function definition() {
         $mform = $this->_form;
+        $courses = $this->_customdata['courses'] ?? [];
+        $programs = $this->_customdata['programs'] ?? [];
+        $courseoptions = [0 => get_string('selecttargetcourse', 'local_sceh_importer')] + $courses;
+        $programoptions = ['' => get_string('programnew', 'local_sceh_importer')] + $programs;
+
+        $mform->addElement('select', 'programmode', get_string('programmode', 'local_sceh_importer'), [
+            'existing' => get_string('programmode_existing', 'local_sceh_importer'),
+            'new' => get_string('programmode_new', 'local_sceh_importer'),
+        ]);
+        $mform->setDefault('programmode', !empty($programs) ? 'existing' : 'new');
+
+        $mform->addElement('select', 'selectedprogramidnumber', get_string('programselect', 'local_sceh_importer'), $programoptions);
+        $mform->setDefault('selectedprogramidnumber', !empty($programs) ? array_key_first($programs) : '');
+        $mform->hideIf('selectedprogramidnumber', 'programmode', 'eq', 'new');
+
+        $mform->addElement('select', 'coursemode', get_string('coursemode', 'local_sceh_importer'), [
+            'existing' => get_string('coursemode_existing', 'local_sceh_importer'),
+            'new' => get_string('coursemode_new', 'local_sceh_importer'),
+        ]);
+        $mform->setDefault('coursemode', !empty($courses) ? 'existing' : 'new');
+
+        $mform->addElement('select', 'targetcourseid', get_string('targetcourse', 'local_sceh_importer'), $courseoptions);
+        $mform->setDefault('targetcourseid', !empty($courses) ? (int)array_key_first($courses) : 0);
+        $mform->hideIf('targetcourseid', 'coursemode', 'eq', 'new');
+
+        $mform->addElement('text', 'newcoursefullname', get_string('newcoursefullname', 'local_sceh_importer'), ['size' => 80]);
+        $mform->setType('newcoursefullname', PARAM_TEXT);
+        $mform->hideIf('newcoursefullname', 'coursemode', 'eq', 'existing');
+
+        $mform->addElement('text', 'programidnumber', get_string('programidnumber', 'local_sceh_importer'), ['size' => 40]);
+        $mform->setType('programidnumber', PARAM_ALPHANUMEXT);
+        $mform->hideIf('programidnumber', 'programmode', 'eq', 'existing');
+
+        $mform->addElement('text', 'programname', get_string('programname', 'local_sceh_importer'), ['size' => 80]);
+        $mform->setType('programname', PARAM_TEXT);
+        $mform->hideIf('programname', 'programmode', 'eq', 'existing');
 
         $mform->addElement('filepicker', 'packagezip', get_string('packagezip', 'local_sceh_importer'), null, [
             'accepted_types' => ['.zip'],
@@ -37,25 +73,41 @@ class upload_form extends \moodleform {
         $mform->addHelpButton('packagezip', 'packagezip', 'local_sceh_importer');
         $mform->addRule('packagezip', null, 'required', null, 'client');
 
-        $mform->addElement('filepicker', 'quizsheet', get_string('quizsheet', 'local_sceh_importer'), null, [
-            'accepted_types' => ['.csv'],
-            'maxbytes' => 0,
-        ]);
-        $mform->addHelpButton('quizsheet', 'quizsheet', 'local_sceh_importer');
+        $this->add_action_buttons(false, get_string('validatezip', 'local_sceh_importer'));
+    }
 
-        $mform->addElement('select', 'importmode', get_string('importmode', 'local_sceh_importer'), [
-            'assert' => get_string('importmode_assert', 'local_sceh_importer'),
-            'upsert' => get_string('importmode_upsert', 'local_sceh_importer'),
-            'replace' => get_string('importmode_replace', 'local_sceh_importer'),
-        ]);
-        $mform->setDefault('importmode', 'upsert');
+    /**
+     * Form validation.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
 
-        $mform->addElement('advcheckbox', 'dryrun', get_string('dryrun', 'local_sceh_importer'), get_string('dryrun_desc', 'local_sceh_importer'));
-        $mform->setDefault('dryrun', 1);
+        $programmode = (string)($data['programmode'] ?? 'existing');
+        $coursemode = (string)($data['coursemode'] ?? 'existing');
 
-        $mform->addElement('text', 'changenote', get_string('changenote', 'local_sceh_importer'), ['size' => 80]);
-        $mform->setType('changenote', PARAM_TEXT);
+        if ($programmode === 'existing') {
+            if (trim((string)($data['selectedprogramidnumber'] ?? '')) === '') {
+                $errors['selectedprogramidnumber'] = get_string('error_programrequired', 'local_sceh_importer');
+            }
+        } else {
+            if (trim((string)($data['programidnumber'] ?? '')) === '') {
+                $errors['programidnumber'] = get_string('error_programrequired', 'local_sceh_importer');
+            }
+        }
 
-        $this->add_action_buttons(false, get_string('previewheading', 'local_sceh_importer'));
+        if ($coursemode === 'existing') {
+            if (empty($data['targetcourseid'])) {
+                $errors['targetcourseid'] = get_string('error_selecttargetcourse', 'local_sceh_importer');
+            }
+        } else {
+            if (trim((string)($data['newcoursefullname'] ?? '')) === '') {
+                $errors['newcoursefullname'] = get_string('error_newcoursefullname', 'local_sceh_importer');
+            }
+        }
+        return $errors;
     }
 }

@@ -53,12 +53,15 @@ class import_executor {
 
         $course = get_course($courseid);
         $sectionmap = $this->ensure_sections($course, $manifest['sections'] ?? []);
+        $topicmap = $this->index_topics($manifest['topics'] ?? []);
+        $renderedtopics = [];
 
         $result = [
             'created' => [],
             'skipped' => [],
             'warnings' => [],
         ];
+        $this->persist_program_linkage($courseid, $userid, $manifest);
 
         foreach ($manifest['activities'] ?? [] as $activity) {
             $idnumber = (string)($activity['idnumber'] ?? '');
@@ -92,6 +95,24 @@ class import_executor {
             $sectionidnumber = (string)($activity['section_idnumber'] ?? 'SEC-COMMON');
             $sectionnum = $sectionmap[$sectionidnumber] ?? 0;
 
+            $topicidnumber = trim((string)($activity['topic_idnumber'] ?? ''));
+            if ($topicidnumber !== '' && empty($renderedtopics[$topicidnumber])) {
+                $topic = $topicmap[$topicidnumber] ?? null;
+                if ($topic === null) {
+                    $result['warnings'][] = 'Activity ' . $idnumber . ' references unknown topic ' . $topicidnumber . '.';
+                } else {
+                    $topicsectionidnumber = (string)($topic['section_idnumber'] ?? $sectionidnumber);
+                    $topicsectionnum = $sectionmap[$topicsectionidnumber] ?? $sectionnum;
+                    $topicstatus = $this->ensure_topic_label($course, $topic, $topicsectionnum, $mode);
+                    if ($topicstatus === 'created') {
+                        $result['created'][] = $topicidnumber . ' (topic marker)';
+                    } else if ($topicstatus === 'skipped') {
+                        $result['skipped'][] = $topicidnumber . ' (topic marker already exists)';
+                    }
+                    $renderedtopics[$topicidnumber] = true;
+                }
+            }
+
             $cm = $this->create_activity($course, $userid, $extractdir, $activity, $sectionnum, $result['warnings']);
             if ($cm !== null) {
                 $result['created'][] = $idnumber . ' (cmid ' . $cm->id . ')';
@@ -101,6 +122,38 @@ class import_executor {
         rebuild_course_cache($courseid, true);
 
         return $result;
+    }
+
+    /**
+     * Persist program-to-course linkage for grouped program queries.
+     *
+     * @param int $courseid
+     * @param int $userid
+     * @param array $manifest
+     * @return void
+     */
+    private function persist_program_linkage(int $courseid, int $userid, array $manifest): void {
+        global $DB;
+
+        $programidnumber = trim((string)($manifest['program_idnumber'] ?? ''));
+        if ($programidnumber === '') {
+            return;
+        }
+        $programname = trim((string)($manifest['program_name'] ?? ''));
+
+        $existing = $DB->get_record('local_sceh_importer_prog', ['courseid' => $courseid]);
+        $record = new \stdClass();
+        $record->courseid = $courseid;
+        $record->programidnumber = $programidnumber;
+        $record->programname = $programname;
+        $record->timemodified = time();
+        $record->usermodified = $userid;
+        if ($existing) {
+            $record->id = $existing->id;
+            $DB->update_record('local_sceh_importer_prog', $record);
+            return;
+        }
+        $DB->insert_record('local_sceh_importer_prog', $record);
     }
 
     /**
@@ -147,6 +200,52 @@ class import_executor {
         }
 
         return $map;
+    }
+
+    /**
+     * Index topic definitions by idnumber.
+     *
+     * @param array $topics
+     * @return array<string, array>
+     */
+    private function index_topics(array $topics): array {
+        $indexed = [];
+        foreach ($topics as $topic) {
+            $idnumber = trim((string)($topic['idnumber'] ?? ''));
+            if ($idnumber === '') {
+                continue;
+            }
+            $indexed[$idnumber] = $topic;
+        }
+        return $indexed;
+    }
+
+    /**
+     * Ensure a topic marker exists as a label module in the section.
+     *
+     * @param \stdClass $course
+     * @param array $topic
+     * @param int $sectionnum
+     * @param string $mode
+     * @return string created|skipped
+     */
+    private function ensure_topic_label(\stdClass $course, array $topic, int $sectionnum, string $mode): string {
+        $topicidnumber = trim((string)($topic['idnumber'] ?? ''));
+        if ($topicidnumber === '') {
+            return 'skipped';
+        }
+
+        $existing = $this->find_course_module_by_idnumber((int)$course->id, $topicidnumber);
+        if ($existing) {
+            if ($mode === 'assert') {
+                throw new \moodle_exception('error_assert_conflict', 'local_sceh_importer', '', $topicidnumber);
+            }
+            return 'skipped';
+        }
+
+        $moduleinfo = $this->build_topic_label_moduleinfo($course, $topic, $sectionnum);
+        add_moduleinfo($moduleinfo, $course, null);
+        return 'created';
     }
 
     /**
@@ -387,6 +486,35 @@ class import_executor {
         $moduleinfo->completion = 0;
         $moduleinfo->cmidnumber = (string)($activity['idnumber'] ?? '');
 
+        return $moduleinfo;
+    }
+
+    /**
+     * Build a label module for topic headings.
+     *
+     * @param \stdClass $course
+     * @param array $topic
+     * @param int $sectionnum
+     * @return \stdClass
+     */
+    private function build_topic_label_moduleinfo(\stdClass $course, array $topic, int $sectionnum): \stdClass {
+        global $DB;
+
+        $topicname = trim((string)($topic['name'] ?? 'Topic'));
+        $moduleinfo = new \stdClass();
+        $moduleinfo->course = (int)$course->id;
+        $moduleinfo->modulename = 'label';
+        $moduleinfo->name = $topicname;
+        $moduleinfo->intro = '<h4>' . s($topicname) . '</h4>';
+        $moduleinfo->introformat = FORMAT_HTML;
+        $moduleinfo->section = $sectionnum;
+        $moduleinfo->visible = 1;
+        $moduleinfo->visibleoncoursepage = 1;
+        $moduleinfo->groupmode = 0;
+        $moduleinfo->groupingid = 0;
+        $moduleinfo->completion = 0;
+        $moduleinfo->cmidnumber = trim((string)($topic['idnumber'] ?? ''));
+        $moduleinfo->module = $DB->get_field('modules', 'id', ['name' => 'label'], MUST_EXIST);
         return $moduleinfo;
     }
 

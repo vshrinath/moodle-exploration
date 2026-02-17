@@ -28,6 +28,21 @@ class package_scanner {
     private const MEDIA_EXTENSIONS = ['mp4', 'mov', 'mp3', 'wav'];
     /** @var string[] */
     private const QUIZ_EXTENSIONS = ['xml', 'gift'];
+    /** @var string[] */
+    private const QUIZ_CSV_EXTENSIONS = ['csv'];
+    /** @var array<string, string> */
+    private const BUCKET_TYPE_MAP = [
+        'content' => 'resource',
+        'lesson_plan' => 'lesson_plan',
+        'lesson_plans' => 'lesson_plan',
+        'roleplay' => 'roleplay_assessment',
+        'assignment' => 'assignment',
+        'assignments' => 'assignment',
+        'quiz' => 'quiz',
+        'quizzes' => 'quiz',
+        'rubric' => 'resource',
+        'rubrics' => 'resource',
+    ];
 
     /**
      * Extract uploaded package to a temporary folder.
@@ -80,9 +95,10 @@ class package_scanner {
     public function scan(string $extractdir): array {
         $files = [];
         $sections = [];
+        $topics = [];
+        $topicmap = [];
+        $quizcsvactivities = [];
         $activities = [];
-
-        $sections['SEC-COMMON'] = 'Common Foundation';
 
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($extractdir, \FilesystemIterator::SKIP_DOTS)
@@ -95,77 +111,312 @@ class package_scanner {
 
             $fullpath = $fileinfo->getPathname();
             $relativepath = ltrim(str_replace($extractdir, '', $fullpath), '/');
+            if ($this->should_ignore_path($relativepath)) {
+                continue;
+            }
             $files[$relativepath] = true;
 
             $normalized = str_replace('\\', '/', strtolower($relativepath));
             $extension = strtolower(pathinfo($relativepath, PATHINFO_EXTENSION));
 
-            if (strpos($normalized, 'assets/streams/') === 0) {
-                $streamslug = $this->stream_slug_from_path($normalized);
-                if ($streamslug !== '') {
-                    $sectionid = 'SEC-STREAM-' . strtoupper($streamslug);
-                    $sections[$sectionid] = 'STREAM - ' . $this->pretty_stream_name($streamslug);
-                    if ($this->is_content_file($extension)) {
-                        $activities[] = $this->make_activity('resource', $relativepath, $sections[$sectionid], $sectionid, 'learner');
-                    }
+            $mapped = $this->map_structured_path($relativepath, $normalized, $extension, $sections, $topics, $topicmap);
+            if ($mapped !== null) {
+                if ($mapped['kind'] === 'quiz_csv' && !empty($mapped['activity'])) {
+                    $quizcsvactivities[] = $mapped['activity'];
+                } else if ($mapped['kind'] === 'activity') {
+                    $activities[] = $mapped['activity'];
                 }
                 continue;
             }
 
-            if (strpos($normalized, 'assets/common/') === 0 && $this->is_content_file($extension)) {
-                $activities[] = $this->make_activity('resource', $relativepath, $sections['SEC-COMMON'], 'SEC-COMMON', 'learner');
+            $legacy = $this->map_legacy_path($relativepath, $normalized, $extension, $sections);
+            if ($legacy !== null) {
+                if ($legacy['kind'] === 'quiz_csv' && !empty($legacy['activity'])) {
+                    $quizcsvactivities[] = $legacy['activity'];
+                } else if ($legacy['kind'] === 'activity' && !empty($legacy['activity'])) {
+                    $activities[] = $legacy['activity'];
+                }
                 continue;
-            }
-
-            if (strpos($normalized, 'lesson_plans/') === 0 && $this->is_content_file($extension)) {
-                $activities[] = $this->make_activity('lesson_plan', $relativepath, $sections['SEC-COMMON'], 'SEC-COMMON', 'trainer');
-                continue;
-            }
-
-            if (strpos($normalized, 'assignments/') === 0 && $this->is_content_file($extension)) {
-                $activities[] = $this->make_activity('assignment', $relativepath, $sections['SEC-COMMON'], 'SEC-COMMON', 'learner');
-                continue;
-            }
-
-            if (strpos($normalized, 'roleplay/') === 0 && $this->is_content_file($extension)) {
-                $activities[] = $this->make_activity('roleplay_assessment', $relativepath, $sections['SEC-COMMON'], 'SEC-COMMON', 'trainer');
-                continue;
-            }
-
-            if (strpos($normalized, 'quizzes/') === 0 && in_array($extension, self::QUIZ_EXTENSIONS, true)) {
-                $activities[] = $this->make_activity('quiz', $relativepath, $sections['SEC-COMMON'], 'SEC-COMMON', 'learner');
             }
         }
 
         ksort($sections);
+        usort($topics, static function(array $a, array $b): int {
+            $asection = (string)($a['section_idnumber'] ?? '');
+            $bsection = (string)($b['section_idnumber'] ?? '');
+            if ($asection !== $bsection) {
+                return strcmp($asection, $bsection);
+            }
+            $aorder = (int)($a['order'] ?? 0);
+            $border = (int)($b['order'] ?? 0);
+            if ($aorder !== $border) {
+                return $aorder <=> $border;
+            }
+            return strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? ''));
+        });
+        usort($activities, static function(array $a, array $b): int {
+            $aleft = implode('|', [
+                (string)($a['section_idnumber'] ?? ''),
+                (string)($a['topic_idnumber'] ?? ''),
+                (string)($a['type'] ?? ''),
+                (string)($a['title'] ?? ''),
+                (string)($a['idnumber'] ?? ''),
+            ]);
+            $bright = implode('|', [
+                (string)($b['section_idnumber'] ?? ''),
+                (string)($b['topic_idnumber'] ?? ''),
+                (string)($b['type'] ?? ''),
+                (string)($b['title'] ?? ''),
+                (string)($b['idnumber'] ?? ''),
+            ]);
+            return strcmp($aleft, $bright);
+        });
+        usort($quizcsvactivities, static function(array $a, array $b): int {
+            $aleft = implode('|', [
+                (string)($a['section_idnumber'] ?? ''),
+                (string)($a['topic_idnumber'] ?? ''),
+                (string)($a['title'] ?? ''),
+                (string)($a['idnumber'] ?? ''),
+            ]);
+            $bright = implode('|', [
+                (string)($b['section_idnumber'] ?? ''),
+                (string)($b['topic_idnumber'] ?? ''),
+                (string)($b['title'] ?? ''),
+                (string)($b['idnumber'] ?? ''),
+            ]);
+            return strcmp($aleft, $bright);
+        });
 
         return [
             'sections' => $sections,
+            'topics' => $topics,
             'activities' => $activities,
+            'quiz_csv_activities' => $quizcsvactivities,
             'files' => array_keys($files),
         ];
     }
 
     /**
-     * @param string $path
-     * @return string
+     * Map generic numbered folder structure (section/topic/activity buckets).
+     *
+     * @param string $relativepath
+     * @param string $normalized
+     * @param string $extension
+     * @param array<string, string> $sections
+     * @param array<int, array> $topics
+     * @param array<string, bool> $topicmap
+     * @return array|null
      */
-    private function stream_slug_from_path(string $path): string {
-        $parts = explode('/', $path);
-        $streamindex = array_search('streams', $parts, true);
-        if ($streamindex === false || !isset($parts[$streamindex + 1])) {
-            return '';
+    private function map_structured_path(
+        string $relativepath,
+        string $normalized,
+        string $extension,
+        array &$sections,
+        array &$topics,
+        array &$topicmap
+    ): ?array {
+        $parts = explode('/', $normalized);
+        if (empty($parts)) {
+            return null;
         }
-        return preg_replace('/[^a-z0-9]+/', '-', $parts[$streamindex + 1]);
+
+        $sectionindex = null;
+        $sectionmeta = null;
+        foreach ($parts as $index => $part) {
+            $candidate = $this->parse_ordered_segment($part);
+            if ($candidate !== null) {
+                $sectionindex = $index;
+                $sectionmeta = $candidate;
+                break;
+            }
+        }
+        if ($sectionmeta === null || $sectionindex === null) {
+            return null;
+        }
+
+        $sectionid = $this->build_section_idnumber($sectionmeta['order'], $sectionmeta['title']);
+        $sections[$sectionid] = $sectionmeta['title'];
+
+        $cursor = $sectionindex + 1;
+        $topicid = null;
+        if (isset($parts[$cursor])) {
+            $topicmeta = $this->parse_ordered_segment($parts[$cursor]);
+            if ($topicmeta !== null) {
+                $topicid = $this->build_topic_idnumber($sectionid, $topicmeta['order'], $topicmeta['title']);
+                $topickey = $sectionid . '::' . $topicid;
+                if (!isset($topicmap[$topickey])) {
+                    $topics[] = [
+                        'idnumber' => $topicid,
+                        'name' => $topicmeta['title'],
+                        'section_idnumber' => $sectionid,
+                        'order' => (int)$topicmeta['order'],
+                    ];
+                    $topicmap[$topickey] = true;
+                }
+                $cursor++;
+            }
+        }
+
+        if (!isset($parts[$cursor])) {
+            return null;
+        }
+
+        $bucket = $parts[$cursor];
+        if (!isset(self::BUCKET_TYPE_MAP[$bucket])) {
+            return null;
+        }
+
+        $type = self::BUCKET_TYPE_MAP[$bucket];
+        if ($type === 'quiz') {
+            if (in_array($extension, self::QUIZ_CSV_EXTENSIONS, true)) {
+                $activity = $this->make_activity('quiz', $relativepath, $sections[$sectionid], $sectionid, 'learner');
+                if ($topicid !== null) {
+                    $activity['topic_idnumber'] = $topicid;
+                }
+                $activity['quiz_csv_path'] = $relativepath;
+                return [
+                    'kind' => 'quiz_csv',
+                    'activity' => $activity,
+                ];
+            }
+            if (!in_array($extension, self::QUIZ_EXTENSIONS, true)) {
+                return null;
+            }
+        } else if (!$this->is_content_file($extension)) {
+            return null;
+        }
+
+        $audience = in_array($type, ['lesson_plan', 'roleplay_assessment'], true) ? 'trainer' : 'learner';
+        if ($bucket === 'rubric' || $bucket === 'rubrics') {
+            $audience = 'trainer';
+        }
+
+        $activity = $this->make_activity($type, $relativepath, $sections[$sectionid], $sectionid, $audience);
+        if ($topicid !== null) {
+            $activity['topic_idnumber'] = $topicid;
+        }
+
+        return [
+            'kind' => 'activity',
+            'activity' => $activity,
+        ];
     }
 
     /**
-     * @param string $slug
+     * Ensure the legacy common section key exists.
+     *
+     * @param array<string, string> $sections
+     * @return void
+     */
+    private function ensure_default_common_section(array &$sections): void {
+        if (!isset($sections['SEC-COMMON'])) {
+            $sections['SEC-COMMON'] = 'Common Foundation';
+        }
+    }
+
+    /**
+     * Parse ordered segment names like "01. Topic Name" or "2-Another Topic".
+     *
+     * @param string $segment
+     * @return array{order:int,title:string}|null
+     */
+    private function parse_ordered_segment(string $segment): ?array {
+        $raw = trim($segment);
+        if (!preg_match('/^(\d{1,3})[.\-\s_]+(.+)$/', $raw, $matches)) {
+            return null;
+        }
+        $title = trim((string)$matches[2]);
+        if ($title === '') {
+            return null;
+        }
+        return [
+            'order' => (int)$matches[1],
+            'title' => $this->title_from_filename($title),
+        ];
+    }
+
+    /**
+     * Legacy fallback mapper for explicit top-level bucket structure.
+     *
+     * Supports wrapper-root zips by finding the first matching bucket segment.
+     * Intentionally does not parse `assets/*` paths anymore.
+     *
+     * @param string $relativepath
+     * @param string $normalized
+     * @param string $extension
+     * @param array<string, string> $sections
+     * @return array|null
+     */
+    private function map_legacy_path(
+        string $relativepath,
+        string $normalized,
+        string $extension,
+        array &$sections
+    ): ?array {
+        $parts = explode('/', $normalized);
+        $bucketindex = null;
+        $bucket = '';
+        foreach ($parts as $index => $part) {
+            if (in_array($part, ['lesson_plans', 'assignments', 'roleplay', 'quizzes'], true)) {
+                $bucketindex = $index;
+                $bucket = $part;
+                break;
+            }
+        }
+        if ($bucketindex === null) {
+            return null;
+        }
+        if (!isset($parts[$bucketindex + 1])) {
+            return null;
+        }
+
+        $this->ensure_default_common_section($sections);
+        $sectionname = $sections['SEC-COMMON'];
+        $sectionid = 'SEC-COMMON';
+
+        if ($bucket === 'lesson_plans' && $this->is_content_file($extension)) {
+            return ['kind' => 'activity', 'activity' => $this->make_activity('lesson_plan', $relativepath, $sectionname, $sectionid, 'trainer')];
+        }
+        if ($bucket === 'assignments' && $this->is_content_file($extension)) {
+            return ['kind' => 'activity', 'activity' => $this->make_activity('assignment', $relativepath, $sectionname, $sectionid, 'learner')];
+        }
+        if ($bucket === 'roleplay' && $this->is_content_file($extension)) {
+            return ['kind' => 'activity', 'activity' => $this->make_activity('roleplay_assessment', $relativepath, $sectionname, $sectionid, 'trainer')];
+        }
+        if ($bucket === 'quizzes' && in_array($extension, self::QUIZ_EXTENSIONS, true)) {
+            return ['kind' => 'activity', 'activity' => $this->make_activity('quiz', $relativepath, $sectionname, $sectionid, 'learner')];
+        }
+        if ($bucket === 'quizzes' && in_array($extension, self::QUIZ_CSV_EXTENSIONS, true)) {
+            $activity = $this->make_activity('quiz', $relativepath, $sectionname, $sectionid, 'learner');
+            $activity['quiz_csv_path'] = $relativepath;
+            return ['kind' => 'quiz_csv', 'activity' => $activity];
+        }
+        return null;
+    }
+
+    /**
+     * Build deterministic section idnumber from order + title.
+     *
+     * @param int $order
+     * @param string $title
      * @return string
      */
-    private function pretty_stream_name(string $slug): string {
-        $label = str_replace('-', ' ', $slug);
-        return ucwords(trim($label));
+    private function build_section_idnumber(int $order, string $title): string {
+        $slug = strtoupper(preg_replace('/[^A-Za-z0-9]+/', '-', $title));
+        return 'SEC-' . str_pad((string)$order, 2, '0', STR_PAD_LEFT) . '-' . trim($slug, '-');
+    }
+
+    /**
+     * Build deterministic topic idnumber from section + order + title.
+     *
+     * @param string $sectionid
+     * @param int $order
+     * @param string $title
+     * @return string
+     */
+    private function build_topic_idnumber(string $sectionid, int $order, string $title): string {
+        $slug = strtoupper(preg_replace('/[^A-Za-z0-9]+/', '-', $title));
+        return $sectionid . '-TOP-' . str_pad((string)$order, 2, '0', STR_PAD_LEFT) . '-' . trim($slug, '-');
     }
 
     /**
@@ -214,5 +465,28 @@ class package_scanner {
     private function title_from_filename(string $filename): string {
         $value = preg_replace('/[_-]+/', ' ', trim($filename));
         return ucwords($value);
+    }
+
+    /**
+     * Ignore zip metadata and hidden file artifacts (e.g. macOS AppleDouble).
+     *
+     * @param string $relativepath
+     * @return bool
+     */
+    private function should_ignore_path(string $relativepath): bool {
+        $normalized = str_replace('\\', '/', $relativepath);
+        $parts = explode('/', $normalized);
+        foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
+                continue;
+            }
+            if ($part === '__MACOSX') {
+                return true;
+            }
+            if (strpos($part, '._') === 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

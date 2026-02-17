@@ -22,6 +22,9 @@ defined('MOODLE_INTERNAL') || die();
  * Builds and validates draft manifests.
  */
 class manifest_builder {
+    /** @var string */
+    private const IDNUMBER_PATTERN = '/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/';
+
     /**
      * Build manifest array from scanned package artifacts.
      *
@@ -29,10 +32,24 @@ class manifest_builder {
      * @param array $quizrows
      * @param string $importmode
      * @param bool $dryrun
+     * @param array $inlinequizactivities
      * @param string $changenote
+     * @param string $programidnumber
+     * @param string $programname
+     * @param array<string, string> $coursemeta
      * @return array
      */
-    public function build(array $scan, array $quizrows, string $importmode, bool $dryrun, string $changenote): array {
+    public function build(
+        array $scan,
+        array $quizrows,
+        string $importmode,
+        bool $dryrun,
+        array $inlinequizactivities,
+        string $changenote,
+        string $programidnumber,
+        string $programname,
+        array $coursemeta
+    ): array {
         $sections = [];
         $order = 1;
         foreach ($scan['sections'] as $idnumber => $name) {
@@ -42,6 +59,7 @@ class manifest_builder {
                 'order' => $order++,
             ];
         }
+        $topics = $scan['topics'] ?? [];
 
         $activities = [];
         foreach ($scan['activities'] as $activity) {
@@ -52,6 +70,9 @@ class manifest_builder {
                 'title' => $activity['title'],
                 'audience' => $activity['audience'],
             ];
+            if (!empty($activity['topic_idnumber'])) {
+                $entry['topic_idnumber'] = $activity['topic_idnumber'];
+            }
 
             if (!empty($activity['file'])) {
                 $entry['file'] = $activity['file'];
@@ -73,7 +94,33 @@ class manifest_builder {
             $activities[] = $entry;
         }
 
+        foreach ($inlinequizactivities as $inlinequizactivity) {
+            $entry = [
+                'idnumber' => (string)($inlinequizactivity['idnumber'] ?? ''),
+                'type' => 'quiz',
+                'section_idnumber' => (string)($inlinequizactivity['section_idnumber'] ?? 'SEC-COMMON'),
+                'title' => (string)($inlinequizactivity['title'] ?? 'Quiz'),
+                'audience' => (string)($inlinequizactivity['audience'] ?? 'learner'),
+                'quiz_source' => [
+                    'format' => 'inline',
+                    'question_count' => count((array)($inlinequizactivity['rows'] ?? [])),
+                    'rows' => (array)($inlinequizactivity['rows'] ?? []),
+                ],
+            ];
+            if (!empty($inlinequizactivity['topic_idnumber'])) {
+                $entry['topic_idnumber'] = (string)$inlinequizactivity['topic_idnumber'];
+            }
+            $activities[] = $entry;
+        }
+
         if (!empty($quizrows)) {
+            if (!isset($scan['sections']['SEC-COMMON'])) {
+                $sections[] = [
+                    'idnumber' => 'SEC-COMMON',
+                    'name' => 'Common Foundation',
+                    'order' => count($sections) + 1,
+                ];
+            }
             $activities[] = [
                 'idnumber' => 'QUIZ-INLINE-SPREADSHEET',
                 'type' => 'quiz',
@@ -90,15 +137,23 @@ class manifest_builder {
 
         return [
             'manifest_version' => '1.0',
+            'program_idnumber' => $programidnumber,
+            'program_name' => $programname,
             'program_version' => 'draft',
             'package_version' => date('Y.m.d.His'),
             'change_note' => $changenote,
+            'course' => [
+                'idnumber' => (string)($coursemeta['idnumber'] ?? ''),
+                'shortname' => (string)($coursemeta['shortname'] ?? ''),
+                'fullname' => (string)($coursemeta['fullname'] ?? ''),
+            ],
             'import' => [
                 'mode' => $importmode,
                 'dry_run' => $dryrun,
                 'scope' => 'course',
             ],
             'sections' => $sections,
+            'topics' => $topics,
             'activities' => $activities,
         ];
     }
@@ -113,8 +168,45 @@ class manifest_builder {
     public function validate(array $manifest, array $knownfiles): array {
         $errors = [];
         $warnings = [];
+        $sectionids = [];
+        foreach ($manifest['sections'] ?? [] as $section) {
+            $sectionid = (string)($section['idnumber'] ?? '');
+            if ($sectionid === '') {
+                $errors[] = 'Section is missing idnumber.';
+                continue;
+            }
+            if (!$this->is_valid_idnumber($sectionid)) {
+                $errors[] = 'Section idnumber has invalid format: ' . $sectionid;
+            }
+            if (isset($sectionids[$sectionid])) {
+                $errors[] = 'Duplicate section idnumber: ' . $sectionid;
+                continue;
+            }
+            $sectionids[$sectionid] = true;
+        }
 
         $idnumbers = [];
+        $topicids = [];
+        foreach ($manifest['topics'] ?? [] as $topic) {
+            $topicid = (string)($topic['idnumber'] ?? '');
+            if ($topicid === '') {
+                $errors[] = 'Topic is missing idnumber.';
+                continue;
+            }
+            if (isset($topicids[$topicid])) {
+                $errors[] = 'Duplicate topic idnumber: ' . $topicid;
+                continue;
+            }
+            if (!$this->is_valid_idnumber($topicid)) {
+                $errors[] = 'Topic idnumber has invalid format: ' . $topicid;
+            }
+            $topicsectionid = (string)($topic['section_idnumber'] ?? '');
+            if ($topicsectionid === '' || !isset($sectionids[$topicsectionid])) {
+                $errors[] = 'Topic references unknown section_idnumber: ' . $topicid;
+            }
+            $topicids[$topicid] = true;
+        }
+
         foreach ($manifest['activities'] as $activity) {
             $idnumber = $activity['idnumber'] ?? '';
             if ($idnumber === '') {
@@ -126,9 +218,21 @@ class manifest_builder {
                 $errors[] = 'Duplicate activity idnumber: ' . $idnumber;
             }
             $idnumbers[$idnumber] = true;
+            if (!$this->is_valid_idnumber((string)$idnumber)) {
+                $errors[] = 'Activity idnumber has invalid format: ' . $idnumber;
+            }
 
             if (empty($activity['title'])) {
                 $errors[] = 'Activity is missing title: ' . $idnumber;
+            }
+
+            $activitysectionid = (string)($activity['section_idnumber'] ?? '');
+            if ($activitysectionid === '' || !isset($sectionids[$activitysectionid])) {
+                $errors[] = 'Activity references unknown section_idnumber: ' . $idnumber;
+            }
+
+            if (!empty($activity['topic_idnumber']) && !isset($topicids[(string)$activity['topic_idnumber']])) {
+                $errors[] = 'Activity references unknown topic_idnumber: ' . $idnumber;
             }
 
             if (!empty($activity['file']) && !in_array($activity['file'], $knownfiles, true)) {
@@ -139,16 +243,43 @@ class manifest_builder {
                 $errors[] = 'Quiz source file not found in package: ' . $activity['quiz_source']['path'];
             }
 
-            if (($activity['type'] ?? '') === 'roleplay_assessment' && empty($activity['rubric_idnumber'])) {
-                $warnings[] = 'Roleplay activity has no rubric_idnumber: ' . $idnumber;
-            }
         }
 
         if (($manifest['import']['mode'] ?? '') === 'replace' && trim((string)($manifest['change_note'] ?? '')) === '') {
             $errors[] = 'Replace mode requires a change_note.';
         }
 
+        $courseidnumber = trim((string)($manifest['course']['idnumber'] ?? ''));
+        if ($courseidnumber === '') {
+            $errors[] = 'Course idnumber is required.';
+        } else if (!$this->is_valid_idnumber($courseidnumber)) {
+            $errors[] = 'Course idnumber has invalid format: ' . $courseidnumber;
+        }
+
+        $programidnumber = trim((string)($manifest['program_idnumber'] ?? ''));
+        if ($programidnumber !== '' && !$this->is_valid_idnumber($programidnumber)) {
+            $errors[] = 'Program ID number has invalid format: ' . $programidnumber;
+        }
+
+        if (trim((string)($manifest['program_idnumber'] ?? '')) === '') {
+            $warnings[] = 'Program ID number is empty. Add program_idnumber to group Foundation/VT/MRA courses under one program.';
+        }
+
+        if (trim((string)($manifest['program_name'] ?? '')) === '') {
+            $warnings[] = 'Program name is empty. Add program_name for clearer grouped program views.';
+        }
+
         return ['errors' => $errors, 'warnings' => $warnings];
+    }
+
+    /**
+     * Validate idnumber format.
+     *
+     * @param string $idnumber
+     * @return bool
+     */
+    private function is_valid_idnumber(string $idnumber): bool {
+        return preg_match(self::IDNUMBER_PATTERN, $idnumber) === 1;
     }
 
     /**
