@@ -54,6 +54,7 @@ $programrecords = $DB->get_records_sql(
 );
 $programoptions = [];
 $programmap = [];
+$programnames = [];
 foreach ($programrecords as $programrecord) {
     $programidnumber = (string)$programrecord->programidnumber;
     $programname = trim((string)$programrecord->programname);
@@ -63,11 +64,21 @@ foreach ($programrecords as $programrecord) {
         'idnumber' => $programidnumber,
         'name' => $programname,
     ];
+    if ($programname !== '') {
+        $programnames[] = $programname;
+    }
+}
+
+$coursefullnames = [];
+foreach ($courses as $course) {
+    $coursefullnames[] = trim((string)$course->fullname);
 }
 
 $mform = new upload_form(null, [
     'courses' => $courseoptions,
     'programs' => $programoptions,
+    'programnames' => $programnames,
+    'coursefullnames' => $coursefullnames,
 ]);
 
 if ($mform->is_cancelled()) {
@@ -168,6 +179,11 @@ if ($data = $mform->get_data()) {
     $coursemode = (string)($data->coursemode ?? 'existing');
     if ($coursemode === 'new') {
         $newcoursefullname = trim((string)$data->newcoursefullname);
+        foreach ($courses as $existingcourse) {
+            if (\core_text::strtolower(trim((string)$existingcourse->fullname)) === \core_text::strtolower($newcoursefullname)) {
+                throw new moodle_exception('error_newcoursefullname_taken', 'local_sceh_importer');
+            }
+        }
 
         $defaultcategoryid = 1;
         $categoryoptions = core_course_category::make_categories_list();
@@ -210,6 +226,16 @@ if ($data = $mform->get_data()) {
     if ($programmode === 'new') {
         $programidnumber = trim((string)($data->programidnumber ?? ''));
         $programname = trim((string)($data->programname ?? ''));
+        foreach (array_keys($programoptions) as $existingprogramidnumber) {
+            if (\core_text::strtolower(trim((string)$existingprogramidnumber)) === \core_text::strtolower($programidnumber)) {
+                throw new moodle_exception('error_programidnumber_taken', 'local_sceh_importer');
+            }
+        }
+        foreach ($programnames as $existingprogramname) {
+            if (\core_text::strtolower(trim((string)$existingprogramname)) === \core_text::strtolower($programname)) {
+                throw new moodle_exception('error_programname_taken', 'local_sceh_importer');
+            }
+        }
     } else {
         $selectedprogramidnumber = trim((string)($data->selectedprogramidnumber ?? ''));
         if (!empty($programmap[$selectedprogramidnumber])) {

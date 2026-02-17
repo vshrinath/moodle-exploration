@@ -4,6 +4,31 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-17] — Tighten importer naming checks and remove confusing program dropdown option
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added duplicate checks for `Create new program`:
+  - Program ID number must be unique.
+  - Program name must be unique.
+- Added duplicate check for `Create new course`:
+  - Course full name must be unique.
+- Added required validation for program name when creating a new program.
+- Removed `Create new program (enter below)` from the existing-program dropdown to avoid mixed intent in the same control.
+- Added matching backend guards in controller logic so duplicate creation is blocked even if client-side validation is bypassed.
+
+### Why
+Users should get immediate, clear feedback when trying to create entities that already exist. Keeping the existing-program dropdown limited to real options also reduces confusion and aligns the UI with the selected create/use mode.
+
+### Files touched
+- `local_sceh_importer/classes/form/upload_form.php` — Added uniqueness and required-field validation; removed pseudo-option from existing-program select
+- `local_sceh_importer/index.php` — Added server-side duplicate guards and passed existing names into form context
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added new user-facing validation strings
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-17] — Simplify importer to validate-first workflow with conditional program/course setup
 
 **Commit**: `PENDING` on branch `front-end-explorations`

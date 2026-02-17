@@ -32,7 +32,7 @@ class upload_form extends \moodleform {
         $courses = $this->_customdata['courses'] ?? [];
         $programs = $this->_customdata['programs'] ?? [];
         $courseoptions = [0 => get_string('selecttargetcourse', 'local_sceh_importer')] + $courses;
-        $programoptions = ['' => get_string('programnew', 'local_sceh_importer')] + $programs;
+        $programoptions = $programs;
 
         $mform->addElement('select', 'programmode', get_string('programmode', 'local_sceh_importer'), [
             'existing' => get_string('programmode_existing', 'local_sceh_importer'),
@@ -41,7 +41,7 @@ class upload_form extends \moodleform {
         $mform->setDefault('programmode', !empty($programs) ? 'existing' : 'new');
 
         $mform->addElement('select', 'selectedprogramidnumber', get_string('programselect', 'local_sceh_importer'), $programoptions);
-        $mform->setDefault('selectedprogramidnumber', !empty($programs) ? array_key_first($programs) : '');
+        $mform->setDefault('selectedprogramidnumber', !empty($programs) ? (string)array_key_first($programs) : '');
         $mform->hideIf('selectedprogramidnumber', 'programmode', 'eq', 'new');
 
         $mform->addElement('select', 'coursemode', get_string('coursemode', 'local_sceh_importer'), [
@@ -94,8 +94,29 @@ class upload_form extends \moodleform {
                 $errors['selectedprogramidnumber'] = get_string('error_programrequired', 'local_sceh_importer');
             }
         } else {
-            if (trim((string)($data['programidnumber'] ?? '')) === '') {
+            $programidnumber = trim((string)($data['programidnumber'] ?? ''));
+            $programname = trim((string)($data['programname'] ?? ''));
+            if ($programidnumber === '') {
                 $errors['programidnumber'] = get_string('error_programrequired', 'local_sceh_importer');
+            }
+            if ($programname === '') {
+                $errors['programname'] = get_string('error_programname_required', 'local_sceh_importer');
+            }
+
+            $existingprogramids = array_keys((array)($this->_customdata['programs'] ?? []));
+            foreach ($existingprogramids as $existingprogramid) {
+                if (\core_text::strtolower(trim((string)$existingprogramid)) === \core_text::strtolower($programidnumber)) {
+                    $errors['programidnumber'] = get_string('error_programidnumber_taken', 'local_sceh_importer');
+                    break;
+                }
+            }
+
+            $existingprogramnames = (array)($this->_customdata['programnames'] ?? []);
+            foreach ($existingprogramnames as $existingprogramname) {
+                if (\core_text::strtolower(trim((string)$existingprogramname)) === \core_text::strtolower($programname)) {
+                    $errors['programname'] = get_string('error_programname_taken', 'local_sceh_importer');
+                    break;
+                }
             }
         }
 
@@ -104,8 +125,17 @@ class upload_form extends \moodleform {
                 $errors['targetcourseid'] = get_string('error_selecttargetcourse', 'local_sceh_importer');
             }
         } else {
-            if (trim((string)($data['newcoursefullname'] ?? '')) === '') {
+            $newcoursefullname = trim((string)($data['newcoursefullname'] ?? ''));
+            if ($newcoursefullname === '') {
                 $errors['newcoursefullname'] = get_string('error_newcoursefullname', 'local_sceh_importer');
+            } else {
+                $existingcoursefullnames = (array)($this->_customdata['coursefullnames'] ?? []);
+                foreach ($existingcoursefullnames as $existingcoursefullname) {
+                    if (\core_text::strtolower(trim((string)$existingcoursefullname)) === \core_text::strtolower($newcoursefullname)) {
+                        $errors['newcoursefullname'] = get_string('error_newcoursefullname_taken', 'local_sceh_importer');
+                        break;
+                    }
+                }
             }
         }
         return $errors;
