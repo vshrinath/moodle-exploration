@@ -144,7 +144,7 @@ if ($data = $mform->get_data()) {
     $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     
     // Validate file type based on module type
-    $allowedextensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'mp4', 'mov', 'mp3', 'wav'];
+    $allowedextensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'mp4', 'mov', 'mp3', 'wav', 'csv'];
     if (!in_array($extension, $allowedextensions, true)) {
         throw new moodle_exception('error_invalidfiletype', 'local_sceh_importer', '', $extension);
     }
