@@ -1,0 +1,1946 @@
+{
+  "version": "2.7",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bi8Au",
+      "x": -961,
+      "y": -48,
+      "name": "Frame",
+      "clip": true,
+      "width": 1505,
+      "height": 3252,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "CbzdT",
+          "x": 0,
+          "y": 0,
+          "name": "Moodle Homepage - Hospital Learning Platform",
+          "width": 1505,
+          "height": 2527,
+          "fill": "#FFFFFF",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "dSMwn",
+              "name": "Header",
+              "width": "fill_container",
+              "height": 80,
+              "fill": "#FFFFFF",
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#E0E0E0"
+              },
+              "padding": [
+                0,
+                80
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ddVZ9",
+                  "name": "logoSection",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "rkfdg",
+                      "name": "logoMark",
+                      "width": 48,
+                      "height": 48,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "thickness": 2,
+                        "fill": "#C02635"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "BW6mo",
+                          "name": "logoIcon",
+                          "width": 24,
+                          "height": 24,
+                          "iconFontName": "eye",
+                          "iconFontFamily": "lucide",
+                          "fill": "#C02635"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kebjF",
+                      "name": "logoText",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "9V7fy",
+                          "name": "hospitalName",
+                          "fill": "#1A1A1A",
+                          "content": "SCEH Learning Platform",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "PiV13",
+                          "name": "tagline",
+                          "fill": "#666666",
+                          "content": "Dr. Shroff's Charity Eye Hospital",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gPXL9",
+                  "name": "newHeaderActions",
+                  "gap": 20,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "gESYW",
+                      "name": "helpLink",
+                      "fill": "#666666",
+                      "content": "Help",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dydyx",
+                      "name": "contactLink",
+                      "fill": "#666666",
+                      "content": "Contact",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nAggV",
+                      "name": "loginBtn2",
+                      "fill": "#C02635",
+                      "cornerRadius": 6,
+                      "gap": 8,
+                      "padding": [
+                        12,
+                        28
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "MWeVz",
+                          "name": "loginIcon2",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "user",
+                          "iconFontFamily": "lucide",
+                          "fill": "#FFFFFF"
+                        },
+                        {
+                          "type": "text",
+                          "id": "KuFBe",
+                          "name": "loginText2",
+                          "fill": "#FFFFFF",
+                          "content": "Login",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "p3pAB",
+              "name": "Hero Section",
+              "metadata": {
+                "type": "unsplash",
+                "username": "novantino",
+                "link": "https://unsplash.com/@novantino",
+                "author": "Rendy Novantino"
+              },
+              "width": "fill_container",
+              "height": 580,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "https://images.unsplash.com/photo-1649614859327-7c6e68cc502a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzEwMDMyNDF8&ixlib=rb-4.1.0&q=80&w=1080",
+                "mode": "fill"
+              },
+              "layout": "vertical",
+              "padding": [
+                80,
+                60,
+                60,
+                60
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TgHnb",
+                  "name": "heroOverlay",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#00000099",
+                  "layout": "vertical",
+                  "gap": 32,
+                  "padding": [
+                    60,
+                    80
+                  ],
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "kNPsO",
+                      "name": "heroContent",
+                      "width": 800,
+                      "layout": "vertical",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nNqJR",
+                          "name": "heroTitle",
+                          "fill": "#FFFFFF",
+                          "textGrowth": "fixed-width",
+                          "width": 1000,
+                          "content": "Excellence in Ophthalmic Education & Training",
+                          "lineHeight": 1.2,
+                          "fontFamily": "Inter",
+                          "fontSize": 46,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "egW1u",
+                          "name": "heroSubtitle",
+                          "fill": "#FFFFFFCC",
+                          "textGrowth": "fixed-width",
+                          "width": 900,
+                          "content": "Join Dr. Shroff's Charity Eye Hospital's comprehensive training programs. Empowering healthcare professionals with world-class ophthalmic education since 1914.",
+                          "lineHeight": 1.6,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "PQzOJ",
+                          "name": "heroCTA",
+                          "gap": 16,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "zPCxS",
+                              "name": "primaryCTA",
+                              "fill": "#C02635",
+                              "cornerRadius": 8,
+                              "gap": 8,
+                              "padding": [
+                                16,
+                                32
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "PIfSe",
+                                  "name": "primaryCTAText",
+                                  "fill": "#FFFFFF",
+                                  "content": "Explore Programs",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 16,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "q6XS0",
+                                  "name": "primaryCTAIcon",
+                                  "width": 20,
+                                  "height": 20,
+                                  "iconFontName": "arrow-right",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#FFFFFF"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "KXn0k",
+                              "name": "secondaryCTA",
+                              "fill": "#FFFFFF33",
+                              "cornerRadius": 8,
+                              "stroke": {
+                                "thickness": 2,
+                                "fill": "#FFFFFF"
+                              },
+                              "gap": 8,
+                              "padding": [
+                                16,
+                                32
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "JjEdv",
+                                  "name": "secondaryCTAText",
+                                  "fill": "#FFFFFF",
+                                  "content": "Download Brochure",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 16,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ILw0x",
+                      "name": "heroStats",
+                      "width": "fill_container",
+                      "gap": 60,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "PgeTA",
+                          "name": "stat1",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xt7ow",
+                              "name": "stat1Number",
+                              "fill": "#FFFFFF",
+                              "content": "500+",
+                              "fontFamily": "Inter",
+                              "fontSize": 36,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "uLPIE",
+                              "name": "stat1Label",
+                              "fill": "#FFFFFFB3",
+                              "content": "AOPs Trained Annually",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ntvn2",
+                          "name": "stat2",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "AS6Wl",
+                              "name": "stat2Number",
+                              "fill": "#FFFFFF",
+                              "content": "110+",
+                              "fontFamily": "Inter",
+                              "fontSize": 36,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "KLBpn",
+                              "name": "stat2Label",
+                              "fill": "#FFFFFFB3",
+                              "content": "Years of Excellence",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "5M0Vs",
+                          "name": "stat3",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "yRTLC",
+                              "name": "stat3Number",
+                              "fill": "#FFFFFF",
+                              "content": "8",
+                              "fontFamily": "Inter",
+                              "fontSize": 36,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "fWuSX",
+                              "name": "stat3Label",
+                              "fill": "#FFFFFFB3",
+                              "content": "Training Centers",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "l1W2W",
+                          "name": "stat4",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Xjf4E",
+                              "name": "stat4Number",
+                              "fill": "#FFFFFF",
+                              "content": "100%",
+                              "fontFamily": "Inter",
+                              "fontSize": 36,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "VqF1h",
+                              "name": "stat4Label",
+                              "fill": "#FFFFFFB3",
+                              "content": "Placement Support",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "f2WcN",
+              "name": "Departments Section",
+              "width": "fill_container",
+              "fill": "#F8F9FA",
+              "layout": "vertical",
+              "gap": 48,
+              "padding": [
+                80,
+                60
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "impYj",
+                  "name": "deptHeader",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DJD2k",
+                      "name": "deptTitle",
+                      "fill": "#1A1A1A",
+                      "content": "Training Programs",
+                      "fontFamily": "Inter",
+                      "fontSize": 36,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zzJBo",
+                      "name": "deptSubtitle",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": 800,
+                      "content": "Comprehensive ophthalmic education across multiple specializations",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "glzfJ",
+                  "name": "deptGrid",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "NNfy0",
+                      "name": "deptRow2",
+                      "width": "fill_container",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "eUKbk",
+                          "name": "dept3",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "gap": 20,
+                          "padding": 32,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "bwlpe",
+                              "name": "dept3Icon",
+                              "width": 64,
+                              "height": 64,
+                              "fill": "#3B82F615",
+                              "cornerRadius": 12,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon_font",
+                                  "id": "DTfPw",
+                                  "name": "dept3IconSymbol",
+                                  "width": 32,
+                                  "height": 32,
+                                  "iconFontName": "glasses",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#3B82F6"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "zM8hx",
+                              "name": "dept3Name",
+                              "fill": "#1A1A1A",
+                              "content": "Optometry Training",
+                              "fontFamily": "Inter",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "4x4MG",
+                              "name": "dept3Desc",
+                              "fill": "#666666",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Specialized fellowships in Pediatric Optometry, Vision Therapy, Low Vision Rehabilitation, and Contact Lens Management",
+                              "lineHeight": 1.4,
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "PYmhN",
+                              "name": "dept3Stats",
+                              "gap": 24,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "8JO52",
+                                  "name": "dept3Courses",
+                                  "fill": "#999999",
+                                  "content": "Duration: 12-18 Months",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "aT2lF",
+                                  "name": "dept3Learners",
+                                  "fill": "#999999",
+                                  "content": "5 Specializations",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Fpq8F",
+                              "name": "dept3Link",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "LgyRO",
+                                  "name": "dept3LinkText",
+                                  "fill": "#C02635",
+                                  "content": "Apply Now",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "l27Wk",
+                                  "name": "dept3LinkIcon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "iconFontName": "arrow-right",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#C02635"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IgjnH",
+                          "name": "dept4",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "gap": 20,
+                          "padding": 32,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "WCu4s",
+                              "name": "dept4Icon",
+                              "width": 64,
+                              "height": 64,
+                              "fill": "#F5970015",
+                              "cornerRadius": 12,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon_font",
+                                  "id": "nuL65",
+                                  "name": "dept4IconSymbol",
+                                  "width": 32,
+                                  "height": 32,
+                                  "iconFontName": "briefcase",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#F59700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "EFhio",
+                              "name": "dept4Name",
+                              "fill": "#1A1A1A",
+                              "content": "Eye Care Management",
+                              "fontFamily": "Inter",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "jB5zd",
+                              "name": "dept4Desc",
+                              "fill": "#666666",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "One-year fellowship covering clinical ophthalmology, patient care, public health, HR, IT systems, and operations management",
+                              "lineHeight": 1.4,
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "JsBGe",
+                              "name": "dept4Stats",
+                              "gap": 24,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "HafmI",
+                                  "name": "dept4Courses",
+                                  "fill": "#999999",
+                                  "content": "Duration: 1 Year",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "odPvT",
+                                  "name": "dept4Learners",
+                                  "fill": "#999999",
+                                  "content": "Comprehensive Training",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "L5TSm",
+                              "name": "dept4Link",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "4Wx12",
+                                  "name": "dept4LinkText",
+                                  "fill": "#C02635",
+                                  "content": "Enroll Now",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "b9kCa",
+                                  "name": "dept4LinkIcon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "iconFontName": "arrow-right",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#C02635"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Lqs1z",
+                      "name": "deptRow1",
+                      "width": "fill_container",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Vjkwe",
+                          "name": "dept1",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "gap": 20,
+                          "padding": 32,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "G908C",
+                              "name": "dept1Icon",
+                              "width": 64,
+                              "height": 64,
+                              "fill": "#C0263515",
+                              "cornerRadius": 12,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon_font",
+                                  "id": "AmiOj",
+                                  "name": "dept1IconSymbol",
+                                  "width": 32,
+                                  "height": 32,
+                                  "iconFontName": "users",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#C02635"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "PbC2K",
+                              "name": "dept1Name",
+                              "fill": "#1A1A1A",
+                              "content": "Allied Ophthalmic Personnel (AOP)",
+                              "fontFamily": "Inter",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BMsTB",
+                              "name": "dept1Desc",
+                              "fill": "#666666",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Two-year certified program for women from underserved communities. Includes Ophthalmic Assistant, Vision Technician, and Counselor tracks.",
+                              "lineHeight": 1.4,
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "RVYEx",
+                              "name": "dept1Stats",
+                              "gap": 24,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "mRFT7",
+                                  "name": "dept1Courses",
+                                  "fill": "#999999",
+                                  "content": "Duration: 2 Years",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "4M7S6",
+                                  "name": "dept1Learners",
+                                  "fill": "#999999",
+                                  "content": "500 Enrolled Annually",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "8MMhf",
+                              "name": "dept1Link",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WdVQh",
+                                  "name": "dept1LinkText",
+                                  "fill": "#C02635",
+                                  "content": "Learn More",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "01ui0",
+                                  "name": "dept1LinkIcon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "iconFontName": "arrow-right",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#C02635"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "djdDW",
+                          "name": "dept2",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "gap": 20,
+                          "padding": 32,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "XVWwI",
+                              "name": "dept2Icon",
+                              "width": 64,
+                              "height": 64,
+                              "fill": "#22C55E15",
+                              "cornerRadius": 12,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon_font",
+                                  "id": "loKAq",
+                                  "name": "dept2IconSymbol",
+                                  "width": 32,
+                                  "height": 32,
+                                  "iconFontName": "eye",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#22C55E"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "UQDbu",
+                              "name": "dept2Name",
+                              "fill": "#1A1A1A",
+                              "content": "Ophthalmic Training",
+                              "fontFamily": "Inter",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BzBp8",
+                              "name": "dept2Desc",
+                              "fill": "#666666",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Long-term fellowships in Cornea, Glaucoma, Retina, Pediatric Ophthalmology, and Comprehensive Ophthalmology (1-3 years)",
+                              "lineHeight": 1.4,
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "56EYI",
+                              "name": "dept2Stats",
+                              "gap": 24,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ttkRl",
+                                  "name": "dept2Courses",
+                                  "fill": "#999999",
+                                  "content": "Duration: 1-3 Years",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Rc5ao",
+                                  "name": "dept2Learners",
+                                  "fill": "#999999",
+                                  "content": "Multiple Specializations",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "uSZcF",
+                              "name": "dept2Link",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "NFxBW",
+                                  "name": "dept2LinkText",
+                                  "fill": "#C02635",
+                                  "content": "View Programs",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "RrjBo",
+                                  "name": "dept2LinkIcon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "iconFontName": "arrow-right",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#C02635"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "6qngU",
+              "name": "Special Programs",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "layout": "vertical",
+              "gap": 48,
+              "padding": [
+                80,
+                60
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "MlzQE",
+                  "name": "spHeader",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "saPcq",
+                      "name": "spTitle",
+                      "fill": "#1A1A1A",
+                      "content": "Specialized Training Initiatives",
+                      "fontFamily": "Inter",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "XkCxS",
+                      "name": "spSubtitle",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Short-term intensive programs for skill enhancement",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "0Xp4u",
+                  "name": "spGrid",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HinRI",
+                      "name": "sp1",
+                      "width": "fill_container",
+                      "fill": "#F8F9FA",
+                      "cornerRadius": 8,
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "hsUP7",
+                          "name": "sp1Icon",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "#C0263510",
+                          "cornerRadius": 28,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "tT6Ud",
+                              "name": "sp1IconSymbol",
+                              "width": 28,
+                              "height": 28,
+                              "iconFontName": "microscope",
+                              "iconFontFamily": "lucide",
+                              "fill": "#C02635"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "FK042",
+                          "name": "sp1Title",
+                          "fill": "#1A1A1A",
+                          "content": "Eye Bank Technician Training",
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "PsXR3",
+                          "name": "sp1Desc",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "5-10 day intensive program covering tissue recovery, eye donation counseling, and tissue evaluation",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "0BPCw",
+                          "name": "sp1Duration",
+                          "fill": "#999999",
+                          "content": "Duration: 5-10 Days",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "7qUp9",
+                      "name": "sp2",
+                      "width": "fill_container",
+                      "fill": "#F8F9FA",
+                      "cornerRadius": 8,
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "qpVMl",
+                          "name": "sp2Icon",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "#22C55E10",
+                          "cornerRadius": 28,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "Guj8G",
+                              "name": "sp2IconSymbol",
+                              "width": 28,
+                              "height": 28,
+                              "iconFontName": "stethoscope",
+                              "iconFontFamily": "lucide",
+                              "fill": "#22C55E"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Lp8pI",
+                          "name": "sp2Title",
+                          "fill": "#1A1A1A",
+                          "content": "Phacoemulsification Training",
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "8AAiN",
+                          "name": "sp2Desc",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "2-week hands-on surgical training for advanced cataract surgery techniques",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "OFf0D",
+                          "name": "sp2Duration",
+                          "fill": "#999999",
+                          "content": "Duration: 2 Weeks",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ApKi9",
+                      "name": "sp3",
+                      "width": "fill_container",
+                      "fill": "#F8F9FA",
+                      "cornerRadius": 8,
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Dydqc",
+                          "name": "sp3Icon",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "#3B82F610",
+                          "cornerRadius": 28,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "cak5T",
+                              "name": "sp3IconSymbol",
+                              "width": 28,
+                              "height": 28,
+                              "iconFontName": "monitor",
+                              "iconFontFamily": "lucide",
+                              "fill": "#3B82F6"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "2DLyQ",
+                          "name": "sp3Title",
+                          "fill": "#1A1A1A",
+                          "content": "Observership Programs",
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "6ujjD",
+                          "name": "sp3Desc",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "3-month observership opportunities across various specializations for hands-on clinical exposure",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZuRop",
+                          "name": "sp3Duration",
+                          "fill": "#999999",
+                          "content": "Duration: 3 Months",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vRo17",
+              "name": "Certifications",
+              "width": "fill_container",
+              "fill": "#F8F9FA",
+              "layout": "vertical",
+              "gap": 48,
+              "padding": [
+                80,
+                60
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "2pG5W",
+                  "name": "certHeader",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "N61gS",
+                      "name": "certTitle",
+                      "fill": "#1A1A1A",
+                      "content": "Recognition & Affiliations",
+                      "fontFamily": "Inter",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "wf7mj",
+                      "name": "certSubtitle",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": 800,
+                      "content": "Dr. Shroff's Charity Eye Hospital - A legacy of excellence since 1914",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CragV",
+                  "name": "accreditGrid",
+                  "gap": 40,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "x8d6g",
+                      "name": "accredit1",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "AAAfi",
+                          "name": "accredit1Icon",
+                          "width": 80,
+                          "height": 80,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 40,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#E0E0E0"
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "Cvate",
+                              "name": "accredit1Symbol",
+                              "width": 40,
+                              "height": 40,
+                              "iconFontName": "shield-check",
+                              "iconFontFamily": "lucide",
+                              "fill": "#C02635"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "GezOK",
+                          "name": "accredit1Text",
+                          "fill": "#3C3950",
+                          "content": "NABH Accredited",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mxOKm",
+                      "name": "accredit2",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "TAv4R",
+                          "name": "accredit2Icon",
+                          "width": 80,
+                          "height": 80,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 40,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#E0E0E0"
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "R07IC",
+                              "name": "accredit2Symbol",
+                              "width": 40,
+                              "height": 40,
+                              "iconFontName": "award",
+                              "iconFontFamily": "lucide",
+                              "fill": "#C02635"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "DhIRV",
+                          "name": "accredit2Text",
+                          "fill": "#3C3950",
+                          "content": "Health Sector Skill Council",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Yf4Uk",
+                      "name": "accredit3",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "VmBYn",
+                          "name": "accredit3Icon",
+                          "width": 80,
+                          "height": 80,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 40,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#E0E0E0"
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "OWS9O",
+                              "name": "accredit3Symbol",
+                              "width": 40,
+                              "height": 40,
+                              "iconFontName": "graduation-cap",
+                              "iconFontFamily": "lucide",
+                              "fill": "#C02635"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "J862j",
+                          "name": "accredit3Text",
+                          "fill": "#3C3950",
+                          "content": "Medical Council of India",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "I152u",
+                      "name": "accredit4",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "7t0ma",
+                          "name": "accredit4Icon",
+                          "width": 80,
+                          "height": 80,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 40,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#E0E0E0"
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "43hL9",
+                              "name": "accredit4Symbol",
+                              "width": 40,
+                              "height": 40,
+                              "iconFontName": "bookmark",
+                              "iconFontFamily": "lucide",
+                              "fill": "#C02635"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "e3ys1",
+                          "name": "accredit4Text",
+                          "fill": "#3C3950",
+                          "content": "DGHS Recognized",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oTCX7",
+                      "name": "accredit5",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ojQl3",
+                          "name": "accredit5Icon",
+                          "width": 80,
+                          "height": 80,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 40,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#E0E0E0"
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "V3p2c",
+                              "name": "accredit5Symbol",
+                              "width": 40,
+                              "height": 40,
+                              "iconFontName": "star",
+                              "iconFontFamily": "lucide",
+                              "fill": "#C02635"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "G9Pou",
+                          "name": "accredit5Text",
+                          "fill": "#3C3950",
+                          "content": "ISO Certified",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "2Kusz",
+              "name": "Footer",
+              "width": "fill_container",
+              "fill": "#1A1A1A",
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tmOz2",
+                  "name": "footerTop",
+                  "gap": 100,
+                  "padding": [
+                    50,
+                    80
+                  ],
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "mBaI7",
+                      "name": "footerBrand",
+                      "width": 360,
+                      "layout": "vertical",
+                      "gap": 20,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BqcyC",
+                          "name": "footerLogo",
+                          "gap": 12,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Dy6WJ",
+                              "name": "footerLogoMark",
+                              "width": 40,
+                              "height": 40,
+                              "fill": "#C02635",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon_font",
+                                  "id": "yCj2I",
+                                  "name": "footerLogoIcon",
+                                  "width": 20,
+                                  "height": 20,
+                                  "iconFontName": "eye",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "#FFFFFF"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "TbZh3",
+                              "name": "footerLogoText",
+                              "fill": "#FFFFFF",
+                              "content": "SCEH Learning Platform",
+                              "fontFamily": "Inter",
+                              "fontSize": 18,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "2fK4Q",
+                          "name": "footerBrandDesc",
+                          "fill": "#999999",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Dr. Shroff's Charity Eye Hospital has been providing quality eye care and education since 1914. Our training programs create skilled ophthalmic professionals to serve communities across India.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IoycC",
+                      "name": "footerLinks",
+                      "gap": 60,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "u8iDi",
+                          "name": "footerCol1",
+                          "layout": "vertical",
+                          "gap": 20,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "2WQBa",
+                              "name": "footerCol1Title",
+                              "fill": "#FFFFFF",
+                              "content": "Quick Links",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "vc5MF",
+                              "name": "footerCol1Link1",
+                              "fill": "#999999",
+                              "content": "About SCEH",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "F8Nk9",
+                              "name": "footerCol1Link2",
+                              "fill": "#999999",
+                              "content": "Our Services",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Xbxkq",
+                              "name": "footerCol1Link3",
+                              "fill": "#999999",
+                              "content": "Research",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "gudBH",
+                              "name": "footerCol1Link4",
+                              "fill": "#999999",
+                              "content": "Public Health",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vmNx3",
+                          "name": "footerCol2",
+                          "layout": "vertical",
+                          "gap": 20,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "4DmAI",
+                              "name": "footerCol2Title",
+                              "fill": "#FFFFFF",
+                              "content": "Education",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "XydHi",
+                              "name": "footerCol2Link1",
+                              "fill": "#999999",
+                              "content": "Training Programmes",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "zNT3N",
+                              "name": "footerCol2Link2",
+                              "fill": "#999999",
+                              "content": "Fellowships",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "7xcvH",
+                              "name": "footerCol2Link3",
+                              "fill": "#999999",
+                              "content": "Admissions",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "3ug0H",
+                              "name": "footerCol2Link4",
+                              "fill": "#999999",
+                              "content": "Faculty",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "duP6i",
+                          "name": "footerCol3",
+                          "layout": "vertical",
+                          "gap": 20,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "edDZe",
+                              "name": "footerCol3Title",
+                              "fill": "#FFFFFF",
+                              "content": "Centres",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ZjrHE",
+                              "name": "footerCol3Link1",
+                              "fill": "#999999",
+                              "content": "Delhi",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Hz6LR",
+                              "name": "footerCol3Link2",
+                              "fill": "#999999",
+                              "content": "Vrindavan",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "fSBhX",
+                              "name": "footerCol3Link3",
+                              "fill": "#999999",
+                              "content": "Alwar",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "AW2Uh",
+                              "name": "footerCol3Link4",
+                              "fill": "#999999",
+                              "content": "View All Centres",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "XPALB",
+                          "name": "newFooterCol4",
+                          "layout": "vertical",
+                          "gap": 20,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NcH2I",
+                              "name": "quickLinksTitle",
+                              "fill": "#FFFFFF",
+                              "content": "Resources",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "7P66z",
+                              "name": "link1",
+                              "fill": "#999999",
+                              "content": "Partners",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "fvMnW",
+                              "name": "link2",
+                              "fill": "#999999",
+                              "content": "News & Events",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "HKHyv",
+                              "name": "link3",
+                              "fill": "#999999",
+                              "content": "Gallery",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "OkM0w",
+                              "name": "link4",
+                              "fill": "#999999",
+                              "content": "Downloads",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LRnAd",
+                  "name": "footerBottom",
+                  "fill": "#0F0F0F",
+                  "padding": [
+                    20,
+                    80
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "A0bZb",
+                      "name": "footerCopyright",
+                      "fill": "#666666",
+                      "content": "© 2024 Dr. Shroff's Charity Eye Hospital. A unit of Radhasoami Sewa Sabha.",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "6jrEn",
+                      "name": "footerLegal",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "prdJM",
+                          "name": "footerPrivacy",
+                          "fill": "#666666",
+                          "content": "Privacy",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "z3Vec",
+                          "name": "footerTerms",
+                          "fill": "#666666",
+                          "content": "Terms",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "vaQLe",
+                          "name": "footerCookie",
+                          "fill": "#666666",
+                          "content": "Sitemap",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

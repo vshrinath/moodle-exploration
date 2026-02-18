@@ -446,6 +446,32 @@ if ($preview !== null) {
             $existingactivitylookup[$idkey] = true;
         }
 
+        $learnerimpactdata = [];
+        $existingactivitydetails = $DB->get_records_sql(
+            'SELECT cm.id AS cmid, cm.idnumber, cm.instance, m.name AS modname
+               FROM {course_modules} cm
+               JOIN {modules} m ON m.id = cm.module
+              WHERE cm.course = :courseid
+                AND cm.deletioninprogress = 0
+                AND cm.idnumber <> \'\'',
+            ['courseid' => (int)($preview['targetcourseid'] ?? 0)]
+        );
+        foreach ($existingactivitydetails as $detail) {
+            $idkey = \core_text::strtolower(trim((string)$detail->idnumber));
+            if ($idkey === '') {
+                continue;
+            }
+            $learnercount = 0;
+            if ($detail->modname === 'quiz') {
+                $learnercount = $DB->count_records('quiz_attempts', ['quiz' => (int)$detail->instance]);
+            } else if ($detail->modname === 'assign') {
+                $learnercount = $DB->count_records('assign_submission', ['assignment' => (int)$detail->instance, 'status' => 'submitted']);
+            }
+            if ($learnercount > 0) {
+                $learnerimpactdata[$idkey] = $learnercount;
+            }
+        }
+
         $importurl = new moodle_url('/local/sceh_importer/index.php');
         echo $OUTPUT->heading(get_string('selectactivitiesheading', 'local_sceh_importer'), 4);
 
@@ -486,11 +512,15 @@ if ($preview !== null) {
             $topicname = ($topicid !== '') ? ($topicnamemap[$topicid] ?? $topicid) : '';
             $grouplabel = format_string($sectionname) . ($topicname !== '' ? ' / ' . format_string($topicname) : '');
 
-            $groupcell = new html_table_cell(html_writer::tag('strong', $grouplabel) .
-                html_writer::tag('div', s($sectionid . ($topicid !== '' ? ' / ' . $topicid : '')), ['class' => 'text-muted']));
+            $groupcell = new html_table_cell(
+                html_writer::tag('span', '▼', ['class' => 'sceh-import-group-toggle']) .
+                html_writer::tag('strong', $grouplabel) .
+                html_writer::tag('div', s($sectionid . ($topicid !== '' ? ' / ' . $topicid : '')), ['class' => 'text-muted'])
+            );
             $groupcell->colspan = 4;
             $grouprow = new html_table_row([$groupcell]);
             $grouprow->attributes['class'] = 'sceh-import-group-row';
+            $grouprow->attributes['data-group'] = $sectionid . '||' . $topicid;
             $selectiontable->data[] = $grouprow;
 
             foreach ((array)$group['activities'] as $activity) {
@@ -514,9 +544,18 @@ if ($preview !== null) {
             }
             $checkbox = html_writer::empty_tag('input', $checkboxattrs);
             $sourcepath = (string)($activity['file'] ?? $activity['quiz_source']['path'] ?? '');
+            $learnerimpactwarning = '';
+            if ($isexisting && isset($learnerimpactdata[$idkey]) && $learnerimpactdata[$idkey] > 0) {
+                $learnerimpactwarning = html_writer::empty_tag('br') .
+                    html_writer::tag('small', 
+                        get_string('learnerimpact_warning', 'local_sceh_importer', ['count' => $learnerimpactdata[$idkey]]),
+                        ['class' => 'text-warning']
+                    );
+            }
             $titlehtml = s($title) . html_writer::empty_tag('br') .
                 html_writer::tag('small', s($idnumber), ['class' => 'text-muted']) .
-                ($sourcepath !== '' ? html_writer::empty_tag('br') . html_writer::tag('small', s($sourcepath), ['class' => 'text-muted']) : '');
+                ($sourcepath !== '' ? html_writer::empty_tag('br') . html_writer::tag('small', s($sourcepath), ['class' => 'text-muted']) : '') .
+                $learnerimpactwarning;
             $statusbadgeclass = $isexisting ? 'badge rounded-pill text-bg-secondary' : 'badge rounded-pill text-bg-success';
             $statusbadge = html_writer::tag('span', s($statuslabel), ['class' => $statusbadgeclass]);
 
@@ -527,6 +566,7 @@ if ($preview !== null) {
             $statuscell = new html_table_cell($statusbadge);
 
             $row = new html_table_row([$checkboxcell, $titlecell, $typecell, $statuscell]);
+            $row->attributes['data-group'] = $sectionid . '||' . $topicid;
             if ($isexisting) {
                 $row->attributes['class'] = 'sceh-import-existing-row';
             } else {
@@ -544,6 +584,36 @@ if ($preview !== null) {
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'doimport', 'value' => 1]);
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'allowactivityreplace', 'value' => 0, 'id' => 'sceh-import-allow-activity-replace']);
+        
+        echo html_writer::start_tag('div', ['class' => 'mb-3 d-flex gap-2 align-items-center']);
+        echo html_writer::tag('button', get_string('selectall_new', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-sm btn-secondary',
+            'id' => 'sceh-select-all-new',
+        ]);
+        echo html_writer::tag('button', get_string('deselectall_existing', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-sm btn-secondary',
+            'id' => 'sceh-deselect-all-existing',
+        ]);
+        echo html_writer::tag('button', get_string('collapseall', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-sm btn-outline-secondary',
+            'id' => 'sceh-collapse-all',
+        ]);
+        echo html_writer::tag('button', get_string('expandall', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-sm btn-outline-secondary',
+            'id' => 'sceh-expand-all',
+        ]);
+        echo html_writer::tag('span', '?', [
+            'class' => 'badge rounded-circle bg-info text-white',
+            'style' => 'cursor: pointer; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;',
+            'id' => 'sceh-versioning-help-trigger',
+            'title' => get_string('versioning_help_title', 'local_sceh_importer'),
+        ]);
+        echo html_writer::end_tag('div');
+        
         echo html_writer::table($selectiontable);
         echo html_writer::tag('div', get_string('selectactivitieshelp', 'local_sceh_importer'), ['class' => 'text-muted mb-3']);
         echo html_writer::tag('div', get_string('selectactivitiesreplacehelp', 'local_sceh_importer'), ['class' => 'text-muted mb-3']);
@@ -598,6 +668,38 @@ if ($preview !== null) {
         echo html_writer::end_tag('div');
         echo html_writer::end_tag('div');
         echo html_writer::end_tag('div');
+
+        echo html_writer::start_tag('div', [
+            'id' => 'sceh-versioning-help-modal',
+            'class' => 'sceh-import-modal',
+            'hidden' => 'hidden',
+            'aria-hidden' => 'true',
+        ]);
+        echo html_writer::start_tag('div', [
+            'class' => 'sceh-import-modal__backdrop',
+            'id' => 'sceh-versioning-help-backdrop',
+        ]);
+        echo html_writer::start_tag('div', [
+            'class' => 'sceh-import-modal__dialog',
+            'role' => 'dialog',
+            'aria-modal' => 'true',
+            'aria-labelledby' => 'sceh-versioning-help-title',
+        ]);
+        echo html_writer::tag('h5', get_string('versioning_help_title', 'local_sceh_importer'), [
+            'id' => 'sceh-versioning-help-title',
+            'class' => 'mb-3',
+        ]);
+        echo html_writer::tag('p', get_string('versioning_help', 'local_sceh_importer'), ['class' => 'mb-4']);
+        echo html_writer::start_tag('div', ['class' => 'sceh-import-modal__actions']);
+        echo html_writer::tag('button', 'Close', [
+            'type' => 'button',
+            'class' => 'btn btn-primary',
+            'id' => 'sceh-versioning-help-close',
+        ]);
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
         echo html_writer::end_tag('div');
 
         $PAGE->requires->js_init_code(
@@ -634,6 +736,103 @@ if ($preview !== null) {
                 };
                 boxes.forEach((cb) => cb.addEventListener('change', sync));
                 sync();
+                
+                const selectAllNew = document.getElementById('sceh-select-all-new');
+                if (selectAllNew) {
+                    selectAllNew.addEventListener('click', () => {
+                        boxes.forEach((cb) => {
+                            if (!cb.dataset.existingactivity) {
+                                cb.checked = true;
+                            }
+                        });
+                        sync();
+                    });
+                }
+                
+                const deselectAllExisting = document.getElementById('sceh-deselect-all-existing');
+                if (deselectAllExisting) {
+                    deselectAllExisting.addEventListener('click', () => {
+                        boxes.forEach((cb) => {
+                            if (cb.dataset.existingactivity === '1') {
+                                cb.checked = false;
+                            }
+                        });
+                        sync();
+                    });
+                }
+                
+                const groupRows = Array.from(document.querySelectorAll('.sceh-import-group-row'));
+                groupRows.forEach((groupRow) => {
+                    groupRow.addEventListener('click', () => {
+                        const groupKey = groupRow.dataset.group;
+                        const isCollapsed = groupRow.classList.contains('collapsed');
+                        const activityRows = Array.from(document.querySelectorAll('tr[data-group=\"' + groupKey + '\"]')).filter(r => !r.classList.contains('sceh-import-group-row'));
+                        
+                        if (isCollapsed) {
+                            groupRow.classList.remove('collapsed');
+                            activityRows.forEach(r => r.style.display = '');
+                        } else {
+                            groupRow.classList.add('collapsed');
+                            activityRows.forEach(r => r.style.display = 'none');
+                        }
+                    });
+                });
+                
+                const collapseAll = document.getElementById('sceh-collapse-all');
+                if (collapseAll) {
+                    collapseAll.addEventListener('click', () => {
+                        groupRows.forEach((groupRow) => {
+                            const groupKey = groupRow.dataset.group;
+                            const activityRows = Array.from(document.querySelectorAll('tr[data-group=\"' + groupKey + '\"]')).filter(r => !r.classList.contains('sceh-import-group-row'));
+                            groupRow.classList.add('collapsed');
+                            activityRows.forEach(r => r.style.display = 'none');
+                        });
+                    });
+                }
+                
+                const expandAll = document.getElementById('sceh-expand-all');
+                if (expandAll) {
+                    expandAll.addEventListener('click', () => {
+                        groupRows.forEach((groupRow) => {
+                            const groupKey = groupRow.dataset.group;
+                            const activityRows = Array.from(document.querySelectorAll('tr[data-group=\"' + groupKey + '\"]')).filter(r => !r.classList.contains('sceh-import-group-row'));
+                            groupRow.classList.remove('collapsed');
+                            activityRows.forEach(r => r.style.display = '');
+                        });
+                    });
+                }
+                
+                const versioningHelpTrigger = document.getElementById('sceh-versioning-help-trigger');
+                const versioningHelpModal = document.getElementById('sceh-versioning-help-modal');
+                const versioningHelpClose = document.getElementById('sceh-versioning-help-close');
+                const versioningHelpBackdrop = document.getElementById('sceh-versioning-help-backdrop');
+                
+                if (versioningHelpTrigger && versioningHelpModal) {
+                    versioningHelpTrigger.addEventListener('click', () => {
+                        versioningHelpModal.hidden = false;
+                        versioningHelpModal.setAttribute('aria-hidden', 'false');
+                        if (versioningHelpClose) { versioningHelpClose.focus(); }
+                    });
+                }
+                
+                if (versioningHelpClose) {
+                    versioningHelpClose.addEventListener('click', () => {
+                        if (versioningHelpModal) {
+                            versioningHelpModal.hidden = true;
+                            versioningHelpModal.setAttribute('aria-hidden', 'true');
+                        }
+                    });
+                }
+                
+                if (versioningHelpBackdrop) {
+                    versioningHelpBackdrop.addEventListener('click', () => {
+                        if (versioningHelpModal) {
+                            versioningHelpModal.hidden = true;
+                            versioningHelpModal.setAttribute('aria-hidden', 'true');
+                        }
+                    });
+                }
+                
                 if (cancelBtn) {
                     cancelBtn.addEventListener('click', () => {
                         confirmedActivityReplace = false;
@@ -661,10 +860,16 @@ if ($preview !== null) {
                     });
                 }
                 document.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape' && modal && !modal.hidden) {
-                        confirmedActivityReplace = false;
-                        if (allowActivityReplace) { allowActivityReplace.value = '0'; }
-                        closeModal();
+                    if (event.key === 'Escape') {
+                        if (modal && !modal.hidden) {
+                            confirmedActivityReplace = false;
+                            if (allowActivityReplace) { allowActivityReplace.value = '0'; }
+                            closeModal();
+                        }
+                        if (versioningHelpModal && !versioningHelpModal.hidden) {
+                            versioningHelpModal.hidden = true;
+                            versioningHelpModal.setAttribute('aria-hidden', 'true');
+                        }
                     }
                 });
                 form.addEventListener('submit', (event) => {

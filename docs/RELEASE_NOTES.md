@@ -4,6 +4,29 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Improve importer UX with plain-language errors, bulk controls, and collapsible groups
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Rewrote 20+ error messages to use plain language instead of technical jargon
+- Added bulk selection controls: "Select all new" and "Deselect all existing" buttons
+- Added collapsible section/topic groups with expand/collapse all controls
+- Added versioning help modal with explanation of V2/V3 behavior
+- Added learner impact warnings showing quiz attempts and assignment submissions for existing activities
+- Improved visual hierarchy with toggle icons for collapsible groups
+
+### Why
+Program owners need clear, actionable error messages and efficient ways to manage large imports. Learner impact visibility prevents accidental data loss.
+
+### Files touched
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Rewrote error messages, added new UI strings
+- `local_sceh_importer/index.php` — Added bulk controls, collapsible groups, versioning help modal, learner impact detection
+- `local_sceh_importer/styles.css` — Added styles for collapsible groups and toggle icons
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Refine import completion metrics and remove expected archive notices from warnings
 
 **Commit**: `PENDING` on branch `front-end-explorations`

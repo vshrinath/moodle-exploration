@@ -54,3 +54,27 @@
     gap: 0.75rem;
     justify-content: flex-end;
 }
+
+.sceh-import-group-row {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sceh-import-group-row:hover {
+    background: #dce6f0 !important;
+}
+
+.sceh-import-group-row.collapsed + tr {
+    display: none;
+}
+
+.sceh-import-group-toggle {
+    display: inline-block;
+    width: 16px;
+    margin-right: 8px;
+    transition: transform 0.2s;
+}
+
+.sceh-import-group-row.collapsed .sceh-import-group-toggle {
+    transform: rotate(-90deg);
+}
