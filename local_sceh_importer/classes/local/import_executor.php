@@ -280,6 +280,11 @@ class import_executor {
             return add_moduleinfo($moduleinfo, $course, null);
         }
 
+        if ($type === 'url') {
+            $moduleinfo = $this->build_url_moduleinfo($course, $activity, $sectionnum);
+            return add_moduleinfo($moduleinfo, $course, null);
+        }
+
         if ($type === 'quiz') {
             $moduleinfo = $this->build_quiz_moduleinfo($course, $activity, $sectionnum);
             $cm = add_moduleinfo($moduleinfo, $course, null);
@@ -388,6 +393,38 @@ class import_executor {
         }
 
         $moduleinfo->module = $DB->get_field('modules', 'id', ['name' => 'assign'], MUST_EXIST);
+        return $moduleinfo;
+    }
+
+    /**
+     * Build moduleinfo for URL resource.
+     *
+     * @param \stdClass $course
+     * @param array $activity
+     * @param int $sectionnum
+     * @return \stdClass
+     */
+    private function build_url_moduleinfo(\stdClass $course, array $activity, int $sectionnum): \stdClass {
+        global $DB;
+
+        $moduleinfo = $this->build_common_moduleinfo($course, $activity, $sectionnum, 'url');
+
+        $url = trim((string)($activity['url'] ?? ''));
+        $urltype = strtolower(trim((string)($activity['url_type'] ?? '')));
+
+        $moduleinfo->externalurl = $url;
+        $moduleinfo->display = RESOURCELIB_DISPLAY_AUTO;
+        $moduleinfo->printintro = 1;
+
+        $isyoutube = (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false);
+        if ($isyoutube && in_array($urltype, ['video', 'youtube', 'embed'], true)) {
+            $moduleinfo->display = RESOURCELIB_DISPLAY_EMBED;
+        } else {
+            $moduleinfo->display = RESOURCELIB_DISPLAY_OPEN;
+        }
+
+        $moduleinfo->module = $DB->get_field('modules', 'id', ['name' => 'url'], MUST_EXIST);
+
         return $moduleinfo;
     }
 

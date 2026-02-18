@@ -99,6 +99,7 @@ class package_scanner {
         $topicmap = [];
         $quizcsvactivities = [];
         $activities = [];
+        $linkscsv = [];
 
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($extractdir, \FilesystemIterator::SKIP_DOTS)
@@ -118,6 +119,12 @@ class package_scanner {
 
             $normalized = str_replace('\\', '/', strtolower($relativepath));
             $extension = strtolower(pathinfo($relativepath, PATHINFO_EXTENSION));
+            $basename = strtolower(basename($relativepath));
+
+            if ($basename === 'links.csv') {
+                $linkscsv[$relativepath] = $fullpath;
+                continue;
+            }
 
             $mapped = $this->map_structured_path($relativepath, $normalized, $extension, $sections, $topics, $topicmap);
             if ($mapped !== null) {
@@ -137,6 +144,13 @@ class package_scanner {
                     $activities[] = $legacy['activity'];
                 }
                 continue;
+            }
+        }
+
+        foreach ($linkscsv as $relativepath => $fullpath) {
+            $parsed = $this->parse_links_csv($fullpath, $relativepath, $sections, $topicmap);
+            if (!empty($parsed)) {
+                $activities = array_merge($activities, $parsed);
             }
         }
 
@@ -495,5 +509,145 @@ class package_scanner {
             }
         }
         return false;
+    }
+
+    /**
+     * Parse links.csv file and create URL activities.
+     *
+     * @param string $fullpath
+     * @param string $relativepath
+     * @param array<string, string> $sections
+     * @param array<string, bool> $topicmap
+     * @return array
+     */
+    private function parse_links_csv(string $fullpath, string $relativepath, array &$sections, array $topicmap): array {
+        if (!is_readable($fullpath)) {
+            return [];
+        }
+
+        $normalized = str_replace('\\', '/', strtolower($relativepath));
+        $parts = explode('/', $normalized);
+
+        $sectionid = null;
+        $topicid = null;
+        $bucket = null;
+
+        $sectionindex = null;
+        $sectionmeta = null;
+        foreach ($parts as $index => $part) {
+            $candidate = $this->parse_ordered_segment($part);
+            if ($candidate !== null) {
+                $sectionindex = $index;
+                $sectionmeta = $candidate;
+                break;
+            }
+        }
+
+        if ($sectionmeta !== null && $sectionindex !== null) {
+            $sectionid = $this->build_section_idnumber($sectionmeta['order'], $sectionmeta['title']);
+            if (!isset($sections[$sectionid])) {
+                $sections[$sectionid] = $sectionmeta['title'];
+            }
+
+            $cursor = $sectionindex + 1;
+            if (isset($parts[$cursor])) {
+                $topicmeta = $this->parse_ordered_segment($parts[$cursor]);
+                if ($topicmeta !== null) {
+                    $topicid = $this->build_topic_idnumber($sectionid, $topicmeta['order'], $topicmeta['title']);
+                    $cursor++;
+                }
+            }
+
+            if (isset($parts[$cursor])) {
+                $bucket = $parts[$cursor];
+            }
+        } else {
+            $this->ensure_default_common_section($sections);
+            $sectionid = 'SEC-COMMON';
+        }
+
+        if ($bucket === 'quiz' || $bucket === 'quizzes') {
+            return [];
+        }
+
+        $handle = fopen($fullpath, 'r');
+        if ($handle === false) {
+            return [];
+        }
+
+        $header = fgetcsv($handle);
+        if ($header === false) {
+            fclose($handle);
+            return [];
+        }
+
+        $header = array_map('trim', array_map('strtolower', $header));
+        $orderindex = array_search('order', $header, true);
+        $titleindex = array_search('title', $header, true);
+        $urlindex = array_search('url', $header, true);
+        $typeindex = array_search('type', $header, true);
+        $audienceindex = array_search('audience', $header, true);
+
+        if ($titleindex === false || $urlindex === false) {
+            fclose($handle);
+            return [];
+        }
+
+        $rows = [];
+        $rownum = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $rownum++;
+            $title = isset($row[$titleindex]) ? trim($row[$titleindex]) : '';
+            $url = isset($row[$urlindex]) ? trim($row[$urlindex]) : '';
+            if ($title === '' || $url === '') {
+                continue;
+            }
+
+            $order = ($orderindex !== false && isset($row[$orderindex])) ? (int)$row[$orderindex] : 0;
+            $type = ($typeindex !== false && isset($row[$typeindex])) ? trim($row[$typeindex]) : '';
+            $audience = ($audienceindex !== false && isset($row[$audienceindex])) ? trim(strtolower($row[$audienceindex])) : 'learner';
+
+            if (!in_array($audience, ['learner', 'trainer'], true)) {
+                $audience = 'learner';
+            }
+
+            $rows[] = [
+                'order' => $order,
+                'rownum' => $rownum,
+                'title' => $title,
+                'url' => $url,
+                'type' => $type,
+                'audience' => $audience,
+            ];
+        }
+        fclose($handle);
+
+        usort($rows, static function(array $a, array $b): int {
+            if ($a['order'] !== $b['order']) {
+                return $a['order'] <=> $b['order'];
+            }
+            return $a['rownum'] <=> $b['rownum'];
+        });
+
+        $activities = [];
+        foreach ($rows as $row) {
+            $idbase = strtoupper(preg_replace('/[^A-Za-z0-9]+/', '-', $row['title']));
+            $activity = [
+                'idnumber' => 'URL-' . $idbase,
+                'type' => 'url',
+                'title' => $row['title'],
+                'section_name' => $sections[$sectionid] ?? 'Common Foundation',
+                'section_idnumber' => $sectionid,
+                'url' => $row['url'],
+                'url_type' => $row['type'],
+                'audience' => $row['audience'],
+            ];
+            if ($topicid !== null) {
+                $activity['topic_idnumber'] = $topicid;
+            }
+            $activities[] = $activity;
+        }
+
+        return $activities;
     }
 }
