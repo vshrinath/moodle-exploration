@@ -4,9 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
-## [2026-02-18] — Fix critical bugs in individual file replacement
+## [2026-02-18] — Add quiz preview in import workflow
 
 **Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added "Preview Questions" button next to quiz activities in import preview
+- Modal displays all questions with correct answers marked
+- Shows question type, options, and correct answers for verification
+- Supports multichoice, truefalse, shortanswer, and essay question types
+
+### Why
+Users can now verify quiz CSV parsed correctly before importing, catching formatting errors and content issues early.
+
+### Files touched
+- `local_sceh_importer/index.php` — Added preview button, modal, and JavaScript for quiz preview
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added preview strings
+
+---
+
+## [2026-02-18] — Fix critical bugs in individual file replacement
+
+**Commit**: `a0a66d6` on branch `front-end-explorations`
 
 ### What changed
 - Fixed data loss risk: new activity is created first, then old one is archived (not vice versa)

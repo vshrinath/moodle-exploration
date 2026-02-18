@@ -1017,18 +1017,132 @@ if ($preview !== null) {
     }
 
     $activitytable = new html_table();
-    $activitytable->head = ['ID Number', 'Type', 'Section', 'Topic', 'Title'];
-    foreach ($preview['manifest']['activities'] as $activity) {
+    $activitytable->head = ['ID Number', 'Type', 'Section', 'Topic', 'Title', 'Actions'];
+    foreach ($preview['manifest']['activities'] as $activityindex => $activity) {
+        $actions = '';
+        
+        // Add preview button for quiz activities
+        if (($activity['type'] ?? '') === 'quiz' && !empty($activity['quiz_source']['rows'])) {
+            $previewbtn = html_writer::tag('button', get_string('previewquiz', 'local_sceh_importer'), [
+                'type' => 'button',
+                'class' => 'btn btn-sm btn-secondary',
+                'data-action' => 'preview-quiz',
+                'data-activity-index' => $activityindex,
+            ]);
+            $actions = $previewbtn;
+        }
+        
         $activitytable->data[] = [
             $activity['idnumber'] ?? get_string('empty', 'local_sceh_importer'),
             $activity['type'] ?? get_string('empty', 'local_sceh_importer'),
             $activity['section_idnumber'] ?? get_string('empty', 'local_sceh_importer'),
             $activity['topic_idnumber'] ?? get_string('empty', 'local_sceh_importer'),
             $activity['title'] ?? get_string('empty', 'local_sceh_importer'),
+            $actions,
         ];
     }
     echo $OUTPUT->heading(get_string('activities', 'local_sceh_importer'), 4);
     echo html_writer::table($activitytable);
+    
+    // Add quiz preview modal
+    echo html_writer::start_div('', ['id' => 'quiz-preview-modal', 'style' => 'display:none;']);
+    echo html_writer::div('', 'modal-backdrop fade', ['id' => 'quiz-modal-backdrop']);
+    echo html_writer::start_div('modal fade show', ['style' => 'display:block;', 'tabindex' => '-1']);
+    echo html_writer::start_div('modal-dialog modal-lg modal-dialog-scrollable');
+    echo html_writer::start_div('modal-content');
+    
+    echo html_writer::start_div('modal-header');
+    echo html_writer::tag('h5', get_string('quizpreview', 'local_sceh_importer'), ['class' => 'modal-title', 'id' => 'quiz-preview-title']);
+    echo html_writer::tag('button', '×', ['type' => 'button', 'class' => 'btn-close', 'data-action' => 'close-quiz-preview']);
+    echo html_writer::end_div();
+    
+    echo html_writer::start_div('modal-body', ['id' => 'quiz-preview-body']);
+    echo html_writer::end_div();
+    
+    echo html_writer->start_div('modal-footer');
+    echo html_writer::tag('button', get_string('close'), ['type' => 'button', 'class' => 'btn btn-secondary', 'data-action' => 'close-quiz-preview']);
+    echo html_writer::end_div();
+    
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    
+    // Add quiz data as JSON for JavaScript
+    $quizdata = [];
+    foreach ($preview['manifest']['activities'] as $activityindex => $activity) {
+        if (($activity['type'] ?? '') === 'quiz' && !empty($activity['quiz_source']['rows'])) {
+            $quizdata[$activityindex] = [
+                'title' => $activity['title'] ?? 'Quiz',
+                'rows' => $activity['quiz_source']['rows'],
+            ];
+        }
+    }
+    if (!empty($quizdata)) {
+        $PAGE->requires->js_init_code("
+            window.scehQuizData = " . json_encode($quizdata) . ";
+            
+            document.querySelectorAll('[data-action=\"preview-quiz\"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = this.getAttribute('data-activity-index');
+                    const quiz = window.scehQuizData[index];
+                    if (!quiz) return;
+                    
+                    document.getElementById('quiz-preview-title').textContent = quiz.title;
+                    
+                    let html = '';
+                    quiz.rows.forEach((row, i) => {
+                        html += '<div class=\"quiz-question mb-4 p-3 border rounded\">';
+                        html += '<h6>Question ' + (i + 1) + '</h6>';
+                        html += '<p><strong>' + escapeHtml(row.question_text || '') + '</strong></p>';
+                        html += '<p class=\"text-muted small\">Type: ' + escapeHtml(row.question_type || '') + '</p>';
+                        
+                        const qtype = (row.question_type || '').toLowerCase();
+                        if (qtype === 'multichoice' || qtype === 'mcq' || qtype === 'singlechoice') {
+                            html += '<ul class=\"list-unstyled ms-3\">';
+                            ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
+                                const optval = row['option_' + opt.toLowerCase()];
+                                if (optval) {
+                                    const correct = (row.correct_option || '').toUpperCase() === opt;
+                                    html += '<li class=\"' + (correct ? 'text-success fw-bold' : '') + '\">';
+                                    html += (correct ? '✓ ' : '○ ') + escapeHtml(optval);
+                                    html += '</li>';
+                                }
+                            });
+                            html += '</ul>';
+                        } else if (qtype === 'truefalse' || qtype === 'true_false' || qtype === 'tf') {
+                            const correct = (row.correct_option || '').toUpperCase();
+                            html += '<ul class=\"list-unstyled ms-3\">';
+                            html += '<li class=\"' + (correct === 'T' || correct === 'TRUE' ? 'text-success fw-bold' : '') + '\">';
+                            html += (correct === 'T' || correct === 'TRUE' ? '✓ ' : '○ ') + 'True</li>';
+                            html += '<li class=\"' + (correct === 'F' || correct === 'FALSE' ? 'text-success fw-bold' : '') + '\">';
+                            html += (correct === 'F' || correct === 'FALSE' ? '✓ ' : '○ ') + 'False</li>';
+                            html += '</ul>';
+                        } else {
+                            html += '<p class=\"text-success\"><strong>Correct answer:</strong> ' + escapeHtml(row.correct_option || '') + '</p>';
+                        }
+                        
+                        html += '</div>';
+                    });
+                    
+                    document.getElementById('quiz-preview-body').innerHTML = html;
+                    document.getElementById('quiz-preview-modal').style.display = 'block';
+                });
+            });
+            
+            document.querySelectorAll('[data-action=\"close-quiz-preview\"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.getElementById('quiz-preview-modal').style.display = 'none';
+                });
+            });
+            
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        ");
+    }
 
     echo $OUTPUT->heading(get_string('manifestyaml', 'local_sceh_importer'), 4);
     echo html_writer::tag('pre', s($preview['yaml']), ['style' => 'max-height: 420px; overflow: auto;']);
