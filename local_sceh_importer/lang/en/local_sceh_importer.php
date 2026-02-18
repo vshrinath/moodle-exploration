@@ -17,6 +17,10 @@
 $string['pluginname'] = 'SCEH package importer';
 $string['importer'] = 'SCEH package importer';
 $string['manage'] = 'Manage package imports';
+
+// Events
+$string['event_package_imported'] = 'Package imported';
+
 $string['importpage'] = 'Package import preview';
 $string['importintro'] = 'Select or create a program and course, then upload a package zip to generate and validate a draft manifest.';
 $string['validatezip'] = 'Validate ZIP file';

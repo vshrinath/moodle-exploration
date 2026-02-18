@@ -19,6 +19,14 @@ require_once($CFG->dirroot . '/course/lib.php');
 
 use local_sceh_importer\local\import_executor;
 
+// File upload constants
+if (!defined('LOCAL_SCEH_IMPORTER_MAX_FILE_SIZE')) {
+    define('LOCAL_SCEH_IMPORTER_MAX_FILE_SIZE', 100 * 1024 * 1024); // 100MB
+}
+if (!defined('LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT')) {
+    define('LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT', 30 * MINSECS); // 30 minutes
+}
+
 require_login();
 
 $systemcontext = context_system::instance();
@@ -60,8 +68,7 @@ if ($confirm && confirm_sesskey()) {
     }
     
     // Check session expiration (30 minutes)
-    $sessiontimeout = 30 * 60;
-    if ((time() - (int)$savedpreview['time']) > $sessiontimeout) {
+    if ((time() - (int)$savedpreview['time']) > LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT) {
         unset($SESSION->$previewkey);
         throw new moodle_exception('error_importexpired', 'local_sceh_importer');
     }
@@ -150,16 +157,35 @@ if ($data = $mform->get_data()) {
     $filename = $uploadedfile->get_filename();
     $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     
-    // Validate file type based on module type
+    // Validate file extension
     $allowedextensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'mp4', 'mov', 'mp3', 'wav', 'csv'];
     if (!in_array($extension, $allowedextensions, true)) {
         throw new moodle_exception('error_invalidfiletype', 'local_sceh_importer', '', $extension);
     }
     
+    // Validate MIME type
+    $mimetype = $uploadedfile->get_mimetype();
+    $allowedmimetypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/plain',
+        'video/mp4',
+        'video/quicktime',
+        'audio/mpeg',
+        'audio/wav',
+        'text/csv',
+        'application/vnd.ms-excel',
+    ];
+    if (!in_array($mimetype, $allowedmimetypes, true)) {
+        throw new moodle_exception('error_invalidmimetype', 'local_sceh_importer', '', $mimetype);
+    }
+    
     // Validate file size (max 100MB)
-    $maxsize = 100 * 1024 * 1024;
-    if ($uploadedfile->get_filesize() > $maxsize) {
-        throw new moodle_exception('error_filetoobig', 'local_sceh_importer', '', display_size($maxsize));
+    if ($uploadedfile->get_filesize() > LOCAL_SCEH_IMPORTER_MAX_FILE_SIZE) {
+        throw new moodle_exception('error_filetoobig', 'local_sceh_importer', '', display_size(LOCAL_SCEH_IMPORTER_MAX_FILE_SIZE));
     }
     
     $preview = [

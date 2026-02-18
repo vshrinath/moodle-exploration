@@ -49,7 +49,6 @@ class rules_table_renderer {
             $deleteurl = new \moodle_url('/local/sceh_rules/' . $list_page, [
                 'action' => 'delete',
                 'id' => $rule->id,
-                'sesskey' => sesskey()
             ]);
 
             $enabled = !empty($rule->enabled);
@@ -93,9 +92,8 @@ class rules_table_renderer {
                         'text' => get_string('delete'),
                         'url' => $deleteurl,
                         'style' => 'danger',
-                        'attributes' => [
-                            'onclick' => 'return confirm("' . get_string('confirmruledeletion', 'local_sceh_rules') . '");',
-                        ],
+                        'method' => 'post',
+                        'confirm' => get_string('confirmruledeletion', 'local_sceh_rules'),
                     ],
                 ],
             ]);
@@ -127,7 +125,6 @@ class rules_table_renderer {
             $deleteurl = new \moodle_url('/local/sceh_rules/' . $list_page, [
                 'action' => 'delete',
                 'id' => $rule->id,
-                'sesskey' => sesskey()
             ]);
 
             $enabled = !empty($rule->enabled);
@@ -172,9 +169,8 @@ class rules_table_renderer {
                         'text' => get_string('delete'),
                         'url' => $deleteurl,
                         'style' => 'danger',
-                        'attributes' => [
-                            'onclick' => 'return confirm("' . get_string('confirmruledeletion', 'local_sceh_rules') . '");',
-                        ],
+                        'method' => 'post',
+                        'confirm' => get_string('confirmruledeletion', 'local_sceh_rules'),
                     ],
                 ],
             ]);

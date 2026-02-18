@@ -23,6 +23,11 @@ use local_sceh_importer\local\manifest_builder;
 use local_sceh_importer\local\package_scanner;
 use local_sceh_importer\local\quiz_sheet_parser;
 
+// Import session timeout constant
+if (!defined('LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT')) {
+    define('LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT', 30 * MINSECS); // 30 minutes
+}
+
 require_login();
 
 $systemcontext = context_system::instance();
@@ -105,6 +110,13 @@ if (optional_param('doimport', 0, PARAM_BOOL)) {
         if (!empty($savedpreview['errors'])) {
             throw new moodle_exception('error_importvalidation', 'local_sceh_importer');
         }
+        
+        // Check session expiration (30 minutes)
+        if ((time() - (int)($savedpreview['time'] ?? 0)) > LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT) {
+            unset($SESSION->$previewkey);
+            throw new moodle_exception('error_importexpired', 'local_sceh_importer');
+        }
+        
         if (!is_dir((string)$savedpreview['extractdir'])) {
             throw new moodle_exception('error_importexpired', 'local_sceh_importer');
         }

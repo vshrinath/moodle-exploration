@@ -4,6 +4,38 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Security and Reliability Improvements
+
+### What changed
+- Added MIME type validation to file uploads in addition to extension checking
+- Standardized configuration path detection across all CLI scripts using centralized helper
+- Added session timeout validation (30 minutes) to import preview workflow
+- Improved temporary file cleanup with proper error handling and race condition prevention
+- Enhanced error handling in badge configuration script with better debugging output
+- Fixed CSRF vulnerability in rule deletion by using POST forms instead of GET links
+- Added capability re-checks in workflow queue for defense-in-depth security
+- Replaced magic numbers with named constants for better maintainability
+- Added audit logging for package imports using Moodle event system
+- Automatic cleanup of temporary files after successful import
+
+### Why
+These changes improve security by preventing file type spoofing attacks, CSRF attacks, and ensuring proper authorization checks. They increase reliability by handling edge cases in file operations and providing audit trails for compliance. The system is now more maintainable with centralized configuration logic and named constants.
+
+### Files touched
+- `scripts/lib/config_helper.php` — New centralized config path helper
+- `scripts/config/configure_badge_system.php` — Uses new config helper, improved error handling
+- `local_sceh_importer/update_file.php` — Added MIME type validation, named constants
+- `local_sceh_importer/index.php` — Added session timeout check, named constants
+- `local_sceh_importer/classes/local/package_scanner.php` — Improved temp file handling with cleanup
+- `local_sceh_importer/classes/local/import_executor.php` — Added audit event and temp cleanup
+- `local_sceh_importer/classes/event/package_imported.php` — New audit event for imports
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added event language string
+- `local_sceh_rules/classes/output/sceh_card.php` — Added POST form support for buttons
+- `local_sceh_rules/classes/helper/rules_table_renderer.php` — Delete actions now use POST with CSRF protection
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added capability re-checks in workflow queue
+
+---
+
 ## [2026-02-18] — Add quiz preview in import workflow
 
 **Commit**: `PENDING` on branch `front-end-explorations`

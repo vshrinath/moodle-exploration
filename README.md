@@ -91,6 +91,20 @@ This project uses environment variables for sensitive configuration. See [docs/D
 - Never commit `.env` file to version control
 - Use `./scripts/generate-env.sh` to create secure passwords
 
+### Recent Security Improvements (2026-02-18)
+
+All critical and high severity security issues have been addressed:
+
+- **CSRF Protection**: POST forms with sesskey validation for destructive operations
+- **Input Validation**: MIME type validation for file uploads (extension + content type)
+- **Session Security**: 30-minute timeout for import preview workflows
+- **Audit Logging**: Moodle event system tracks all package imports
+- **Temp File Cleanup**: Automatic cleanup after successful imports
+- **Error Handling**: Comprehensive exception handling with Throwable catch
+- **Config Security**: Centralized config helper with fallback paths
+
+See [CHECKPOINT_14_VALIDATION_COMPLETE.md](CHECKPOINT_14_VALIDATION_COMPLETE.md) for validation details.
+
 ## Development
 
 ### Running Tests

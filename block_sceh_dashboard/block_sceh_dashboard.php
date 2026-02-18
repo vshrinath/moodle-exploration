@@ -108,6 +108,8 @@ class block_sceh_dashboard extends block_base {
      */
     private function get_workflow_queue_items($userid) {
         $context = context_system::instance();
+        
+        // Re-verify capabilities for defense-in-depth
         $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
         $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
         $is_trainer = has_capability('local/sceh_rules:trainer', $context);

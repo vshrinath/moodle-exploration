@@ -241,6 +241,7 @@ class sceh_card {
      * @param string $text
      * @param \moodle_url $url
      * @param string $style
+     * @param array $attributes Additional attributes (can include 'method' => 'post', 'confirm' => 'message')
      * @return string
      */
     private static function render_button(
@@ -249,7 +250,48 @@ class sceh_card {
         string $style = 'primary',
         array $attributes = []
     ): string {
+        $method = $attributes['method'] ?? 'get';
+        $confirm = $attributes['confirm'] ?? '';
+        unset($attributes['method'], $attributes['confirm']);
+        
+        if ($method === 'post') {
+            // Use POST form for CSRF protection
+            $formid = 'sceh-form-' . uniqid();
+            $attributes['class'] = trim(($attributes['class'] ?? '') . ' btn btn-' . $style);
+            $attributes['type'] = 'submit';
+            $attributes['form'] = $formid;
+            if ($confirm !== '') {
+                $attributes['onclick'] = 'return confirm(' . json_encode($confirm) . ');';
+            }
+            
+            $form = \html_writer::start_tag('form', [
+                'id' => $formid,
+                'method' => 'post',
+                'action' => $url->out_omit_querystring(),
+                'style' => 'display:inline;',
+            ]);
+            foreach ($url->params() as $key => $value) {
+                $form .= \html_writer::empty_tag('input', [
+                    'type' => 'hidden',
+                    'name' => $key,
+                    'value' => $value,
+                ]);
+            }
+            $form .= \html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => 'sesskey',
+                'value' => sesskey(),
+            ]);
+            $form .= \html_writer::end_tag('form');
+            
+            return $form . \html_writer::tag('button', $text, $attributes);
+        }
+        
+        // GET link (default)
         $attributes['class'] = trim(($attributes['class'] ?? '') . ' btn btn-' . $style);
+        if ($confirm !== '') {
+            $attributes['onclick'] = 'return confirm(' . json_encode($confirm) . ');';
+        }
         return \html_writer::link($url, $text, $attributes);
     }
 

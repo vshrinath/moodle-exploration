@@ -128,8 +128,50 @@ class import_executor {
         }
 
         rebuild_course_cache($courseid, true);
+        
+        // Trigger audit event
+        $event = \local_sceh_importer\event\package_imported::create([
+            'context' => \context_course::instance($courseid),
+            'courseid' => $courseid,
+            'userid' => $userid,
+            'other' => [
+                'created_count' => count($result['created']),
+                'replaced_count' => count($result['replaced']),
+                'skipped_count' => count($result['skipped']),
+                'program_idnumber' => $manifest['program_idnumber'] ?? '',
+            ],
+        ]);
+        $event->trigger();
+        
+        // Clean up temporary extraction directory
+        $this->cleanup_temp_directory($extractdir);
 
         return $result;
+    }
+    
+    /**
+     * Clean up temporary directory after import
+     *
+     * @param string $extractdir Path to extraction directory
+     * @return void
+     */
+    private function cleanup_temp_directory(string $extractdir): void {
+        if (empty($extractdir) || !is_dir($extractdir)) {
+            return;
+        }
+        
+        // Only clean up if it's in the temp directory
+        global $CFG;
+        $tempbase = $CFG->dataroot . '/temp/local_sceh_importer/';
+        if (strpos($extractdir, $tempbase) !== 0) {
+            return;
+        }
+        
+        // Remove the entire user temp directory (includes extract dir and zip)
+        $usertempdir = dirname(dirname($extractdir));
+        if (is_dir($usertempdir) && strpos($usertempdir, $tempbase) === 0) {
+            remove_dir($usertempdir);
+        }
     }
 
     /**

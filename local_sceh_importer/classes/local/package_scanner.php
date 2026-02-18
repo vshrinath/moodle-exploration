@@ -59,8 +59,8 @@ class package_scanner {
             throw new \moodle_exception('error_invalidzip', 'local_sceh_importer');
         }
 
-        $tempbase = $CFG->dataroot . '/temp/local_sceh_importer/' . $userid . '/' . time() . '-' . random_int(1000, 9999);
-        if (!check_dir_exists($tempbase, true, true)) {
+        $tempbase = make_unique_writable_directory($CFG->dataroot . '/temp/local_sceh_importer/' . $userid);
+        if (!$tempbase) {
             throw new \moodle_exception('error_extract', 'local_sceh_importer');
         }
 
@@ -69,21 +69,37 @@ class package_scanner {
 
         $zip = new \ZipArchive();
         if ($zip->open($zippath) !== true) {
+            $this->cleanup_temp_directory($tempbase);
             throw new \moodle_exception('error_zipopen', 'local_sceh_importer');
         }
 
         $extractdir = $tempbase . '/extract';
         if (!check_dir_exists($extractdir, true, true)) {
+            $zip->close();
+            $this->cleanup_temp_directory($tempbase);
             throw new \moodle_exception('error_extract', 'local_sceh_importer');
         }
 
         if (!$zip->extractTo($extractdir)) {
             $zip->close();
+            $this->cleanup_temp_directory($tempbase);
             throw new \moodle_exception('error_extract', 'local_sceh_importer');
         }
         $zip->close();
 
         return $extractdir;
+    }
+    
+    /**
+     * Clean up temporary directory
+     *
+     * @param string $directory
+     * @return void
+     */
+    private function cleanup_temp_directory(string $directory): void {
+        if (is_dir($directory)) {
+            remove_dir($directory);
+        }
     }
 
     /**
