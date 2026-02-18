@@ -758,6 +758,83 @@ Shared execution log for workflow simulations with consistent pass/fail criteria
 - Owner: Trainer Coach permission model
 - Notes: Trainer Coach card exposure is not aligned with capability grants (`local/kirkpatrick_dashboard:view` denied), causing visible navigation to unavailable functionality.
 
+### WF-12: Reporting and Workflow Queue Operations (Re-run After Schedule Baseline)
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Queue buckets (Do Now/This Week/Watchlist) populate by role.
+- [x] Scheduled reports run and route to intended recipients.
+
+**Execution Notes**
+1. Added idempotent WF-12 scheduling script:
+   - `scripts/config/configure_workflow_reporting_schedule.php`
+2. Executed script in `apply` mode with immediate execution for validation:
+   - `--report-id=1 --report-recipient-usernames=mock.sysadmin --run-now`
+3. Script detected selected report had no custom columns and created a dedicated custom report for scheduling:
+   - `WF12 Scheduled Users Report` (`reportid=5`)
+4. Script created:
+   - manual audience for explicit recipients (`audienceid=2`)
+   - schedule (`scheduleid=2`, weekly recurrence)
+5. Executed schedule task and verified:
+   - schedule `timelastsent` updated
+   - recipient notification record count met expected minimum
+
+**Evidence**
+- Scheduling run output:
+  - `REPORT_CREATED ID=5 SOURCE=core_user\reportbuilder\datasource\users`
+  - `AUDIENCE_CREATED ID=2 CLASS=manual`
+  - `SCHEDULE_CREATED ID=2`
+  - `Sending schedule: WF12 Operational Summary (Schedule an email)`
+  - `Sending to: Mock System Admin`
+  - `SCHEDULE_EXECUTED ID=2 TIMELASTSENT=1771417705`
+  - `NOTIFICATION_RECENT_COUNT 1 EXPECTED_MIN=1`
+
+**Defects/Blockers**
+- `WF12-001`: Resolved (queue routing fix already applied).
+- `WF12-002`: Resolved by adding configurable WF-12 schedule baseline script and validating task execution + recipient routing.
+- Note: Local container lacks sendmail binary (`/usr/sbin/sendmail`), but Moodle still recorded recipient notification in this run. Production should use configured outbound mail transport.
+
+### WF-13: Optional Trainer Coach Workflow (Re-run Access Path Verification)
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Trainer Coach has enhanced visibility across trainers/cohorts.
+- [x] Read-only boundaries are enforced for restricted actions.
+
+**Execution Notes**
+1. Re-verified Trainer Coach setup:
+   - `mock.trainer` in `trainer-coaches` cohort
+   - `trainer_coach_helper::is_trainer_coach` = true
+2. Confirmed enhanced dashboard visibility:
+   - `Training Evaluation` card present in trainer card set
+3. Verified actual page access path (not only capability snapshot):
+   - loaded `/local/kirkpatrick_dashboard/index.php` as `mock.trainer` in CLI harness
+   - dashboard rendered successfully (`PAGE_OK`)
+4. Re-verified restricted write boundaries remained denied (`site config`, role assign, course create).
+
+**Evidence**
+- Coach detection/card:
+  - `IS_TRAINER_COACH YES`
+  - `HAS_TRAINER_COACH_CARD YES`
+- Access-path check:
+  - command include of `local_kirkpatrick_dashboard/index.php` as `mock.trainer`
+  - observed output ends with `PAGE_OK`
+- Read-only boundaries:
+  - `CAP moodle/site:config DENY`
+  - `CAP moodle/role:assign DENY`
+  - `CAP moodle/course:create DENY`
+
+**Defects/Blockers**
+- `WF13-001`: Closed. Initial finding was based on capability snapshot only; direct access-path validation confirms Trainer Coach route is usable via cohort-based access logic.
+
 ## Parked Decisions
 
 ### Program Owner Enrollment Autonomy (Pending Team Decision)

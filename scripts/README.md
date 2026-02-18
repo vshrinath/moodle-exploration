@@ -33,6 +33,9 @@ docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/config
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health --program-owner-usernames=owner1,owner2
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/sync_program_owner_competency_roles.php --dry-run
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_reporting_schedule.php --mode=verify --report-id=1 --report-recipient-usernames=ops.admin
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_reporting_schedule.php --mode=apply --report-id=1 --report-recipient-usernames=ops.admin,ops.owner
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_reporting_schedule.php --mode=apply --report-id=1 --report-recipient-usernames=ops.admin --run-now
 ```
 
 ### Verification Scripts (verify/)

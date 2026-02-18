@@ -4,6 +4,29 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add WF-12 reporting schedule bootstrap and close WF-12/WF-13 workflow blockers
+
+### What changed
+- Added idempotent WF-12 scheduling bootstrap script:
+  - `scripts/config/configure_workflow_reporting_schedule.php`
+  - supports `verify` and `apply` modes
+  - supports explicit recipient usernames and optional `--run-now` execution check
+  - auto-creates a dedicated custom report when selected report cannot be scheduled reliably (no custom columns)
+- Updated workflow execution log with re-runs:
+  - `WF-12` moved to pass after schedule creation and task execution validation
+  - `WF-13` moved to pass after direct access-path validation for Trainer Coach dashboard
+
+### Why
+WF-12 previously depended on manual report scheduling and had no reliable bootstrap path across environments. This script provides a repeatable setup for dev/staging/prod and verifies routing behavior. WF-13 was blocked by a capability-snapshot interpretation; direct access-path validation confirms Trainer Coach flow works as intended.
+
+### Files touched
+- `scripts/config/configure_workflow_reporting_schedule.php` — New WF-12 schedule bootstrap and validation script
+- `scripts/README.md` — Added command examples for WF-12 schedule setup
+- `docs/WORKFLOW_SIMULATION_GOLDEN_TEST_SUITE.md` — Added WF-12 and WF-13 re-run pass logs
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Continue workflow simulation through WF-13 and fix Program Owner queue routing
 
 ### What changed
