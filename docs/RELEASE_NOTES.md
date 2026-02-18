@@ -4,6 +4,30 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add quiz template and auto-ignore metadata files
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added template_quiz.csv with all question types (multichoice, truefalse, shortanswer, essay)
+- Scanner now ignores README.txt, .DS_Store, Thumbs.db, desktop.ini, template_quiz.csv
+- Added template version (v1.0) to README and validation success message
+- Updated README to reference template_quiz.csv instead of inline example
+
+### Why
+Users no longer need to delete README.txt or worry about OS metadata files. Template quiz reduces CSV format errors.
+
+### Files touched
+- `local_sceh_importer/templates/course-package-template/template_quiz.csv` — Example quiz with correct headers
+- `local_sceh_importer/templates/course-package-template/README.txt` — Added version, removed delete instruction
+- `local_sceh_importer/classes/local/package_scanner.php` — Auto-ignore metadata files
+- `local_sceh_importer/index.php` — Show template version after validation
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added template version string
+- `local_sceh_importer/templates/course-package-template.zip` — Regenerated with updates
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add contextual validation errors with folder paths and inline structure help
 
 **Commit**: `PENDING` on branch `front-end-explorations`

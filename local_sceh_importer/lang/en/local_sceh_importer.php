@@ -142,3 +142,4 @@ $string['showstructurehelp'] = 'Show supported folder structures';
 $string['supportedstructures'] = 'Supported folder structures';
 $string['structurehelp_intro'] = 'Your ZIP file can use either of these structures:';
 $string['structurehelp_tips'] = 'Tips: Numbers control order. Only create folders you need. File names become activity titles.';
+$string['templateversion'] = 'ZIP validated against template v{$a}';

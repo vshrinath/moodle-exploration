@@ -476,6 +476,13 @@ class package_scanner {
     private function should_ignore_path(string $relativepath): bool {
         $normalized = str_replace('\\', '/', $relativepath);
         $parts = explode('/', $normalized);
+        $basename = basename($normalized);
+        
+        // Ignore common metadata files
+        if (in_array(strtolower($basename), ['readme.txt', '.ds_store', 'thumbs.db', 'desktop.ini', 'template_quiz.csv'], true)) {
+            return true;
+        }
+        
         foreach ($parts as $part) {
             if ($part === '' || $part === '.') {
                 continue;

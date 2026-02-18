@@ -459,6 +459,10 @@ if ($preview !== null) {
 
     if (empty($preview['errors'])) {
         echo $OUTPUT->notification(get_string('validationok', 'local_sceh_importer'), core\output\notification::NOTIFY_SUCCESS);
+        echo html_writer::tag('div', 
+            '✓ ' . get_string('templateversion', 'local_sceh_importer', '1.0'),
+            ['class' => 'text-muted small mb-2']
+        );
     } else {
         echo $OUTPUT->notification(get_string('validationfail', 'local_sceh_importer'), core\output\notification::NOTIFY_ERROR);
     }
