@@ -4,6 +4,34 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Improve Program Owner dashboard actions and accessibility styling
+
+### What changed
+- Updated Program Owner dashboard quick actions to support expandable sub-action panels for grouped workflows:
+  - `Manage Programs`
+  - `Manage Courses`
+  - `Manage Competencies`
+- Added competency sub-actions:
+  - `Add Framework`
+  - `View Frameworks`
+- Improved Program Owner role detection in theme body classes for category-scoped Program Owners.
+- Updated Program Owner dashboard styles for better usability and accessibility:
+  - removed gradient styling in Program Owner action/sub-action cards
+  - enforced high-contrast text/background combinations
+  - fixed sub-action card label wrapping by using content-width buttons
+
+### Why
+Program Owners needed clearer, task-oriented navigation without unreadable inline links, and visual treatment needed to meet accessibility expectations for contrast and readability.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added expandable sub-action behavior and competency sub-actions
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added new Program Owner action strings
+- `block_sceh_dashboard/styles.css` — Implemented accessible flat color styles and sub-action sizing/wrapping fixes
+- `theme_sceh/classes/output/core_renderer.php` — Added category-scoped Program Owner detection fallback for body class routing
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add WF-12 reporting schedule bootstrap and close WF-12/WF-13 workflow blockers
 
 ### What changed

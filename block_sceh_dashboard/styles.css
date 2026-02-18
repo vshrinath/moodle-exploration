@@ -9,6 +9,247 @@
     padding: 0 20px 20px;
 }
 
+.sceh-program-owner-dashboard {
+    padding: 0 20px 20px;
+}
+
+.sceh-po-quick-actions {
+    margin-bottom: 8px;
+}
+
+/* Program Owner quick actions: accessible flat colors (no gradients). */
+.sceh-program-owner-dashboard .sceh-card {
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.sceh-program-owner-dashboard .sceh-card-link {
+    color: #111827;
+}
+
+.sceh-program-owner-dashboard .sceh-card-icon {
+    color: #1f2937;
+}
+
+.sceh-program-owner-dashboard .sceh-card-blue {
+    background: #dbeafe;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-green {
+    background: #dcfce7;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-red {
+    background: #fee2e2;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-yellow {
+    background: #fef9c3;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-purple {
+    background: #f3e8ff;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-teal {
+    background: #ccfbf1;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-orange {
+    background: #ffedd5;
+    background-image: none !important;
+}
+
+.sceh-program-owner-dashboard .sceh-card-indigo {
+    background: #e0e7ff;
+    background-image: none !important;
+}
+
+.sceh-po-card-accordion {
+    padding: 0;
+    min-height: 180px;
+    overflow: hidden;
+}
+
+.sceh-po-card-accordion > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 24px 16px 14px;
+}
+
+.sceh-po-card-accordion > summary::-webkit-details-marker {
+    display: none;
+}
+
+.sceh-po-card-summary-inner {
+    text-align: center;
+    color: #fff;
+}
+
+.sceh-po-card-summary-inner i {
+    margin-bottom: 12px;
+    opacity: 0.95;
+}
+
+.sceh-po-card-children {
+    padding: 0 12px 14px;
+    display: grid;
+    gap: 6px;
+}
+
+.sceh-po-card-chip {
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    padding: 6px 10px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 13px;
+    text-align: center;
+}
+
+.sceh-po-card-chip:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.28);
+    text-decoration: none;
+}
+
+.sceh-po-subactions-bar {
+    margin: 6px 20px 0;
+}
+
+.sceh-po-subactions-panel {
+    display: none;
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.12);
+    padding: 14px;
+    margin-bottom: 8px;
+}
+
+.sceh-po-subactions-panel.is-open {
+    display: block;
+}
+
+.sceh-po-subactions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.sceh-po-subactions-header h5 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.sceh-po-subactions-panel-teal,
+.sceh-po-subactions-panel-green,
+.sceh-po-subactions-panel-blue,
+.sceh-po-subactions-panel-indigo,
+.sceh-po-subactions-panel-orange,
+.sceh-po-subactions-panel-red,
+.sceh-po-subactions-panel-yellow,
+.sceh-po-subactions-panel-purple {
+    background: #f8fbff;
+}
+
+.sceh-po-subactions-close {
+    border: none;
+    background: #f1f5f9;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+    line-height: 1;
+    color: #334155;
+    cursor: pointer;
+}
+
+.sceh-po-subactions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.sceh-po-subaction-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #111827;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+    width: auto;
+    min-width: max-content;
+    max-width: none;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    line-height: 1.2;
+}
+
+.sceh-po-subaction-card:hover {
+    text-decoration: none;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+}
+
+.sceh-po-subaction-card-blue {
+    background: #dbeafe;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-green {
+    background: #dcfce7;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-red {
+    background: #fee2e2;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-yellow {
+    background: #fef9c3;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-purple {
+    background: #f3e8ff;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-teal {
+    background: #ccfbf1;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-orange {
+    background: #ffedd5;
+    background-image: none !important;
+}
+
+.sceh-po-subaction-card-indigo {
+    background: #e0e7ff;
+    background-image: none !important;
+}
+
 .sceh-card {
     border-radius: 12px;
     padding: 30px 20px;

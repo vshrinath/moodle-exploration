@@ -23,6 +23,37 @@ defined('MOODLE_INTERNAL') || die();
  */
 class core_renderer extends \theme_boost\output\core_renderer {
     /**
+     * Check whether user has Program Owner assignment in any category context.
+     *
+     * @param int $userid
+     * @return bool
+     */
+    private function has_program_owner_category_assignment(int $userid): bool {
+        global $DB;
+
+        if ($userid <= 0) {
+            return false;
+        }
+
+        $sql = "SELECT 1
+                  FROM {role_assignments} ra
+                  JOIN {context} ctx
+                    ON ctx.id = ra.contextid
+                   AND ctx.contextlevel = :contextlevel
+                  JOIN {role} r
+                    ON r.id = ra.roleid
+                 WHERE ra.userid = :userid
+                   AND r.shortname IN (:shortname, :fallbackshortname)";
+
+        return $DB->record_exists_sql($sql, [
+            'contextlevel' => CONTEXT_COURSECAT,
+            'userid' => $userid,
+            'shortname' => 'sceh_program_owner',
+            'fallbackshortname' => 'programowner',
+        ]);
+    }
+
+    /**
      * Page header.
      *
      * Redirect logged-in users from site home (/) to Dashboard (/my/).
@@ -49,18 +80,24 @@ class core_renderer extends \theme_boost\output\core_renderer {
      * @return string
      */
     public function body_attributes($additionalclasses = []) {
+        global $USER;
+
         if (isloggedin() && !isguestuser()) {
             $context = \context_system::instance();
+            $userid = (int)($USER->id ?? 0);
 
             if (has_capability('local/sceh_rules:systemadmin', $context)) {
                 $additionalclasses[] = 'sceh-role-systemadmin';
-            } else if (has_capability('local/sceh_rules:programowner', $context)) {
+            } else if (
+                has_capability('local/sceh_rules:programowner', $context) ||
+                $this->has_program_owner_category_assignment($userid)
+            ) {
                 $additionalclasses[] = 'sceh-role-programowner';
             } else if (has_capability('local/sceh_rules:trainer', $context)) {
                 $additionalclasses[] = 'sceh-role-trainer';
                 if (
                     class_exists('\local_sceh_rules\helper\trainer_coach_helper') &&
-                    \local_sceh_rules\helper\trainer_coach_helper::is_trainer_coach($this->page->user->id)
+                    \local_sceh_rules\helper\trainer_coach_helper::is_trainer_coach($userid)
                 ) {
                     $additionalclasses[] = 'sceh-role-trainercoach';
                 }

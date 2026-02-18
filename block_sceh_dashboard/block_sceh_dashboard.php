@@ -19,21 +19,209 @@ class block_sceh_dashboard extends block_base {
 
         // Reuse shared card styles for workflow queue rendering.
         $PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
-        
-        // Get user role-based cards
-        $cards = $this->get_dashboard_cards();
-        
-        // Render cards
-        $this->content->text .= html_writer::start_div('sceh-dashboard-grid');
-        
-        foreach ($cards as $card) {
-            $this->content->text .= $this->render_card($card);
+
+        if ($this->is_program_owner_user((int)$USER->id)) {
+            $this->content->text .= $this->render_program_owner_dashboard((int)$USER->id);
+        } else {
+            // Get user role-based cards.
+            $cards = $this->get_dashboard_cards();
+
+            // Render cards.
+            $this->content->text .= html_writer::start_div('sceh-dashboard-grid');
+            foreach ($cards as $card) {
+                $this->content->text .= $this->render_card($card);
+            }
+            $this->content->text .= html_writer::end_div();
         }
 
-        $this->content->text .= html_writer::end_div();
         $this->content->text .= $this->render_workflow_queue($USER->id);
         
         return $this->content;
+    }
+
+    /**
+     * Check whether user should use Program Owner dashboard layout.
+     *
+     * @param int $userid
+     * @return bool
+     */
+    private function is_program_owner_user(int $userid): bool {
+        $context = context_system::instance();
+        if (has_capability('local/sceh_rules:systemadmin', $context, $userid)) {
+            return false;
+        }
+        if (has_capability('local/sceh_rules:trainer', $context, $userid)) {
+            return false;
+        }
+        if (has_capability('local/sceh_rules:programowner', $context, $userid)) {
+            return true;
+        }
+        return !empty($this->get_program_owner_categories($userid));
+    }
+
+    /**
+     * Render Program Owner dashboard sections.
+     *
+     * @param int $userid
+     * @return string
+     */
+    private function render_program_owner_dashboard(int $userid): string {
+        $actions = $this->get_program_owner_quick_actions($userid);
+        $statuscards = $this->get_program_owner_status_cards($userid);
+
+        $html = html_writer::start_div('sceh-program-owner-dashboard');
+
+        $html .= html_writer::tag('h4', get_string('poquickactions', 'block_sceh_dashboard'));
+        $html .= html_writer::start_div('sceh-dashboard-grid sceh-po-quick-actions');
+        foreach ($actions as $action) {
+            $html .= $this->render_program_owner_action($action);
+        }
+        $html .= html_writer::end_div();
+        $html .= $this->render_program_owner_subactions_bar($actions);
+
+        $html .= html_writer::tag('h4', get_string('postatusmonitoring', 'block_sceh_dashboard'), ['class' => 'mt-4']);
+        $html .= html_writer::start_div('row');
+        foreach ($statuscards as $statuscard) {
+            $items = [];
+            foreach ($statuscard['steps'] as $step) {
+                $items[] = [
+                    'icon' => 'fa-circle',
+                    'text' => $step['label'] . ': ' . $step['count'],
+                    'subtext' => $step['desc'],
+                    'actions' => [
+                        [
+                            'text' => get_string('open', 'block_sceh_dashboard'),
+                            'url' => $step['url'],
+                            'style' => 'secondary',
+                        ],
+                    ],
+                ];
+            }
+            $html .= html_writer::start_div('col-12 col-xl-6 mb-3');
+            if (class_exists('\local_sceh_rules\output\sceh_card')) {
+                $html .= \local_sceh_rules\output\sceh_card::list([
+                    'title' => $statuscard['title'],
+                    'icon' => $statuscard['icon'],
+                    'status' => $statuscard['status'],
+                    'status_text' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
+                    'count' => array_sum(array_column($statuscard['steps'], 'count')),
+                    'items' => $items,
+                    'size' => 'medium',
+                ]);
+            }
+            $html .= html_writer::end_div();
+        }
+        $html .= html_writer::end_div();
+
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Render single quick action row (accordion when sub-actions exist).
+     *
+     * @param array $action
+     * @return string
+     */
+    private function render_program_owner_action(array $action): string {
+        if (empty($action['children'])) {
+            return $this->render_card([
+                'title' => $action['title'],
+                'icon' => $action['icon'],
+                'color' => $action['color'] ?? 'blue',
+                'url' => $action['url'],
+            ]);
+        }
+
+        $actionkey = clean_param(core_text::strtolower($action['title']), PARAM_ALPHANUMEXT);
+        $html = html_writer::start_div('sceh-card sceh-card-' . ($action['color'] ?? 'indigo'));
+        $html .= html_writer::link(
+            '#',
+            html_writer::div('<i class="fa ' . $action['icon'] . ' fa-3x"></i>', 'sceh-card-icon') .
+            html_writer::div(format_string($action['title']), 'sceh-card-title'),
+            [
+                'class' => 'sceh-card-link sceh-po-open-subactions',
+                'data-action-key' => $actionkey,
+            ]
+        );
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Render inline sub-action bar for quick actions that have sub-options.
+     *
+     * @param array $actions
+     * @return string
+     */
+    private function render_program_owner_subactions_bar(array $actions): string {
+        $html = '';
+        $hasbar = false;
+
+        $html .= html_writer::start_div('sceh-po-subactions-bar', ['id' => 'sceh-po-subactions-bar']);
+        foreach ($actions as $action) {
+            if (empty($action['children'])) {
+                continue;
+            }
+            $hasbar = true;
+            $actionkey = clean_param(core_text::strtolower($action['title']), PARAM_ALPHANUMEXT);
+            $color = clean_param((string)($action['color'] ?? 'blue'), PARAM_ALPHANUMEXT);
+            $html .= html_writer::start_div('sceh-po-subactions-panel', [
+                'id' => 'sceh-po-panel-' . $actionkey,
+                'data-action-key' => $actionkey,
+                'data-color' => $color,
+                'class' => 'sceh-po-subactions-panel sceh-po-subactions-panel-' . $color,
+                'hidden' => 'hidden',
+            ]);
+            $html .= html_writer::start_div('sceh-po-subactions-header');
+            $html .= html_writer::tag('h5', format_string($action['title']));
+            $html .= html_writer::tag('button', '&times;', [
+                'type' => 'button',
+                'class' => 'sceh-po-subactions-close',
+                'data-action-key' => $actionkey,
+                'aria-label' => 'Close',
+            ]);
+            $html .= html_writer::end_div();
+            $html .= html_writer::start_div('sceh-po-subactions-grid');
+            foreach ($action['children'] as $child) {
+                $html .= html_writer::link(
+                    $child['url'],
+                    format_string($child['title']),
+                    ['class' => 'sceh-po-subaction-card sceh-po-subaction-card-' . $color]
+                );
+            }
+            $html .= html_writer::end_div();
+            $html .= html_writer::end_div();
+        }
+        $html .= html_writer::end_div();
+
+        if (!$hasbar) {
+            return $html;
+        }
+
+        $html .= html_writer::script(
+            "(function(){"
+            . "const bar=document.getElementById('sceh-po-subactions-bar');"
+            . "if(!bar){return;}"
+            . "const panels=bar.querySelectorAll('.sceh-po-subactions-panel');"
+            . "const closeAll=()=>{panels.forEach((p)=>{p.classList.remove('is-open');p.hidden=true;});};"
+            . "document.querySelectorAll('.sceh-po-open-subactions').forEach((btn)=>btn.addEventListener('click',function(e){"
+            . "e.preventDefault();"
+            . "const key=btn.dataset.actionKey;"
+            . "const target=bar.querySelector('.sceh-po-subactions-panel[data-action-key=\"'+key+'\"]');"
+            . "const isopen=target && target.classList.contains('is-open') && !target.hidden;"
+            . "closeAll();"
+            . "if(target && !isopen){target.classList.add('is-open');target.hidden=false;}"
+            . "}));"
+            . "bar.querySelectorAll('.sceh-po-subactions-close').forEach((btn)=>btn.addEventListener('click',function(){"
+            . "const key=btn.dataset.actionKey;"
+            . "const target=bar.querySelector('.sceh-po-subactions-panel[data-action-key=\"'+key+'\"]');"
+            . "if(target){target.classList.remove('is-open');target.hidden=true;}"
+            . "}));"
+            . "})();"
+        );
+
+        return $html;
     }
 
     /**
@@ -618,6 +806,480 @@ class block_sceh_dashboard extends block_base {
 
         return $pending;
     }
+
+    /**
+     * Program Owner quick actions and nested links.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_program_owner_quick_actions(int $userid): array {
+        $categoryids = $this->get_program_owner_category_ids($userid);
+        $primarycategoryid = $categoryids[0] ?? 0;
+        $courseids = $this->get_program_owner_course_ids($userid);
+        $primarycourseid = $courseids[0] ?? 0;
+        $canmanagecohorts = has_any_capability([
+            'moodle/cohort:view',
+            'moodle/cohort:manage',
+        ], context_system::instance(), $userid);
+
+        $actions = [
+            [
+                'title' => get_string('pomanageprograms', 'block_sceh_dashboard'),
+                'icon' => 'fa-layer-group',
+                'color' => 'teal',
+                'url' => new moodle_url('/course/index.php'),
+                'children' => [
+                    [
+                        'title' => get_string('poallprograms', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/course/index.php'),
+                    ],
+                    [
+                        'title' => get_string('poaddnewprogram', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/course/editcategory.php', ['parent' => $primarycategoryid]),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('pomanagecourses', 'block_sceh_dashboard'),
+                'icon' => 'fa-book-open',
+                'color' => 'indigo',
+                'url' => new moodle_url('/course/index.php'),
+                'children' => [
+                    [
+                        'title' => get_string('pocreatecourse', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/course/edit.php', ['category' => $primarycategoryid]),
+                    ],
+                    [
+                        'title' => get_string('poeditcourse', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/course/management.php', ['categoryid' => $primarycategoryid]),
+                    ],
+                    [
+                        'title' => get_string('pobulkimport', 'block_sceh_dashboard'),
+                        'url' => $primarycourseid > 0
+                            ? new moodle_url('/local/sceh_importer/index.php', ['courseid' => $primarycourseid])
+                            : new moodle_url('/local/sceh_importer/index.php'),
+                    ],
+                    [
+                        'title' => get_string('povalidatecourses', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php'),
+                    ],
+                    [
+                        'title' => get_string('popublishcourses', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/course/management.php', ['categoryid' => $primarycategoryid]),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('pomanagecompetencies', 'block_sceh_dashboard'),
+                'icon' => 'fa-sitemap',
+                'color' => 'green',
+                'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                    'pagecontextid' => context_system::instance()->id,
+                ]),
+                'children' => [
+                    [
+                        'title' => get_string('poaddframework', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                            'pagecontextid' => context_system::instance()->id,
+                            'action' => 'edit',
+                        ]),
+                    ],
+                    [
+                        'title' => get_string('poviewframeworks', 'block_sceh_dashboard'),
+                        'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                            'pagecontextid' => context_system::instance()->id,
+                        ]),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('poassigntrainers', 'block_sceh_dashboard'),
+                'icon' => 'fa-user-check',
+                'color' => 'orange',
+                'url' => $primarycourseid > 0
+                    ? new moodle_url('/enrol/users.php', ['id' => $primarycourseid])
+                    : new moodle_url('/course/index.php'),
+                'children' => [],
+            ],
+        ];
+
+        if ($canmanagecohorts) {
+            $actions[] = [
+                'title' => get_string('pomanagecohorts', 'block_sceh_dashboard'),
+                'icon' => 'fa-users',
+                'color' => 'blue',
+                'url' => new moodle_url('/cohort/index.php'),
+                'children' => [],
+            ];
+        }
+
+        return $actions;
+    }
+
+    /**
+     * Build Program Owner status/monitoring cards.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_program_owner_status_cards(int $userid): array {
+        $courseids = $this->get_program_owner_course_ids($userid);
+        $courseids = array_map('intval', $courseids);
+
+        $publishing = $this->get_program_owner_publishing_status($userid, $courseids);
+        $cohorts = $this->get_program_owner_cohort_status($courseids);
+        $learners = $this->get_program_owner_learner_status($courseids);
+        $trainers = $this->get_program_owner_trainer_status($userid, $courseids);
+        $content = $this->get_program_owner_content_pipeline_status($userid, $courseids);
+
+        return [
+            [
+                'title' => get_string('popublishing', 'block_sceh_dashboard'),
+                'icon' => 'fa-upload',
+                'status' => $publishing['status'],
+                'steps' => $publishing['steps'],
+            ],
+            [
+                'title' => get_string('pocohorts', 'block_sceh_dashboard'),
+                'icon' => 'fa-users',
+                'status' => $cohorts['status'],
+                'steps' => $cohorts['steps'],
+            ],
+            [
+                'title' => get_string('polearners', 'block_sceh_dashboard'),
+                'icon' => 'fa-user-graduate',
+                'status' => $learners['status'],
+                'steps' => $learners['steps'],
+            ],
+            [
+                'title' => get_string('potrainerassignment', 'block_sceh_dashboard'),
+                'icon' => 'fa-user-check',
+                'status' => $trainers['status'],
+                'steps' => $trainers['steps'],
+            ],
+            [
+                'title' => get_string('pocontentpipeline', 'block_sceh_dashboard'),
+                'icon' => 'fa-boxes-stacked',
+                'status' => $content['status'],
+                'steps' => $content['steps'],
+            ],
+        ];
+    }
+
+    /**
+     * Program Owner category ids.
+     *
+     * @param int $userid
+     * @return int[]
+     */
+    private function get_program_owner_category_ids(int $userid): array {
+        $categories = $this->get_program_owner_categories($userid);
+        return array_values(array_map(static function($category): int {
+            return (int)$category->id;
+        }, $categories));
+    }
+
+    /**
+     * Program Owner course ids in assigned categories.
+     *
+     * @param int $userid
+     * @return int[]
+     */
+    private function get_program_owner_course_ids(int $userid): array {
+        global $DB;
+
+        $categoryids = $this->get_program_owner_category_ids($userid);
+        if (empty($categoryids)) {
+            return [];
+        }
+
+        list($insql, $params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
+        $records = $DB->get_records_select('course', 'category ' . $insql, $params, 'id ASC', 'id');
+        return array_values(array_map(static function($record): int {
+            return (int)$record->id;
+        }, $records));
+    }
+
+    /**
+     * Build publishing status payload.
+     *
+     * @param int $userid
+     * @param int[] $courseids
+     * @return array
+     */
+    private function get_program_owner_publishing_status(int $userid, array $courseids): array {
+        global $DB;
+
+        $draft = 0;
+        $live = 0;
+        if (!empty($courseids)) {
+            list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'cid');
+            $draft = (int)$DB->count_records_select('course', 'id ' . $insql . ' AND visible = 0', $params);
+            $live = (int)$DB->count_records_select('course', 'id ' . $insql . ' AND visible = 1', $params);
+        }
+
+        $needschanges = $this->count_program_owner_stream_issues($userid);
+        $pendingapproval = max(0, $draft - $needschanges);
+        $warn = ($needschanges > 0 || $draft > 0);
+
+        $baseurl = new moodle_url('/course/index.php');
+        return [
+            'status' => $warn ? 'warning' : 'success',
+            'steps' => [
+                ['label' => get_string('postepdraft', 'block_sceh_dashboard'), 'count' => $draft, 'desc' => get_string('postepdraftdesc', 'block_sceh_dashboard'), 'url' => $baseurl],
+                ['label' => get_string('postepneedschanges', 'block_sceh_dashboard'), 'count' => $needschanges, 'desc' => get_string('postepneedschangesdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php')],
+                ['label' => get_string('posteppendingapproval', 'block_sceh_dashboard'), 'count' => $pendingapproval, 'desc' => get_string('posteppendingapprovaldesc', 'block_sceh_dashboard'), 'url' => $baseurl],
+                ['label' => get_string('posteplive', 'block_sceh_dashboard'), 'count' => $live, 'desc' => get_string('posteplivedesc', 'block_sceh_dashboard'), 'url' => $baseurl],
+            ],
+        ];
+    }
+
+    /**
+     * Build cohort readiness payload.
+     *
+     * @param int[] $courseids
+     * @return array
+     */
+    private function get_program_owner_cohort_status(array $courseids): array {
+        global $DB;
+
+        $notconfigured = 0;
+        $setupprogress = 0;
+        $ready = 0;
+        $active = 0;
+
+        if (!empty($courseids)) {
+            list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
+            $rows = $DB->get_records_sql(
+                "SELECT e.courseid, r.shortname AS roleshortname
+                   FROM {enrol} e
+                   JOIN {role} r ON r.id = e.roleid
+                  WHERE e.courseid {$insql}
+                    AND e.enrol = :enroltype
+                    AND e.status = 0",
+                $params + ['enroltype' => 'cohort']
+            );
+
+            $courseflags = [];
+            foreach ($courseids as $courseid) {
+                $courseflags[(int)$courseid] = ['student' => false, 'editingteacher' => false];
+            }
+            foreach ($rows as $row) {
+                $courseid = (int)$row->courseid;
+                if (!isset($courseflags[$courseid])) {
+                    continue;
+                }
+                if ($row->roleshortname === 'student') {
+                    $courseflags[$courseid]['student'] = true;
+                }
+                if ($row->roleshortname === 'editingteacher') {
+                    $courseflags[$courseid]['editingteacher'] = true;
+                }
+            }
+
+            $visiblerecords = $DB->get_records_list('course', 'id', $courseids, '', 'id,visible');
+            foreach ($courseflags as $courseid => $flags) {
+                $hasboth = ($flags['student'] && $flags['editingteacher']);
+                $hasany = ($flags['student'] || $flags['editingteacher']);
+                $visible = !empty($visiblerecords[$courseid]) ? (int)$visiblerecords[$courseid]->visible : 0;
+                if (!$hasany) {
+                    $notconfigured++;
+                } else if (!$hasboth) {
+                    $setupprogress++;
+                } else if ($visible === 1) {
+                    $active++;
+                } else {
+                    $ready++;
+                }
+            }
+        }
+
+        $warn = ($notconfigured > 0 || $setupprogress > 0);
+        $url = new moodle_url('/cohort/index.php');
+        return [
+            'status' => $warn ? 'warning' : 'success',
+            'steps' => [
+                ['label' => get_string('postepnotconfigured', 'block_sceh_dashboard'), 'count' => $notconfigured, 'desc' => get_string('postepnotconfigureddesc', 'block_sceh_dashboard'), 'url' => $url],
+                ['label' => get_string('postepsetupprogress', 'block_sceh_dashboard'), 'count' => $setupprogress, 'desc' => get_string('postepsetupprogressdesc', 'block_sceh_dashboard'), 'url' => $url],
+                ['label' => get_string('postepreadylaunch', 'block_sceh_dashboard'), 'count' => $ready, 'desc' => get_string('postepreadylaunchdesc', 'block_sceh_dashboard'), 'url' => $url],
+                ['label' => get_string('postepactive', 'block_sceh_dashboard'), 'count' => $active, 'desc' => get_string('postepactivedesc', 'block_sceh_dashboard'), 'url' => $url],
+            ],
+        ];
+    }
+
+    /**
+     * Build learner progression payload.
+     *
+     * @param int[] $courseids
+     * @return array
+     */
+    private function get_program_owner_learner_status(array $courseids): array {
+        global $DB;
+
+        $notstarted = 0;
+        $inprogress = 0;
+        $atrisk = 0;
+        $completed = 0;
+
+        if (!empty($courseids)) {
+            list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
+            $sql = "SELECT DISTINCT ra.userid, ctx.instanceid AS courseid
+                      FROM {role_assignments} ra
+                      JOIN {context} ctx
+                        ON ctx.id = ra.contextid
+                       AND ctx.contextlevel = :coursecontext
+                      JOIN {role} r
+                        ON r.id = ra.roleid
+                     WHERE ctx.instanceid {$insql}
+                       AND r.shortname = :studentshortname";
+            $enrolled = $DB->get_records_sql($sql, $params + [
+                'coursecontext' => CONTEXT_COURSE,
+                'studentshortname' => 'student',
+            ]);
+
+            foreach ($enrolled as $record) {
+                $cc = $DB->get_record('course_completions', [
+                    'course' => (int)$record->courseid,
+                    'userid' => (int)$record->userid,
+                ], 'id,timecompleted', IGNORE_MISSING);
+                if (!$cc) {
+                    $notstarted++;
+                    continue;
+                }
+                if (!empty($cc->timecompleted)) {
+                    $completed++;
+                    continue;
+                }
+                $inprogress++;
+
+                $lastaccess = $DB->get_field('user_lastaccess', 'timeaccess', [
+                    'courseid' => (int)$record->courseid,
+                    'userid' => (int)$record->userid,
+                ], IGNORE_MISSING);
+                if (!$lastaccess || (int)$lastaccess < (time() - (14 * DAYSECS))) {
+                    $atrisk++;
+                }
+            }
+        }
+
+        $warn = $atrisk > 0;
+        $url = new moodle_url('/local/sceh_rules/stream_progress.php');
+        return [
+            'status' => $warn ? 'warning' : 'success',
+            'steps' => [
+                ['label' => get_string('postepnotstarted', 'block_sceh_dashboard'), 'count' => $notstarted, 'desc' => get_string('postepnotstarteddesc', 'block_sceh_dashboard'), 'url' => $url],
+                ['label' => get_string('postepinprogress', 'block_sceh_dashboard'), 'count' => $inprogress, 'desc' => get_string('postepinprogressdesc', 'block_sceh_dashboard'), 'url' => $url],
+                ['label' => get_string('postepatrisk', 'block_sceh_dashboard'), 'count' => $atrisk, 'desc' => get_string('postepatriskdesc', 'block_sceh_dashboard'), 'url' => $url],
+                ['label' => get_string('postepcompleted', 'block_sceh_dashboard'), 'count' => $completed, 'desc' => get_string('postepcompleteddesc', 'block_sceh_dashboard'), 'url' => $url],
+            ],
+        ];
+    }
+
+    /**
+     * Build trainer assignment payload.
+     *
+     * @param int $userid
+     * @param int[] $courseids
+     * @return array
+     */
+    private function get_program_owner_trainer_status(int $userid, array $courseids): array {
+        global $DB;
+
+        $assigned = 0;
+        $unassigned = 0;
+        $needsreview = $this->count_trainer_ungraded_submissions($userid);
+        $ontrack = 0;
+
+        if (!empty($courseids)) {
+            list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
+            $rows = $DB->get_records_sql(
+                "SELECT DISTINCT ctx.instanceid AS courseid
+                   FROM {role_assignments} ra
+                   JOIN {context} ctx
+                     ON ctx.id = ra.contextid
+                    AND ctx.contextlevel = :coursecontext
+                   JOIN {role} r
+                     ON r.id = ra.roleid
+                  WHERE ctx.instanceid {$insql}
+                    AND r.shortname = :editingshortname",
+                $params + [
+                    'coursecontext' => CONTEXT_COURSE,
+                    'editingshortname' => 'editingteacher',
+                ]
+            );
+            $assignedcourseids = array_map(static function($row): int {
+                return (int)$row->courseid;
+            }, $rows);
+            $assigned = count($assignedcourseids);
+            $unassigned = max(0, count($courseids) - $assigned);
+            $ontrack = max(0, $assigned - min($assigned, $needsreview));
+        }
+
+        $warn = ($unassigned > 0 || $needsreview > 0);
+        $primarycourseid = $courseids[0] ?? 0;
+        return [
+            'status' => $warn ? 'warning' : 'success',
+            'steps' => [
+                ['label' => get_string('postepunassigned', 'block_sceh_dashboard'), 'count' => $unassigned, 'desc' => get_string('postepunassigneddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/course/index.php')],
+                ['label' => get_string('postepassigned', 'block_sceh_dashboard'), 'count' => $assigned, 'desc' => get_string('postepassigneddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/enrol/users.php', ['id' => $primarycourseid])],
+                ['label' => get_string('postepneedsreview', 'block_sceh_dashboard'), 'count' => $needsreview, 'desc' => get_string('postepneedsreviewdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/my/courses.php')],
+                ['label' => get_string('postepontrack', 'block_sceh_dashboard'), 'count' => $ontrack, 'desc' => get_string('postepontrackdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/my/courses.php')],
+            ],
+        ];
+    }
+
+    /**
+     * Build content pipeline payload.
+     *
+     * @param int $userid
+     * @param int[] $courseids
+     * @return array
+     */
+    private function get_program_owner_content_pipeline_status(int $userid, array $courseids): array {
+        global $DB;
+
+        $newimports = 0;
+        $needsfixed = $this->count_program_owner_stream_issues($userid);
+        $readyreview = 0;
+        $approved = 0;
+
+        if (!empty($courseids) && $DB->get_manager()->table_exists('local_sceh_importer_prog')) {
+            list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
+            $imported = $DB->get_records_sql(
+                "SELECT courseid, timemodified
+                   FROM {local_sceh_importer_prog}
+                  WHERE courseid {$insql}",
+                $params
+            );
+            foreach ($imported as $record) {
+                if ((int)$record->timemodified >= (time() - (7 * DAYSECS))) {
+                    $newimports++;
+                }
+                $course = $DB->get_record('course', ['id' => (int)$record->courseid], 'id,visible', IGNORE_MISSING);
+                if (!$course) {
+                    continue;
+                }
+                if ((int)$course->visible === 1) {
+                    $approved++;
+                } else {
+                    $readyreview++;
+                }
+            }
+        }
+
+        $warn = ($needsfixed > 0);
+        $importurl = new moodle_url('/local/sceh_importer/index.php');
+        return [
+            'status' => $warn ? 'warning' : 'success',
+            'steps' => [
+                ['label' => get_string('postepnewimports', 'block_sceh_dashboard'), 'count' => $newimports, 'desc' => get_string('postepnewimportsdesc', 'block_sceh_dashboard'), 'url' => $importurl],
+                ['label' => get_string('postepneedsfixes', 'block_sceh_dashboard'), 'count' => $needsfixed, 'desc' => get_string('postepneedsfixesdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php')],
+                ['label' => get_string('postepreadyreview', 'block_sceh_dashboard'), 'count' => $readyreview, 'desc' => get_string('postepreadyreviewdesc', 'block_sceh_dashboard'), 'url' => $importurl],
+                ['label' => get_string('postepapproved', 'block_sceh_dashboard'), 'count' => $approved, 'desc' => get_string('postepapproveddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/course/index.php')],
+            ],
+        ];
+    }
     
     private function get_dashboard_cards() {
         global $USER;
@@ -627,6 +1289,9 @@ class block_sceh_dashboard extends block_base {
         // Check user roles via local_sceh_rules capability model.
         $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
         $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
+        if (!$is_program_owner) {
+            $is_program_owner = !empty($this->get_program_owner_categories((int)$USER->id));
+        }
         $is_trainer = has_capability('local/sceh_rules:trainer', $context);
 
         if ($is_system_admin) {
