@@ -136,3 +136,5 @@ $string['replacesuccess'] = 'Successfully replaced "{$a->oldname}" with "{$a->ne
 $string['backtoupdate'] = 'Back to update page';
 $string['error_archivefailed'] = 'Could not archive the existing activity. Please try again.';
 $string['updateexisting'] = 'Update existing course';
+$string['downloadtemplate'] = 'Download folder template';
+$string['downloadtemplatehelp'] = 'Use this template to organize your files before zipping';

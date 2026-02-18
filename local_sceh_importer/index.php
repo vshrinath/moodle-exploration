@@ -416,6 +416,16 @@ foreach ($pageerrors as $pageerror) {
     echo $OUTPUT->notification($pageerror, core\output\notification::NOTIFY_ERROR);
 }
 
+echo html_writer::tag('div',
+    html_writer::tag('a', '📥 ' . get_string('downloadtemplate', 'local_sceh_importer'), [
+        'href' => new moodle_url('/local/sceh_importer/templates/course-package-template.zip'),
+        'class' => 'btn btn-sm btn-outline-secondary mb-3',
+        'download' => 'course-package-template.zip',
+    ]) . ' ' .
+    html_writer::tag('span', get_string('downloadtemplatehelp', 'local_sceh_importer'), ['class' => 'text-muted']),
+    ['class' => 'mb-3']
+);
+
 $mform->display();
 
 if ($preview !== null) {

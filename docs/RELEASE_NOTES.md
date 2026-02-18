@@ -4,6 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add downloadable folder template and hide debug details by default
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added downloadable ZIP template with empty folder structure (01. Week 1/01. Day 1/content/, quiz/, etc.)
+- Added README.txt in template explaining folder structure, quiz CSV format, and file types
+- Added download link on upload form with help text
+- Manifest YAML now hidden by default (visible under "Show debug details")
+
+### Why
+Non-tech users need a clear starting point. Empty folders prevent accidental file uploads and the README explains exactly what goes where.
+
+### Files touched
+- `local_sceh_importer/templates/course-package-template/` — Empty folder structure with README
+- `local_sceh_importer/templates/course-package-template.zip` — Downloadable template
+- `local_sceh_importer/index.php` — Added template download link
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added template strings
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add incremental update feature for targeted file replacement
 
 **Commit**: `PENDING` on branch `front-end-explorations`
