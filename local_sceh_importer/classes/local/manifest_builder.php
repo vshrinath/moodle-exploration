@@ -184,14 +184,25 @@ class manifest_builder {
         foreach ($manifest['sections'] ?? [] as $section) {
             $sectionid = (string)($section['idnumber'] ?? '');
             if ($sectionid === '') {
-                $errors[] = 'Section is missing idnumber.';
+                $errors[] = [
+                    'message' => 'Section is missing idnumber.',
+                    'type' => 'section_missing_id',
+                ];
                 continue;
             }
             if (!$this->is_valid_idnumber($sectionid)) {
-                $errors[] = 'Section idnumber has invalid format: ' . $sectionid;
+                $errors[] = [
+                    'message' => 'Section idnumber has invalid format: ' . $sectionid,
+                    'type' => 'section_invalid_id',
+                    'context' => $sectionid,
+                ];
             }
             if (isset($sectionids[$sectionid])) {
-                $errors[] = 'Duplicate section idnumber: ' . $sectionid;
+                $errors[] = [
+                    'message' => 'Duplicate section idnumber: ' . $sectionid,
+                    'type' => 'section_duplicate',
+                    'context' => $sectionid,
+                ];
                 continue;
             }
             $sectionids[$sectionid] = true;
@@ -202,82 +213,165 @@ class manifest_builder {
         foreach ($manifest['topics'] ?? [] as $topic) {
             $topicid = (string)($topic['idnumber'] ?? '');
             if ($topicid === '') {
-                $errors[] = 'Topic is missing idnumber.';
+                $errors[] = [
+                    'message' => 'Topic is missing idnumber.',
+                    'type' => 'topic_missing_id',
+                ];
                 continue;
             }
             if (isset($topicids[$topicid])) {
-                $errors[] = 'Duplicate topic idnumber: ' . $topicid;
+                $errors[] = [
+                    'message' => 'Duplicate topic idnumber: ' . $topicid,
+                    'type' => 'topic_duplicate',
+                    'context' => $topicid,
+                ];
                 continue;
             }
             if (!$this->is_valid_idnumber($topicid)) {
-                $errors[] = 'Topic idnumber has invalid format: ' . $topicid;
+                $errors[] = [
+                    'message' => 'Topic idnumber has invalid format: ' . $topicid,
+                    'type' => 'topic_invalid_id',
+                    'context' => $topicid,
+                ];
             }
             $topicsectionid = (string)($topic['section_idnumber'] ?? '');
             if ($topicsectionid === '' || !isset($sectionids[$topicsectionid])) {
-                $errors[] = 'Topic references unknown section_idnumber: ' . $topicid;
+                $errors[] = [
+                    'message' => 'Topic references unknown section_idnumber: ' . $topicid,
+                    'type' => 'topic_unknown_section',
+                    'context' => $topicid,
+                ];
             }
             $topicids[$topicid] = true;
         }
 
         foreach ($manifest['activities'] as $activity) {
             $idnumber = $activity['idnumber'] ?? '';
+            $filepath = $activity['file'] ?? $activity['quiz_source']['path'] ?? '';
+            
             if ($idnumber === '') {
-                $errors[] = 'Activity is missing idnumber.';
+                $errors[] = [
+                    'message' => 'Activity is missing idnumber.',
+                    'type' => 'activity_missing_id',
+                    'filepath' => $filepath,
+                ];
                 continue;
             }
 
             if (isset($idnumbers[$idnumber])) {
-                $errors[] = 'Duplicate activity idnumber: ' . $idnumber;
+                $errors[] = [
+                    'message' => 'Duplicate activity idnumber: ' . $idnumber,
+                    'type' => 'activity_duplicate',
+                    'context' => $idnumber,
+                    'filepath' => $filepath,
+                ];
             }
             $idnumbers[$idnumber] = true;
             if (!$this->is_valid_idnumber((string)$idnumber)) {
-                $errors[] = 'Activity idnumber has invalid format: ' . $idnumber;
+                $errors[] = [
+                    'message' => 'Activity idnumber has invalid format: ' . $idnumber,
+                    'type' => 'activity_invalid_id',
+                    'context' => $idnumber,
+                    'filepath' => $filepath,
+                ];
             }
 
             if (empty($activity['title'])) {
-                $errors[] = 'Activity is missing title: ' . $idnumber;
+                $errors[] = [
+                    'message' => 'Activity is missing title: ' . $idnumber,
+                    'type' => 'activity_missing_title',
+                    'context' => $idnumber,
+                    'filepath' => $filepath,
+                ];
             }
 
             $activitysectionid = (string)($activity['section_idnumber'] ?? '');
             if ($activitysectionid === '' || !isset($sectionids[$activitysectionid])) {
-                $errors[] = 'Activity references unknown section_idnumber: ' . $idnumber;
+                $errors[] = [
+                    'message' => 'Activity references unknown section_idnumber: ' . $idnumber,
+                    'type' => 'activity_unknown_section',
+                    'context' => $idnumber,
+                    'filepath' => $filepath,
+                ];
             }
 
             if (!empty($activity['topic_idnumber']) && !isset($topicids[(string)$activity['topic_idnumber']])) {
-                $errors[] = 'Activity references unknown topic_idnumber: ' . $idnumber;
+                $errors[] = [
+                    'message' => 'Activity references unknown topic_idnumber: ' . $idnumber,
+                    'type' => 'activity_unknown_topic',
+                    'context' => $idnumber,
+                    'filepath' => $filepath,
+                ];
             }
 
             if (!empty($activity['file']) && !in_array($activity['file'], $knownfiles, true)) {
-                $errors[] = 'File not found in package: ' . $activity['file'];
+                $folderpath = dirname($activity['file']);
+                $filename = basename($activity['file']);
+                $errors[] = [
+                    'message' => 'File not found in package: ' . $activity['file'],
+                    'type' => 'file_missing',
+                    'context' => $idnumber,
+                    'filepath' => $activity['file'],
+                    'folderpath' => $folderpath,
+                    'filename' => $filename,
+                ];
             }
 
             if (!empty($activity['quiz_source']['path']) && !in_array($activity['quiz_source']['path'], $knownfiles, true)) {
-                $errors[] = 'Quiz source file not found in package: ' . $activity['quiz_source']['path'];
+                $folderpath = dirname($activity['quiz_source']['path']);
+                $filename = basename($activity['quiz_source']['path']);
+                $errors[] = [
+                    'message' => 'Quiz source file not found in package: ' . $activity['quiz_source']['path'],
+                    'type' => 'quiz_file_missing',
+                    'context' => $idnumber,
+                    'filepath' => $activity['quiz_source']['path'],
+                    'folderpath' => $folderpath,
+                    'filename' => $filename,
+                ];
             }
 
             if (($activity['type'] ?? '') === 'quiz' && (($activity['quiz_source']['format'] ?? '') === 'inline')) {
                 $inlineerrors = $this->validate_inline_quiz_rows((string)$idnumber, (array)($activity['quiz_source']['rows'] ?? []));
                 foreach ($inlineerrors as $inlineerror) {
-                    $errors[] = $inlineerror;
+                    $errors[] = [
+                        'message' => $inlineerror,
+                        'type' => 'quiz_validation',
+                        'context' => $idnumber,
+                        'filepath' => $filepath,
+                    ];
                 }
             }
 
         }
 
         if (($manifest['import']['mode'] ?? '') === 'replace' && trim((string)($manifest['change_note'] ?? '')) === '') {
-            $errors[] = 'Replace mode requires a change_note.';
+            $errors[] = [
+                'message' => 'Replace mode requires a change_note.',
+                'type' => 'missing_change_note',
+            ];
         }
 
         $courseidnumber = trim((string)($manifest['course']['idnumber'] ?? ''));
         if ($courseidnumber === '') {
-            $errors[] = 'Course idnumber is required.';
+            $errors[] = [
+                'message' => 'Course idnumber is required.',
+                'type' => 'course_missing_id',
+            ];
         } else if (!$this->is_valid_idnumber($courseidnumber)) {
-            $errors[] = 'Course idnumber has invalid format: ' . $courseidnumber;
+            $errors[] = [
+                'message' => 'Course idnumber has invalid format: ' . $courseidnumber,
+                'type' => 'course_invalid_id',
+                'context' => $courseidnumber,
+            ];
         }
 
         $programidnumber = trim((string)($manifest['program_idnumber'] ?? ''));
         if ($programidnumber !== '' && !$this->is_valid_idnumber($programidnumber)) {
-            $errors[] = 'Program ID number has invalid format: ' . $programidnumber;
+            $errors[] = [
+                'message' => 'Program ID number has invalid format: ' . $programidnumber,
+                'type' => 'program_invalid_id',
+                'context' => $programidnumber,
+            ];
         }
 
         if (trim((string)($manifest['program_idnumber'] ?? '')) === '') {

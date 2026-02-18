@@ -138,3 +138,7 @@ $string['error_archivefailed'] = 'Could not archive the existing activity. Pleas
 $string['updateexisting'] = 'Update existing course';
 $string['downloadtemplate'] = 'Download folder template';
 $string['downloadtemplatehelp'] = 'Use this template to organize your files before zipping';
+$string['showstructurehelp'] = 'Show supported folder structures';
+$string['supportedstructures'] = 'Supported folder structures';
+$string['structurehelp_intro'] = 'Your ZIP file can use either of these structures:';
+$string['structurehelp_tips'] = 'Tips: Numbers control order. Only create folders you need. File names become activity titles.';

@@ -4,6 +4,27 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add contextual validation errors with folder paths and inline structure help
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Validation errors now show folder paths and expected file types
+- Added "Fix:" hints for common errors (missing files, quiz CSVs)
+- Added collapsible "Show supported folder structures" section on upload form
+- Structured error format includes location, expected file, and actionable fix
+
+### Why
+Users need to know exactly where the problem is and how to fix it. Generic errors like "File not found" are frustrating without context.
+
+### Files touched
+- `local_sceh_importer/classes/local/manifest_builder.php` — Structured error format with folder paths
+- `local_sceh_importer/index.php` — Enhanced error display with hints, added structure preview
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added structure help strings
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add downloadable folder template and hide debug details by default
 
 **Commit**: `PENDING` on branch `front-end-explorations`

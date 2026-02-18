@@ -426,6 +426,32 @@ echo html_writer::tag('div',
     ['class' => 'mb-3']
 );
 
+echo html_writer::start_tag('details', ['class' => 'mb-3']);
+echo html_writer::tag('summary', get_string('showstructurehelp', 'local_sceh_importer'), ['class' => 'btn btn-sm btn-link']);
+echo html_writer::start_tag('div', ['class' => 'alert alert-info mt-2']);
+echo html_writer::tag('h6', get_string('supportedstructures', 'local_sceh_importer'));
+echo html_writer::tag('p', get_string('structurehelp_intro', 'local_sceh_importer'));
+echo html_writer::tag('pre', 
+    "✓ Numbered structure (recommended):\n" .
+    "  01. Week 1/\n" .
+    "    01. Day 1/\n" .
+    "      content/        (learner materials)\n" .
+    "      lesson_plan/    (trainer guides)\n" .
+    "      quiz/           (CSV files)\n" .
+    "      assignment/     (assignment files)\n" .
+    "      roleplay/       (trainer scenarios)\n" .
+    "      rubric/         (grading rubrics)\n\n" .
+    "✓ Legacy structure:\n" .
+    "  lesson_plans/\n" .
+    "  assignments/\n" .
+    "  quizzes/\n" .
+    "  roleplay/",
+    ['class' => 'bg-light p-2']
+);
+echo html_writer::tag('p', get_string('structurehelp_tips', 'local_sceh_importer'), ['class' => 'mb-0']);
+echo html_writer::end_tag('div');
+echo html_writer::end_tag('details');
+
 $mform->display();
 
 if ($preview !== null) {
@@ -438,7 +464,29 @@ if ($preview !== null) {
     }
 
     foreach ($preview['errors'] as $error) {
-        echo $OUTPUT->notification($error, core\output\notification::NOTIFY_ERROR);
+        if (is_array($error)) {
+            $errormsg = $error['message'];
+            if (!empty($error['folderpath'])) {
+                $errormsg .= html_writer::empty_tag('br') .
+                    html_writer::tag('strong', 'Location: ', ['class' => 'text-muted']) .
+                    html_writer::tag('code', s($error['folderpath'] . '/'), ['class' => 'text-muted']);
+            }
+            if (!empty($error['filename'])) {
+                $errormsg .= html_writer::empty_tag('br') .
+                    html_writer::tag('strong', 'Expected file: ', ['class' => 'text-muted']) .
+                    html_writer::tag('code', s($error['filename']), ['class' => 'text-muted']);
+            }
+            if ($error['type'] === 'file_missing') {
+                $errormsg .= html_writer::empty_tag('br') .
+                    html_writer::tag('span', 'Fix: Add a PDF, Word, PowerPoint, or media file to this folder', ['class' => 'text-info']);
+            } else if ($error['type'] === 'quiz_file_missing') {
+                $errormsg .= html_writer::empty_tag('br') .
+                    html_writer::tag('span', 'Fix: Add a CSV file with quiz questions to this folder', ['class' => 'text-info']);
+            }
+            echo $OUTPUT->notification($errormsg, core\output\notification::NOTIFY_ERROR);
+        } else {
+            echo $OUTPUT->notification($error, core\output\notification::NOTIFY_ERROR);
+        }
     }
     foreach ($preview['warnings'] as $warning) {
         echo $OUTPUT->notification($warning, core\output\notification::NOTIFY_WARNING);
