@@ -80,38 +80,12 @@ class block_sceh_dashboard extends block_base {
         $html .= $this->render_program_owner_subactions_bar($actions);
 
         $html .= html_writer::tag('h4', get_string('postatusmonitoring', 'block_sceh_dashboard'), ['class' => 'mt-4']);
-        $html .= html_writer::start_div('row');
+        $html .= html_writer::start_div('sceh-dashboard-grid sceh-po-status-grid');
         foreach ($statuscards as $statuscard) {
-            $items = [];
-            foreach ($statuscard['steps'] as $step) {
-                $items[] = [
-                    'icon' => 'fa-circle',
-                    'text' => $step['label'] . ': ' . $step['count'],
-                    'subtext' => $step['desc'],
-                    'actions' => [
-                        [
-                            'text' => get_string('open', 'block_sceh_dashboard'),
-                            'url' => $step['url'],
-                            'style' => 'secondary',
-                        ],
-                    ],
-                ];
-            }
-            $html .= html_writer::start_div('col-12 col-xl-6 mb-3');
-            if (class_exists('\local_sceh_rules\output\sceh_card')) {
-                $html .= \local_sceh_rules\output\sceh_card::list([
-                    'title' => $statuscard['title'],
-                    'icon' => $statuscard['icon'],
-                    'status' => $statuscard['status'],
-                    'status_text' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
-                    'count' => array_sum(array_column($statuscard['steps'], 'count')),
-                    'items' => $items,
-                    'size' => 'medium',
-                ]);
-            }
-            $html .= html_writer::end_div();
+            $html .= $this->render_program_owner_status_summary_card($statuscard);
         }
         $html .= html_writer::end_div();
+        $html .= $this->render_program_owner_status_panels($statuscards);
 
         $html .= html_writer::end_div();
         return $html;
@@ -146,6 +120,132 @@ class block_sceh_dashboard extends block_base {
         );
         $html .= html_writer::end_div();
         return $html;
+    }
+
+    /**
+     * Render top-level Program Owner status summary card.
+     *
+     * @param array $statuscard
+     * @return string
+     */
+    private function render_program_owner_status_summary_card(array $statuscard): string {
+        $statuskey = clean_param(core_text::strtolower($statuscard['title']), PARAM_ALPHANUMEXT);
+        $color = $this->program_owner_status_color((string)($statuscard['status'] ?? 'info'));
+        $totalcount = (int)array_sum(array_column($statuscard['steps'], 'count'));
+
+        $html = html_writer::start_div('sceh-card sceh-card-' . $color);
+        $html .= html_writer::link(
+            '#',
+            html_writer::div('<i class="fa ' . $statuscard['icon'] . ' fa-3x"></i>', 'sceh-card-icon') .
+            html_writer::div(format_string($statuscard['title']), 'sceh-card-title') .
+            html_writer::div((string)$totalcount, 'sceh-po-status-total'),
+            [
+                'class' => 'sceh-card-link sceh-po-open-status',
+                'data-status-key' => $statuskey,
+            ]
+        );
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Render inline status detail panels below status summary cards.
+     *
+     * @param array $statuscards
+     * @return string
+     */
+    private function render_program_owner_status_panels(array $statuscards): string {
+        $html = '';
+        $hasbar = false;
+
+        $html .= html_writer::start_div('sceh-po-status-bar', ['id' => 'sceh-po-status-bar']);
+        foreach ($statuscards as $statuscard) {
+            if (empty($statuscard['steps'])) {
+                continue;
+            }
+            $hasbar = true;
+            $statuskey = clean_param(core_text::strtolower($statuscard['title']), PARAM_ALPHANUMEXT);
+            $color = $this->program_owner_status_color((string)($statuscard['status'] ?? 'info'));
+            $html .= html_writer::start_div(
+                'sceh-po-status-panel sceh-po-subactions-panel sceh-po-status-panel-' . $color . ' sceh-po-subactions-panel-' . $color,
+                [
+                'id' => 'sceh-po-status-panel-' . $statuskey,
+                'data-status-key' => $statuskey,
+                'data-color' => $color,
+                'hidden' => 'hidden',
+            ]);
+            $html .= html_writer::start_div('sceh-po-status-header sceh-po-subactions-header');
+            $html .= html_writer::tag('h5', format_string($statuscard['title']));
+            $html .= html_writer::tag('button', '&times;', [
+                'type' => 'button',
+                'class' => 'sceh-po-status-close sceh-po-subactions-close',
+                'data-status-key' => $statuskey,
+                'aria-label' => 'Close',
+            ]);
+            $html .= html_writer::end_div();
+
+            $html .= html_writer::start_div('sceh-po-status-grid-steps sceh-po-subactions-grid');
+            foreach ($statuscard['steps'] as $step) {
+                $stepcontent = html_writer::div((string)((int)$step['count']), 'sceh-po-status-step-count');
+                $stepcontent .= html_writer::div(format_string($step['label']), 'sceh-po-status-step-title');
+                $html .= html_writer::link(
+                    $step['url'],
+                    $stepcontent,
+                    ['class' => 'sceh-po-status-step-card sceh-po-subaction-card sceh-po-status-step-card-' . $color . ' sceh-po-subaction-card-' . $color]
+                );
+            }
+            $html .= html_writer::end_div();
+            $html .= html_writer::end_div();
+        }
+        $html .= html_writer::end_div();
+
+        if (!$hasbar) {
+            return $html;
+        }
+
+        $html .= html_writer::script(
+            "(function(){"
+            . "const bar=document.getElementById('sceh-po-status-bar');"
+            . "if(!bar){return;}"
+            . "const panels=bar.querySelectorAll('.sceh-po-status-panel');"
+            . "const closeAll=()=>{panels.forEach((p)=>{p.classList.remove('is-open');p.hidden=true;});};"
+            . "document.querySelectorAll('.sceh-po-open-status').forEach((btn)=>btn.addEventListener('click',function(e){"
+            . "e.preventDefault();"
+            . "const key=btn.dataset.statusKey;"
+            . "const target=bar.querySelector('.sceh-po-status-panel[data-status-key=\"'+key+'\"]');"
+            . "const isopen=target && target.classList.contains('is-open') && !target.hidden;"
+            . "closeAll();"
+            . "if(target && !isopen){target.classList.add('is-open');target.hidden=false;}"
+            . "}));"
+            . "bar.querySelectorAll('.sceh-po-status-close').forEach((btn)=>btn.addEventListener('click',function(){"
+            . "const key=btn.dataset.statusKey;"
+            . "const target=bar.querySelector('.sceh-po-status-panel[data-status-key=\"'+key+'\"]');"
+            . "if(target){target.classList.remove('is-open');target.hidden=true;}"
+            . "}));"
+            . "})();"
+        );
+
+        return $html;
+    }
+
+    /**
+     * Map status value to existing accessible card color token.
+     *
+     * @param string $status
+     * @return string
+     */
+    private function program_owner_status_color(string $status): string {
+        switch ($status) {
+            case 'success':
+                return 'green';
+            case 'warning':
+                return 'orange';
+            case 'danger':
+                return 'red';
+            case 'info':
+            default:
+                return 'blue';
+        }
     }
 
     /**

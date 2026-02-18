@@ -4,6 +4,27 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Refine Program Owner Status and Monitoring interaction
+
+### What changed
+- Reworked Program Owner `Status and Monitoring` to match the quick-action interaction pattern:
+  - top-level clickable summary cards
+  - single expandable detail panel below
+- Renamed `Publishing` to `Courses/Programs` in status cards.
+- Simplified detail entries to compact KPI format (count + label only), removing long description text.
+- Improved detail-row spacing/alignment between count badge and title for better readability.
+
+### Why
+This makes status review faster and more consistent with the dashboard’s primary interaction model while reducing visual clutter in operational monitoring views.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added status summary/panel rendering and compact status detail content
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Updated status card naming (`Courses/Programs`)
+- `block_sceh_dashboard/styles.css` — Added status panel/card styling and spacing/alignment fixes
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Improve Program Owner dashboard actions and accessibility styling
 
 ### What changed

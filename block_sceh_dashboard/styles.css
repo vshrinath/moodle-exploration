@@ -123,6 +123,150 @@
     margin: 6px 20px 0;
 }
 
+.sceh-po-status-grid {
+    margin-bottom: 8px;
+}
+
+.sceh-po-status-total {
+    margin: 10px auto 0;
+    min-width: 44px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.08);
+    color: #111827;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.sceh-po-status-bar {
+    margin: 6px 20px 0;
+}
+
+.sceh-po-status-panel {
+    display: none;
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.12);
+    padding: 14px;
+    margin-bottom: 8px;
+}
+
+.sceh-po-status-panel.is-open {
+    display: block;
+}
+
+.sceh-po-status-panel-blue,
+.sceh-po-status-panel-green,
+.sceh-po-status-panel-orange,
+.sceh-po-status-panel-red {
+    background: #f8fbff;
+}
+
+.sceh-po-status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.sceh-po-status-header h5 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.sceh-po-status-close {
+    border: none;
+    background: #f1f5f9;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+    line-height: 1;
+    color: #334155;
+    cursor: pointer;
+}
+
+.sceh-po-status-grid-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.sceh-po-status-step-card {
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #111827;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 14px;
+}
+
+.sceh-po-status-step-card:hover {
+    text-decoration: none;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+}
+
+.sceh-po-status-step-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.1);
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.sceh-po-status-step-title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0;
+    margin-left: 2px;
+}
+
+.sceh-po-status-step-desc {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #334155;
+}
+
+.sceh-po-status-step-card-blue {
+    background: #dbeafe;
+    background-image: none !important;
+}
+
+.sceh-po-status-step-card-green {
+    background: #dcfce7;
+    background-image: none !important;
+}
+
+.sceh-po-status-step-card-orange {
+    background: #ffedd5;
+    background-image: none !important;
+}
+
+.sceh-po-status-step-card-red {
+    background: #fee2e2;
+    background-image: none !important;
+}
+
 .sceh-po-subactions-panel {
     display: none;
     background: #ffffff;
