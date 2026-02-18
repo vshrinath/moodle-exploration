@@ -418,3 +418,364 @@ Shared execution log for workflow simulations with consistent pass/fail criteria
 
 **Defects/Blockers**
 - None for competency creation/link flow after applying the competency role/context fix.
+
+### WF-06: Program Owner Pre-publish Validation
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass (after fix)
+
+**Pass Criteria**
+- [x] Validation catches real configuration issues.
+- [x] Clean configuration passes without false blockers.
+
+**Execution Notes**
+1. Baseline validation on course `1841` surfaced real pre-publish issues:
+   - no conditional access rules on modules
+   - no activity completion rules on modules
+   - quiz pass grade was unset (`gradepass=0`)
+2. Confirmed baseline strengths:
+   - competency links existed (`2`)
+   - badge criteria existed (`1`)
+3. Applied minimal pre-publish fixes:
+   - set stream-choice completion on view (`choice cmid=224`)
+   - set quiz completion to require pass grade (`quiz cmid=223`)
+   - set quiz availability rule requiring completed stream-choice
+   - set quiz grade pass threshold to `70`
+4. Re-ran validation and confirmed all targeted checks pass.
+
+**Evidence**
+- Baseline snapshot:
+  - `CM 223 quiz ... AVAIL=NONE`
+  - `CM 224 choice ... COMP=0 ... AVAIL=NONE`
+  - `GRADE ... pass=0.00000`
+  - `COMP_LINKS 2`
+  - `BADGE_CRITERIA_TOTAL 1`
+- Fix applied:
+  - `WF06_FIX_APPLIED COURSE=1841 QUIZ_CM=223 CHOICE_CM=224 GRADE_ITEM=318`
+- Post-fix snapshot:
+  - `CM 223 quiz COMP=2 PASSGRADE=1 AVAIL=SET`
+  - `CM 224 choice COMP=2 VIEW=1`
+  - `COUNTS AVAIL=1 COMPMODS=2`
+  - `SUMMARY COMP_LINKS=2 QUIZ_GRADEPASS=70.00000 BADGE_CRITERIA_TOTAL=1`
+
+**Defects/Blockers**
+- ID: `WF06-001`
+- Severity: High
+- Owner: Program Owner pre-publish checklist discipline
+- Notes: Validation surfaced missing conditional access/completion/grading thresholds. Resolved by applying explicit module completion + availability + grade pass rules before publish.
+
+### WF-07: Program Owner Publish Workflow
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Publish action transitions program/course to expected published state.
+- [x] Program/course is enrollment-ready for downstream workflow.
+
+**Execution Notes**
+1. Checked Program Owner publish-related capabilities on the draft course (`1841`):
+   - `moodle/course:update` = `ALLOW`
+   - `moodle/course:visibility` = `ALLOW`
+2. Baseline course state was draft-like (`visible=0`).
+3. Executed publish action as `mock.programowner` by setting course visible and saving.
+4. Verified published/readiness signals remained valid after publish.
+
+**Evidence**
+- Capability + pre-state:
+  - `COURSE_VISIBLE 0`
+  - `CAP moodle/course:update ALLOW`
+  - `CAP moodle/course:visibility ALLOW`
+- Publish action:
+  - `PUBLISH_ACTION SUCCESS COURSE=1841`
+- Post-publish readiness:
+  - `POST_PUBLISH COURSE=1841 VISIBLE=1 ENCOMP=1 COMP_LINKS=2 BADGES=1 AVAIL_RULES=1 COMP_MODULES=2`
+
+**Defects/Blockers**
+- None for WF-07 in this run.
+
+### WF-08: Sysadmin Delivery Activation
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Cohort sync enrolls correct learners/trainers.
+- [x] Enrollment updates are reflected in role/course access state.
+
+**Execution Notes**
+1. Baseline showed no cohort-sync enrollment methods on course `1841`.
+2. Created dedicated cohorts for activation:
+   - `mock-allied-learners-2026` (`id=908`)
+   - `mock-allied-trainers-2026` (`id=909`)
+3. Added members:
+   - `mock.learner` -> learners cohort
+   - `mock.trainer` -> trainers cohort
+4. Added cohort sync enrollment methods on course `1841`:
+   - enrol id `737`: learners cohort -> `student`
+   - enrol id `738`: trainers cohort -> `editingteacher`
+5. Verified resulting enrollment and course roles for trainer and learner.
+
+**Evidence**
+- Enrollment methods after activation:
+  - `ENROL 737 cohort ROLE=student COHORTID=908 STATUS=0`
+  - `ENROL 738 cohort ROLE=editingteacher COHORTID=909 STATUS=0`
+- Enrollment verification:
+  - `ENROLLED mock.trainer YES`
+  - `COURSE_ROLE editingteacher`
+  - `ENROLLED mock.learner YES`
+  - `COURSE_ROLE student`
+
+**Defects/Blockers**
+- None for WF-08 in final state.
+
+### WF-09: Trainer Execution Workflow
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass (with one risk note)
+
+**Pass Criteria**
+- [x] Trainer can mark attendance and grade submissions.
+- [x] Feedback and badge actions complete as expected.
+- [x] Cohort progress indicators update after actions.
+
+**Execution Notes**
+1. Verified trainer capabilities at course `1841`:
+   - `mod/attendance:takeattendances`, `mod/assign:grade`, `moodle/grade:edit`, `moodle/badges:awardbadge`, and `report/progress:view` were all `ALLOW`.
+2. Added missing attendance activity to course (`CMID=226`, `INSTANCE=178`) as WF-09 precondition.
+3. Marked attendance for `mock.learner` as `Present` in trainer-led session entries.
+4. Performed trainer grading + feedback update on learner quiz grade item (`itemid=318`), persisted in `grade_grades` with `usermodified=mock.trainer`.
+5. Ran badge issuance action for course badge `104`; learner has issued badge record (`badge_issued.id=58`).
+6. Verified progress delta from trainer actions via attendance-log count for learner (`before=1`, `after=2`).
+
+**Evidence**
+- Capability check output:
+  - `CAP mod/attendance:takeattendances ALLOW`
+  - `CAP mod/assign:grade ALLOW`
+  - `CAP moodle/grade:edit ALLOW`
+  - `CAP moodle/badges:awardbadge ALLOW`
+  - `CAP report/progress:view ALLOW`
+- Attendance action output:
+  - `ATTENDANCE_MARKED SESSION=1284 LOG=1284 LEARNER=mock.learner STATUS=P`
+  - `ATTENDANCE_VERIFY LOG=1284 SESSION=1284 STUDENT=2070 TAKENBY=2069`
+  - `ATTENDANCE_PROGRESS BEFORE=1 AFTER=2`
+- Grading/feedback output:
+  - `GRADE_UPDATE_RESULT 0 ITEM=318`
+  - `GRADE_VERIFY ID=176 FINAL=85.00000 RAW=85.00000 USERMOD=2069 FB=WF09 trainer feedback: good progress`
+- Badge action output:
+  - `BADGE_ISSUE_RESULT FALSE`
+  - `BADGE_ISSUED_VERIFY ID=58 BADGE=104 USER=2070`
+  - `badge_issued.dateissued=1771416668` (`2026-02-18 17:41:08 IST`)
+
+**Defects/Blockers**
+- ID: `WF09-001`
+- Severity: Medium
+- Owner: Activity creation payload defaults / module setup scripts
+- Notes: Assignment activity creation via `add_moduleinfo` failed with `Error writing to database` in this environment. WF-09 grading was validated via quiz-grade submission path; assignment-grade path still needs separate fix/validation.
+
+### WF-10: Learner Journey Workflow (Desktop + Mobile)
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Blocked (mobile/cross-device validation pending)
+
+**Pass Criteria**
+- [ ] Learner can complete onboarding, foundation, stream selection, and stream progression.
+- [ ] Same critical path works on desktop and mobile.
+- [ ] Completion/progress signals are consistent across devices.
+
+**Execution Notes**
+1. Verified learner-path controls in course `1841`:
+   - quiz (`cmid=223`) is gated by availability rules
+   - choice (`cmid=224`) has completion-on-view enabled
+2. Simulated learner stream selection:
+   - submitted choice response as `mock.learner` (`optionid=4`)
+3. Simulated learner progression signal:
+   - marked choice module as viewed (`set_module_viewed`)
+   - quiz visibility changed from not visible to visible for learner
+4. Simulated downstream progression completion updates:
+   - refreshed quiz grade/completion state
+   - verified completion rows for both choice and quiz modules
+5. Could not validate mobile execution path or desktop-vs-mobile state parity in this CLI run.
+
+**Evidence**
+- Availability before stream selection:
+  - `QUIZ_VISIBLE_BEFORE NO`
+- Learner stream selection:
+  - `CHOICE_SUBMIT OK OPTION=4`
+  - `CHOICE_RESP_COUNT 1`
+- Progression unlock and completion:
+  - `SET_MODULE_VIEWED OK` (choice `cmid=224`)
+  - `QUIZ_VISIBLE_NOW YES`
+  - `QUIZ_UPDATE_GRADES OK`
+  - `QUIZ_UPDATE_STATE OK`
+  - `CMC 224 state=1`
+  - `CMC 223 state=1`
+
+**Defects/Blockers**
+- ID: `WF10-001`
+- Severity: Medium
+- Owner: Test execution harness
+- Notes: Mobile validation is required by WF-10 criteria but is not exercisable from current CLI-only simulation flow; needs browser/device pass (responsive + mobile app/browser).
+
+- ID: `WF10-002`
+- Severity: Medium
+- Owner: Course blueprint coverage
+- Notes: Current test course contains stream-choice + quiz progression path, but explicit onboarding/foundation artifacts were not separately modeled/labeled in this run.
+
+### WF-11: Intervention Loop Workflow
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Risk condition is detected and routed to correct owner role.
+- [x] Intervention action reduces or clears risk on recheck.
+
+**Execution Notes**
+1. Used trainer queue risk signal path based on overdue calendar events.
+2. Baseline for `mock.trainer` showed no overdue events.
+3. Created a past-due user event (`WF11 Risk Overdue Event`) for trainer to simulate a real risk trigger.
+4. Verified trainer workflow queue (`Do Now`) showed `Overdue events: 1` and overdue count increased.
+5. Applied intervention by rescheduling the event into the future.
+6. Rechecked overdue count and queue item, confirming risk cleared.
+
+**Evidence**
+- Baseline:
+  - `OVERDUE_BEFORE 0`
+- Risk trigger:
+  - `RISK_EVENT_CREATED ID=1 START=1771409767`
+  - `OVERDUE_AFTER_CREATE 1`
+  - `QUEUE_ROUTE TRAINER_DO_NOW Overdue events: 1`
+- Intervention + recheck:
+  - `OVERDUE_AFTER_INTERVENTION 0`
+  - `QUEUE_RECHECK TRAINER_DO_NOW OVERDUE_ITEM_NOT_FOUND`
+
+**Defects/Blockers**
+- None for the overdue-event intervention loop in this run.
+
+### WF-12: Reporting and Workflow Queue Operations
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Fail
+
+**Pass Criteria**
+- [x] Queue buckets (Do Now/This Week/Watchlist) populate by role.
+- [ ] Scheduled reports run and route to intended recipients.
+
+**Execution Notes**
+1. Validated role-capability baselines and queue generation for all mock roles.
+2. Found and fixed a role-routing gap for Program Owner queue detection:
+   - category-scoped Program Owner users were falling back to learner queue logic.
+   - fix applied in `block_sceh_dashboard` to treat users with Program Owner category assignments as Program Owner for queue routing.
+3. Re-validated role bucket population after fix:
+   - Sysadmin, Program Owner, Trainer, and Learner each produce 3 buckets with role-appropriate item sets.
+4. Checked Moodle report schedule tables:
+   - reports exist (`mdl_reportbuilder_report` count = 4)
+   - no schedules configured (`mdl_reportbuilder_schedule` count = 0)
+5. Because no schedules exist, scheduled-report run/recipient routing could not be validated and WF-12 remains failing.
+
+**Evidence**
+- Role queue population after fix:
+  - `USER mock.sysadmin BUCKETS=3` (`Do Now=0`, `This Week=2`, `Watchlist=2`)
+  - `USER mock.programowner BUCKETS=3` (`Do Now=1`, `This Week=2`, `Watchlist=2`)
+  - `USER mock.trainer BUCKETS=3` (`Do Now=1`, `This Week=2`, `Watchlist=1`)
+  - `USER mock.learner BUCKETS=3` (`Do Now=0`, `This Week=2`, `Watchlist=1`)
+- Program Owner queue item sample after fix:
+  - `Do Now: Programs with stream setup issues: 3`
+  - `This Week: Assigned categories: 1`
+  - `Watchlist: Review competency framework`
+- Report scheduling baseline:
+  - `report_count = 4` in `mdl_reportbuilder_report`
+  - `schedule_count = 0` in `mdl_reportbuilder_schedule`
+
+**Defects/Blockers**
+- ID: `WF12-001`
+- Severity: High
+- Owner: Dashboard queue role routing
+- Notes: Program Owner queue detection relied on system-context capability only, causing category-scoped Program Owners to receive learner queue. Fixed in code during this run by adding category-assignment fallback.
+
+- ID: `WF12-002`
+- Severity: Medium
+- Owner: Reporting configuration
+- Notes: No report schedules are currently configured, so scheduled report execution and recipient routing cannot pass until at least one schedule is configured and executed.
+
+### WF-13: Optional Trainer Coach Workflow
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Fail
+
+**Pass Criteria**
+- [ ] Trainer Coach has enhanced visibility across trainers/cohorts.
+- [x] Read-only boundaries are enforced for restricted actions.
+
+**Execution Notes**
+1. Created trainer-coach cohort baseline for this workflow:
+   - created cohort `trainer-coaches` (`id=910`)
+   - added `mock.trainer` as member
+2. Verified Trainer Coach detection:
+   - `trainer_coach_helper::is_trainer_coach(mock.trainer)` returned true.
+3. Queried trainer cards as `mock.trainer` and confirmed Trainer Coach-only card appears:
+   - `Training Evaluation` card rendered.
+4. Verified restricted write boundaries for trainer:
+   - denied: `moodle/site:config`, `moodle/role:assign`, `moodle/course:create`
+5. Found access mismatch:
+   - Trainer Coach sees `Training Evaluation` card, but lacks `local/kirkpatrick_dashboard:view`, so enhanced visibility path is not actually usable.
+
+**Evidence**
+- Coach setup:
+  - `COHORT_CREATED 910`
+  - `COHORT_MEMBER_ADDED mock.trainer`
+  - `IS_TRAINER_COACH YES`
+- Card visibility:
+  - `TRAINER_CARDS 3`
+  - `CARD Training Evaluation`
+  - `HAS_TRAINER_COACH_CARD YES`
+- Capability boundaries:
+  - `CAP moodle/site:config DENY`
+  - `CAP moodle/role:assign DENY`
+  - `CAP moodle/course:create DENY`
+  - `CAP local/kirkpatrick_dashboard:view DENY`
+
+**Defects/Blockers**
+- ID: `WF13-001`
+- Severity: Medium
+- Owner: Trainer Coach permission model
+- Notes: Trainer Coach card exposure is not aligned with capability grants (`local/kirkpatrick_dashboard:view` denied), causing visible navigation to unavailable functionality.
+
+## Parked Decisions
+
+### Program Owner Enrollment Autonomy (Pending Team Decision)
+
+**Status:** Parked (no code change applied)
+
+**Question:** Should Program Owners manage enrollments directly so they do not depend on Sysadmin for cohort-based delivery activation?
+
+**Options under consideration**
+- **Option A (Safer):** Program Owners can configure course enrollment using existing cohorts only.
+  - Likely capabilities: `moodle/course:enrolconfig`, `enrol/cohort:config`, `moodle/cohort:view`, `moodle/cohort:assign`
+- **Option B (Broader):** Program Owners can fully manage cohorts and enrollments.
+  - Adds global cohort management scope via `moodle/cohort:manage` (higher risk / wider blast radius)
+
+**Implementation approach (if approved)**
+- Reuse current dependency pattern:
+  - `sceh_program_owner` auto-assigns a dedicated dependent enrollment role
+  - observer + backfill sync script (same pattern as competency dependency)
+
+**Notes**
+- Cohorts are system-level in Moodle, so scope boundaries need explicit design if Option B is chosen.

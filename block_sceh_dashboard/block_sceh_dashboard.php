@@ -112,6 +112,9 @@ class block_sceh_dashboard extends block_base {
         // Re-verify capabilities for defense-in-depth
         $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
         $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
+        if (!$is_program_owner) {
+            $is_program_owner = !empty($this->get_program_owner_categories($userid));
+        }
         $is_trainer = has_capability('local/sceh_rules:trainer', $context);
 
         if ($is_system_admin) {

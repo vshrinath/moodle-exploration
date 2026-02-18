@@ -4,6 +4,26 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Continue workflow simulation through WF-13 and fix Program Owner queue routing
+
+### What changed
+- Executed and logged workflow simulations from `WF-06` through `WF-13` in the golden suite with pass/fail/blocked outcomes and command-level evidence.
+- Fixed dashboard workflow queue role routing so category-scoped Program Owners are detected as Program Owners (not incorrectly routed to learner queue).
+- Captured newly discovered gaps during simulation:
+  - `WF-10` mobile/cross-device learner-path validation still pending
+  - `WF-12` scheduled reporting cannot be validated because no report schedules are configured
+  - `WF-13` Trainer Coach card is visible but linked capability is not granted
+
+### Why
+This keeps the workflow validation program moving with reproducible evidence while fixing a real role-routing defect that would misclassify Program Owner operational work. It also leaves a clear defect trail for remaining environment/config gaps before staging/production validation.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Added Program Owner category-assignment fallback in workflow queue role detection
+- `docs/WORKFLOW_SIMULATION_GOLDEN_TEST_SUITE.md` — Logged WF-06 through WF-13 runs, outcomes, and blockers
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Automate Program Owner competency role dependency
 
 ### What changed
