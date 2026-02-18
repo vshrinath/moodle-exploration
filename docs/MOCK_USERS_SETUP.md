@@ -33,11 +33,18 @@ Apply real-environment role/capability baseline (no mock users/cohorts):
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health
 ```
 
+Apply real-environment baseline and assign specific Program Owners:
+
+```bash
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health --program-owner-usernames=owner1,owner2
+```
+
 Notes:
 - `--mode=verify-real-env` is verify-only and skips mock-user/cohort mutations.
 - `--mode=apply-real-env` applies only role/capability baseline and cache purge.
 - `--dry-run` prints intended actions without applying changes.
 - `--category-idnumber` is required in real-environment modes.
+- `--program-owner-usernames` (optional in real-environment modes) assigns category-scoped `sceh_program_owner` and system-scoped `sceh_program_owner_competency`.
 
 ## Current Mock Users
 

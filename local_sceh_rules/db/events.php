@@ -29,4 +29,12 @@ $observers = [
         'eventname' => '\mod_scheduler\event\appointment_added',
         'callback' => '\local_sceh_rules\observer\roster_observer::roster_completed',
     ],
+    [
+        'eventname' => '\core\event\role_assigned',
+        'callback' => '\local_sceh_rules\observer\program_owner_role_observer::role_assigned',
+    ],
+    [
+        'eventname' => '\core\event\role_unassigned',
+        'callback' => '\local_sceh_rules\observer\program_owner_role_observer::role_unassigned',
+    ],
 ];

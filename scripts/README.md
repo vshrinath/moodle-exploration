@@ -31,6 +31,8 @@ Example (workflow simulation baseline):
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=verify-real-env --dry-run --category-idnumber=allied-health
 docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health --program-owner-usernames=owner1,owner2
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/sync_program_owner_competency_roles.php --dry-run
 ```
 
 ### Verification Scripts (verify/)

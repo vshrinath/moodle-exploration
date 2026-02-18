@@ -10,7 +10,7 @@
  * - Ensures Program Owner can review/manage course + quiz content
  *
  * Usage:
- *   php scripts/config/configure_workflow_simulation_baseline.php [--mode=local|verify-real-env|apply-real-env|prod] [--dry-run] [--category-idnumber=<id>]
+ *   php scripts/config/configure_workflow_simulation_baseline.php [--mode=local|verify-real-env|apply-real-env|prod] [--dry-run] [--category-idnumber=<id>] [--program-owner-usernames=<u1,u2,...>]
  */
 
 define('CLI_SCRIPT', true);
@@ -29,6 +29,7 @@ init_cli_admin('moodle/site:config');
 $mode = 'local';
 $dryrun = false;
 $categoryidnumber = null;
+$programownerusernames = [];
 foreach ($argv as $arg) {
     if (strpos($arg, '--mode=') === 0) {
         $mode = substr($arg, 7);
@@ -38,6 +39,12 @@ foreach ($argv as $arg) {
     }
     if (strpos($arg, '--category-idnumber=') === 0) {
         $categoryidnumber = substr($arg, 20);
+    }
+    if (strpos($arg, '--program-owner-usernames=') === 0) {
+        $raw = trim(substr($arg, 27));
+        if ($raw !== '') {
+            $programownerusernames = array_values(array_filter(array_map('trim', explode(',', $raw))));
+        }
     }
 }
 
@@ -91,6 +98,29 @@ function get_role_id_by_shortname(string $shortname): int {
     global $DB;
     $role = $DB->get_record('role', ['shortname' => $shortname], 'id,shortname', MUST_EXIST);
     return (int)$role->id;
+}
+
+/**
+ * Ensure role exists by shortname, create if missing.
+ */
+function ensure_role_exists(string $shortname, string $name, string $description, string $archetype = 'manager'): int {
+    global $DB;
+    $role = $DB->get_record('role', ['shortname' => $shortname], 'id,shortname', IGNORE_MISSING);
+    if ($role) {
+        echo "ROLE_EXISTS\t{$shortname}\tID={$role->id}\n";
+        return (int)$role->id;
+    }
+
+    apply_change("CREATE_ROLE {$shortname}", function() use ($name, $shortname, $description, $archetype): void {
+        create_role($name, $shortname, $description, $archetype);
+    });
+
+    $created = $DB->get_record('role', ['shortname' => $shortname], 'id,shortname', IGNORE_MISSING);
+    if (!$created) {
+        throw new RuntimeException("Required role missing: {$shortname}");
+    }
+    echo "ROLE_CREATED\t{$shortname}\tID={$created->id}\n";
+    return (int)$created->id;
 }
 
 /**
@@ -258,6 +288,12 @@ $role_sysadmin = get_role_id_by_shortname('sceh_system_admin');
 $role_program_owner = get_role_id_by_shortname('sceh_program_owner');
 $role_trainer = get_role_id_by_shortname('sceh_trainer');
 $role_student = get_role_id_by_shortname('student');
+$role_program_owner_competency = ensure_role_exists(
+    'sceh_program_owner_competency',
+    'SCEH Program Owner Competency',
+    'Narrow competency management role for program owners',
+    'manager'
+);
 
 $userspecs = [
     [
@@ -299,6 +335,7 @@ if ($mode === 'local') {
     ensure_role_assignment((int)$users['mock.sysadmin']->id, $role_sysadmin, $sysctx->id);
     ensure_role_assignment((int)$users['mock.trainer']->id, $role_trainer, $sysctx->id);
     ensure_role_assignment((int)$users['mock.learner']->id, $role_student, $sysctx->id);
+    ensure_role_assignment((int)$users['mock.programowner']->id, $role_program_owner_competency, $sysctx->id);
 } else {
     // Explicitly block mock account writes in real environment modes.
     echo "VERIFY_ONLY\tSkipping all mock-user and mock-cohort mutations in real environment modes\n";
@@ -321,7 +358,19 @@ if ($mode === 'local') {
     ensure_role_unassigned((int)$users['mock.programowner']->id, $role_program_owner, $sysctx->id);
     ensure_role_assignment((int)$users['mock.programowner']->id, $role_program_owner, $targetctx->id);
 } else {
-    echo "VERIFY_ONLY\tProgram Owner role scoping for real users is not auto-mutated by this script\n";
+    if (empty($programownerusernames)) {
+        echo "VERIFY_ONLY\tNo --program-owner-usernames provided; skipping real user assignment updates\n";
+    } else {
+        foreach ($programownerusernames as $username) {
+            if (strpos($username, 'mock.') === 0) {
+                throw new RuntimeException("Mock username '{$username}' is not allowed in real environment modes");
+            }
+            $user = $DB->get_record('user', ['username' => $username, 'deleted' => 0], 'id,username', MUST_EXIST);
+            ensure_role_assignment((int)$user->id, $role_program_owner, $targetctx->id);
+            ensure_role_assignment((int)$user->id, $role_program_owner_competency, $sysctx->id);
+            echo "REAL_USER_ASSIGNMENT_OK\t{$user->username}\n";
+        }
+    }
 }
 
 // 3) WF-04 capability baseline for Program Owner role.
@@ -336,6 +385,16 @@ $program_owner_caps = [
 ];
 foreach ($program_owner_caps as $cap) {
     ensure_capability_allow($role_program_owner, $sysctx->id, $cap);
+}
+
+$program_owner_comp_caps = [
+    'moodle/competency:competencymanage',
+    'moodle/competency:competencyview',
+    'moodle/competency:coursecompetencymanage',
+    'moodle/competency:coursecompetencyconfigure',
+];
+foreach ($program_owner_comp_caps as $cap) {
+    ensure_capability_allow($role_program_owner_competency, $sysctx->id, $cap);
 }
 
 // 4) Cohort baseline for WF-02.

@@ -4,6 +4,34 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Automate Program Owner competency role dependency
+
+### What changed
+- Added automatic role dependency handling in `local_sceh_rules`:
+  - assigning `sceh_program_owner` auto-assigns `sceh_program_owner_competency` at system context
+  - unassigning `sceh_program_owner` removes managed competency role only when no Program Owner assignments remain
+- Added observer registration for:
+  - `\core\event\role_assigned`
+  - `\core\event\role_unassigned`
+- Added backfill/sync script:
+  - `scripts/config/sync_program_owner_competency_roles.php`
+  - supports `--dry-run` for safe verification
+- Extended baseline setup docs/scripts to support real-environment Program Owner assignment and dependency setup.
+
+### Why
+This removes manual two-role assignment overhead for Sysadmins while preserving least-privilege boundaries. Program Owners can manage competencies without broadening category governance permissions.
+
+### Files touched
+- `local_sceh_rules/db/events.php` — Registered role assignment/unassignment observers
+- `local_sceh_rules/classes/observer/program_owner_role_observer.php` — New dependency automation logic
+- `scripts/config/sync_program_owner_competency_roles.php` — New backfill/sync utility
+- `scripts/config/configure_workflow_simulation_baseline.php` — Real-environment role assignment support
+- `docs/MOCK_USERS_SETUP.md` — Added real-environment assignment instructions
+- `scripts/README.md` — Added sync script usage
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add mode-safe workflow baseline setup for local and real environments
 
 ### What changed
