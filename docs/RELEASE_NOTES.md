@@ -4,6 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add workflow simulation checklist and golden test suite logs
+
+### What changed
+- Added a workflow simulation sequence document to define execution order from `WF-01` to `WF-13`
+- Added a reusable pass/fail checklist template for each workflow run
+- Added a separate golden test suite log file for cross-tester sharing
+- Logged executed runs for `WF-01` to `WF-04` with evidence, outcomes, and defect tracking
+- Recorded and validated fixes for:
+  - missing mock user `idnumber` values and explicit learner assignment
+  - Program Owner over-permission at system context (category isolation defect)
+  - Program Owner missing course/quiz review and quiz creation capabilities
+
+### Why
+This creates a single, shareable test baseline for workflow validation. It improves repeatability across testers, makes failures auditable, and allows incremental remediation while preserving run history.
+
+### Files touched
+- `docs/WORKFLOW_SIMULATION_CHECKLIST.md` — Workflow sequence and pass/fail criteria template
+- `docs/WORKFLOW_SIMULATION_GOLDEN_TEST_SUITE.md` — Golden execution log with run evidence and defect outcomes
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Security and Reliability Improvements
 
 ### What changed
