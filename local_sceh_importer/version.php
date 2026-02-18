@@ -20,4 +20,7 @@ $plugin->component = 'local_sceh_importer';
 $plugin->version = 2026021701;
 $plugin->requires = 2024051700; // Moodle 5.1.
 $plugin->maturity = MATURITY_ALPHA;
+
+// Template version for support troubleshooting
+define('LOCAL_SCEH_IMPORTER_TEMPLATE_VERSION', '1.0');
 $plugin->release = '0.1.0';

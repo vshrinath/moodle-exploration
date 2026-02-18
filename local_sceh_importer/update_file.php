@@ -59,6 +59,13 @@ if ($confirm && confirm_sesskey()) {
         throw new moodle_exception('error_importexpired', 'local_sceh_importer');
     }
     
+    // Check session expiration (30 minutes)
+    $sessiontimeout = 30 * 60;
+    if ((time() - (int)$savedpreview['time']) > $sessiontimeout) {
+        unset($SESSION->$previewkey);
+        throw new moodle_exception('error_importexpired', 'local_sceh_importer');
+    }
+    
     try {
         $executor = new import_executor();
         $versionedidnumber = $cm->idnumber . '-V' . time();
@@ -133,6 +140,21 @@ if ($data = $mform->get_data()) {
     }
     
     $uploadedfile = reset($draftfiles);
+    $filename = $uploadedfile->get_filename();
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    
+    // Validate file type based on module type
+    $allowedextensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'mp4', 'mov', 'mp3', 'wav'];
+    if (!in_array($extension, $allowedextensions, true)) {
+        throw new moodle_exception('error_invalidfiletype', 'local_sceh_importer', '', $extension);
+    }
+    
+    // Validate file size (max 100MB)
+    $maxsize = 100 * 1024 * 1024;
+    if ($uploadedfile->get_filesize() > $maxsize) {
+        throw new moodle_exception('error_filetoobig', 'local_sceh_importer', '', display_size($maxsize));
+    }
+    
     $preview = [
         'filename' => $uploadedfile->get_filename(),
         'filesize' => display_size($uploadedfile->get_filesize()),

@@ -4,6 +4,31 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Fix critical security and validation issues
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added file type validation (PDF, Word, PowerPoint, media only) with 100MB size limit
+- Added 30-minute session expiration for file replacement previews
+- Added course-level permission check (moodle/course:update) in update page
+- Fixed backward compatibility for validation errors (handles both array and string formats)
+- Extracted template version to constant in version.php
+- Added error messages for invalid file types and oversized files
+
+### Why
+Security hardening: prevent malicious file uploads, enforce proper permissions, prevent session hijacking. Backward compatibility ensures existing code doesn't break.
+
+### Files touched
+- `local_sceh_importer/update_file.php` — File type validation, size limit, session expiration
+- `local_sceh_importer/update.php` — Course-level permission check
+- `local_sceh_importer/index.php` — Backward compatible error display, use version constant
+- `local_sceh_importer/version.php` — Added template version constant
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added error strings
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add quiz template and auto-ignore metadata files
 
 **Commit**: `PENDING` on branch `front-end-explorations`

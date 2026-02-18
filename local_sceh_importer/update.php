@@ -65,6 +65,9 @@ if (empty($courseid) || !isset($courses[$courseid])) {
 $course = $courses[$courseid];
 $coursecontext = context_course::instance($courseid);
 
+// Check course-level permissions
+require_capability('moodle/course:update', $coursecontext);
+
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('updatepage', 'local_sceh_importer'));
 echo html_writer::tag('p', get_string('updatefor', 'local_sceh_importer', format_string($course->fullname)), ['class' => 'lead']);

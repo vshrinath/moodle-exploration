@@ -459,10 +459,12 @@ if ($preview !== null) {
 
     if (empty($preview['errors'])) {
         echo $OUTPUT->notification(get_string('validationok', 'local_sceh_importer'), core\output\notification::NOTIFY_SUCCESS);
-        echo html_writer::tag('div', 
-            '✓ ' . get_string('templateversion', 'local_sceh_importer', '1.0'),
-            ['class' => 'text-muted small mb-2']
-        );
+        if (defined('LOCAL_SCEH_IMPORTER_TEMPLATE_VERSION')) {
+            echo html_writer::tag('div', 
+                '✓ ' . get_string('templateversion', 'local_sceh_importer', LOCAL_SCEH_IMPORTER_TEMPLATE_VERSION),
+                ['class' => 'text-muted small mb-2']
+            );
+        }
     } else {
         echo $OUTPUT->notification(get_string('validationfail', 'local_sceh_importer'), core\output\notification::NOTIFY_ERROR);
     }
@@ -489,10 +491,12 @@ if ($preview !== null) {
             }
             echo $OUTPUT->notification($errormsg, core\output\notification::NOTIFY_ERROR);
         } else {
+            // Backward compatibility: handle string errors
             echo $OUTPUT->notification($error, core\output\notification::NOTIFY_ERROR);
         }
     }
     foreach ($preview['warnings'] as $warning) {
+        // Warnings are still strings
         echo $OUTPUT->notification($warning, core\output\notification::NOTIFY_WARNING);
     }
 
