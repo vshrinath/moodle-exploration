@@ -88,20 +88,22 @@ if ($mform->is_cancelled()) {
 
 $preview = null;
 $execution = null;
+$pageerrors = [];
 $previewkey = 'local_sceh_importer_preview_' . (int)$USER->id;
 
 if (optional_param('doimport', 0, PARAM_BOOL)) {
-    require_sesskey();
-    $savedpreview = $SESSION->$previewkey ?? null;
-    if (empty($savedpreview['manifest']) || empty($savedpreview['extractdir']) || empty($savedpreview['targetcourseid'])) {
-        throw new moodle_exception('error_importstate', 'local_sceh_importer');
-    }
-    if (!empty($savedpreview['errors'])) {
-        throw new moodle_exception('error_importvalidation', 'local_sceh_importer');
-    }
-    if (!is_dir((string)$savedpreview['extractdir'])) {
-        throw new moodle_exception('error_importexpired', 'local_sceh_importer');
-    }
+    try {
+        require_sesskey();
+        $savedpreview = $SESSION->$previewkey ?? null;
+        if (empty($savedpreview['manifest']) || empty($savedpreview['extractdir']) || empty($savedpreview['targetcourseid'])) {
+            throw new moodle_exception('error_importstate', 'local_sceh_importer');
+        }
+        if (!empty($savedpreview['errors'])) {
+            throw new moodle_exception('error_importvalidation', 'local_sceh_importer');
+        }
+        if (!is_dir((string)$savedpreview['extractdir'])) {
+            throw new moodle_exception('error_importexpired', 'local_sceh_importer');
+        }
 
     $preview = [
         'manifest' => (array)$savedpreview['manifest'],
@@ -109,13 +111,84 @@ if (optional_param('doimport', 0, PARAM_BOOL)) {
         'errors' => (array)($savedpreview['errors'] ?? []),
         'warnings' => (array)($savedpreview['warnings'] ?? []),
     ];
+    $totaluploadedactivities = count((array)($preview['manifest']['activities'] ?? []));
 
     $selectedactivityids = optional_param_array('selectedactivityids', [], PARAM_ALPHANUMEXT);
+    $allowactivityreplace = optional_param('allowactivityreplace', 0, PARAM_BOOL);
     $selectedlookup = array_fill_keys($selectedactivityids, true);
+
+    $existingactivityrows = $DB->get_records_sql(
+        'SELECT cm.id AS cmid, cm.idnumber, cm.instance, m.name AS modname
+           FROM {course_modules} cm
+           JOIN {modules} m ON m.id = cm.module
+          WHERE cm.course = :courseid
+            AND cm.deletioninprogress = 0
+            AND cm.idnumber <> \'\'',
+        ['courseid' => (int)$savedpreview['targetcourseid']]
+    );
+    $existingactivitylookup = [];
+    foreach ($existingactivityrows as $row) {
+        $idkey = \core_text::strtolower(trim((string)$row->idnumber));
+        if ($idkey === '') {
+            continue;
+        }
+        $existingactivitylookup[$idkey] = [
+            'cmid' => (int)$row->cmid,
+            'instance' => (int)$row->instance,
+            'modname' => (string)$row->modname,
+        ];
+    }
+    $reservedidnumbers = array_fill_keys(array_keys($existingactivitylookup), true);
+
+    $nextversionedidnumber = static function(string $idnumber, array &$reserved): string {
+        $base = preg_replace('/-V\d+$/i', '', $idnumber);
+        $version = 2;
+        if (preg_match('/-V(\d+)$/i', $idnumber, $matches)) {
+            $version = ((int)$matches[1]) + 1;
+        }
+        do {
+            $candidate = $base . '-V' . $version;
+            $candidatekey = \core_text::strtolower($candidate);
+            $version++;
+        } while (isset($reserved[$candidatekey]));
+        $reserved[$candidatekey] = true;
+        return $candidate;
+    };
+
+    $nextversionedtitle = static function(string $title, string $versionedidnumber): string {
+        $base = trim((string)preg_replace('/\s+\(V\d+\)$/i', '', $title));
+        if ($base === '') {
+            $base = 'Quiz';
+        }
+        $version = 2;
+        if (preg_match('/-V(\d+)$/i', $versionedidnumber, $matches)) {
+            $version = (int)$matches[1];
+        }
+        return $base . ' (V' . $version . ')';
+    };
+
     $selectedactivities = [];
+    $quizconfirmrequired = [];
     foreach ((array)$preview['manifest']['activities'] as $activity) {
         $idnumber = (string)($activity['idnumber'] ?? '');
+        $idkey = \core_text::strtolower(trim($idnumber));
         if ($idnumber !== '' && isset($selectedlookup[$idnumber])) {
+            $existingmodname = \core_text::strtolower((string)($existingactivitylookup[$idkey]['modname'] ?? ''));
+            if ($idkey !== '' && isset($existingactivitylookup[$idkey])) {
+                if (!$allowactivityreplace) {
+                    $quizconfirmrequired[] = $idnumber;
+                    continue;
+                }
+                $versionedidnumber = $nextversionedidnumber($idnumber, $reservedidnumbers);
+                $activity['archive_existing_activity'] = [
+                    'cmid' => (int)$existingactivitylookup[$idkey]['cmid'],
+                    'idnumber' => $idnumber,
+                    'modname' => (string)$existingmodname,
+                ];
+                $activity['idnumber'] = $versionedidnumber;
+                $activity['title'] = $nextversionedtitle((string)($activity['title'] ?? 'Activity'), $versionedidnumber);
+            }
+            $reservedidnumbers[\core_text::strtolower((string)($activity['idnumber'] ?? $idnumber))] = true;
             $selectedactivities[] = $activity;
         }
     }
@@ -124,25 +197,57 @@ if (optional_param('doimport', 0, PARAM_BOOL)) {
     }
     $preview['manifest']['activities'] = $selectedactivities;
 
-    try {
-        $executor = new import_executor();
-        $execution = $executor->execute(
-            (int)$savedpreview['targetcourseid'],
-            (int)$USER->id,
-            (string)$savedpreview['extractdir'],
-            (array)$savedpreview['manifest']
+    if (!empty($quizconfirmrequired)) {
+        $preview['errors'][] = get_string(
+            'error_activityreplaceconfirmrequired',
+            'local_sceh_importer',
+            implode(', ', $quizconfirmrequired)
         );
-        $execution['blocked'] = false;
-        unset($SESSION->$previewkey);
-    } catch (Throwable $e) {
-        $preview['errors'][] = 'Execution failed: ' . $e->getMessage();
-        if (!empty($e->debuginfo)) {
-            $preview['errors'][] = 'Debug: ' . $e->debuginfo;
-        }
         $execution = [
             'blocked' => true,
             'created' => [],
             'skipped' => [],
+            'replaced' => [],
+            'warnings' => [],
+            'totaluploadedactivities' => $totaluploadedactivities,
+        ];
+    }
+
+        if ($execution === null) {
+            try {
+                $executor = new import_executor();
+                $execution = $executor->execute(
+                    (int)$savedpreview['targetcourseid'],
+                    (int)$USER->id,
+                    (string)$savedpreview['extractdir'],
+                    (array)$preview['manifest']
+                );
+                $execution['blocked'] = false;
+                $execution['totaluploadedactivities'] = $totaluploadedactivities;
+                unset($SESSION->$previewkey);
+                $preview = null;
+            } catch (Throwable $e) {
+                $preview['errors'][] = 'Execution failed: ' . $e->getMessage();
+                if (!empty($e->debuginfo)) {
+                    $preview['errors'][] = 'Debug: ' . $e->debuginfo;
+                }
+                $execution = [
+                    'blocked' => true,
+                    'created' => [],
+                    'skipped' => [],
+                    'replaced' => [],
+                    'warnings' => [],
+                    'totaluploadedactivities' => $totaluploadedactivities,
+                ];
+            }
+        }
+    } catch (moodle_exception $e) {
+        $pageerrors[] = $e->getMessage();
+        $execution = [
+            'blocked' => true,
+            'created' => [],
+            'skipped' => [],
+            'replaced' => [],
             'warnings' => [],
         ];
     }
@@ -300,6 +405,9 @@ if ($data = $mform->get_data()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('importpage', 'local_sceh_importer'));
 echo $OUTPUT->notification(get_string('importintro', 'local_sceh_importer'), core\output\notification::NOTIFY_INFO);
+foreach ($pageerrors as $pageerror) {
+    echo $OUTPUT->notification($pageerror, core\output\notification::NOTIFY_ERROR);
+}
 
 $mform->display();
 
@@ -331,31 +439,84 @@ if ($preview !== null) {
         );
         $existingactivitylookup = [];
         foreach ($existingactivityrows as $row) {
-            $existingactivitylookup[(string)$row->idnumber] = true;
+            $idkey = \core_text::strtolower(trim((string)$row->idnumber));
+            if ($idkey === '') {
+                continue;
+            }
+            $existingactivitylookup[$idkey] = true;
         }
 
         $importurl = new moodle_url('/local/sceh_importer/index.php');
         echo $OUTPUT->heading(get_string('selectactivitiesheading', 'local_sceh_importer'), 4);
 
+        $groupedactivities = [];
+        foreach ((array)$preview['manifest']['activities'] as $activity) {
+            $sectionid = (string)($activity['section_idnumber'] ?? '');
+            $topicid = (string)($activity['topic_idnumber'] ?? '');
+            $groupkey = $sectionid . '||' . $topicid;
+            if (!isset($groupedactivities[$groupkey])) {
+                $groupedactivities[$groupkey] = [
+                    'section_idnumber' => $sectionid,
+                    'topic_idnumber' => $topicid,
+                    'activities' => [],
+                ];
+            }
+            $groupedactivities[$groupkey]['activities'][] = $activity;
+        }
+
+        $sectionnamemap = [];
+        foreach ((array)$preview['manifest']['sections'] as $section) {
+            $sectionid = (string)($section['idnumber'] ?? '');
+            $sectionnamemap[$sectionid] = (string)($section['name'] ?? $sectionid);
+        }
+        $topicnamemap = [];
+        foreach ((array)$preview['manifest']['topics'] as $topic) {
+            $topicid = (string)($topic['idnumber'] ?? '');
+            $topicnamemap[$topicid] = (string)($topic['name'] ?? $topicid);
+        }
+
         $selectiontable = new html_table();
+        $preselectedcount = 0;
         $selectiontable->attributes['class'] = 'generaltable sceh-import-selection-table';
         $selectiontable->head = ['', get_string('activities', 'local_sceh_importer'), 'Type', get_string('status', 'local_sceh_importer')];
-        foreach ((array)$preview['manifest']['activities'] as $activity) {
+        foreach ($groupedactivities as $group) {
+            $sectionid = (string)$group['section_idnumber'];
+            $topicid = (string)$group['topic_idnumber'];
+            $sectionname = $sectionnamemap[$sectionid] ?? $sectionid;
+            $topicname = ($topicid !== '') ? ($topicnamemap[$topicid] ?? $topicid) : '';
+            $grouplabel = format_string($sectionname) . ($topicname !== '' ? ' / ' . format_string($topicname) : '');
+
+            $groupcell = new html_table_cell(html_writer::tag('strong', $grouplabel) .
+                html_writer::tag('div', s($sectionid . ($topicid !== '' ? ' / ' . $topicid : '')), ['class' => 'text-muted']));
+            $groupcell->colspan = 4;
+            $grouprow = new html_table_row([$groupcell]);
+            $grouprow->attributes['class'] = 'sceh-import-group-row';
+            $selectiontable->data[] = $grouprow;
+
+            foreach ((array)$group['activities'] as $activity) {
             $idnumber = (string)($activity['idnumber'] ?? '');
+            $idkey = \core_text::strtolower(trim($idnumber));
             $title = (string)($activity['title'] ?? $idnumber);
             $type = (string)($activity['type'] ?? get_string('empty', 'local_sceh_importer'));
-            $isexisting = $idnumber !== '' && !empty($existingactivitylookup[$idnumber]);
+            $isexisting = $idkey !== '' && !empty($existingactivitylookup[$idkey]);
             $statuslabel = $isexisting ? get_string('status_existing', 'local_sceh_importer') : get_string('status_new', 'local_sceh_importer');
             $checkboxattrs = [
                 'type' => 'checkbox',
                 'name' => 'selectedactivityids[]',
                 'value' => $idnumber,
             ];
+            if ($isexisting) {
+                $checkboxattrs['data-existingactivity'] = '1';
+            }
             if (!$isexisting) {
                 $checkboxattrs['checked'] = 'checked';
+                $preselectedcount++;
             }
             $checkbox = html_writer::empty_tag('input', $checkboxattrs);
-            $titlehtml = s($title) . html_writer::empty_tag('br') . html_writer::tag('small', s($idnumber), ['class' => 'text-muted']);
+            $sourcepath = (string)($activity['file'] ?? $activity['quiz_source']['path'] ?? '');
+            $titlehtml = s($title) . html_writer::empty_tag('br') .
+                html_writer::tag('small', s($idnumber), ['class' => 'text-muted']) .
+                ($sourcepath !== '' ? html_writer::empty_tag('br') . html_writer::tag('small', s($sourcepath), ['class' => 'text-muted']) : '');
             $statusbadgeclass = $isexisting ? 'badge rounded-pill text-bg-secondary' : 'badge rounded-pill text-bg-success';
             $statusbadge = html_writer::tag('span', s($statuslabel), ['class' => $statusbadgeclass]);
 
@@ -373,17 +534,157 @@ if ($preview !== null) {
             }
             $selectiontable->data[] = $row;
         }
+        }
 
-        echo html_writer::start_tag('form', ['method' => 'post', 'action' => $importurl->out(false)]);
+        echo html_writer::start_tag('form', [
+            'method' => 'post',
+            'action' => $importurl->out(false),
+            'id' => 'sceh-import-selection-form',
+        ]);
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'doimport', 'value' => 1]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'allowactivityreplace', 'value' => 0, 'id' => 'sceh-import-allow-activity-replace']);
         echo html_writer::table($selectiontable);
         echo html_writer::tag('div', get_string('selectactivitieshelp', 'local_sceh_importer'), ['class' => 'text-muted mb-3']);
-        echo html_writer::tag('button', get_string('importbutton', 'local_sceh_importer'), [
+        echo html_writer::tag('div', get_string('selectactivitiesreplacehelp', 'local_sceh_importer'), ['class' => 'text-muted mb-3']);
+        $buttonattrs = [
             'type' => 'submit',
             'class' => 'btn btn-primary',
+            'id' => 'sceh-import-submit',
+        ];
+        if ($preselectedcount === 0) {
+            $buttonattrs['disabled'] = 'disabled';
+        }
+        echo html_writer::tag('button', get_string('importbutton', 'local_sceh_importer'), $buttonattrs);
+        echo html_writer::tag('div', get_string('error_noselectedactivities', 'local_sceh_importer'), [
+            'class' => 'text-muted mt-2',
+            'id' => 'sceh-import-selection-hint',
+            'style' => $preselectedcount === 0 ? '' : 'display:none;',
         ]);
         echo html_writer::end_tag('form');
+
+        echo html_writer::start_tag('div', [
+            'id' => 'sceh-activity-replace-modal',
+            'class' => 'sceh-import-modal',
+            'hidden' => 'hidden',
+            'aria-hidden' => 'true',
+        ]);
+        echo html_writer::start_tag('div', [
+            'class' => 'sceh-import-modal__backdrop',
+            'id' => 'sceh-activity-replace-backdrop',
+        ]);
+        echo html_writer::start_tag('div', [
+            'class' => 'sceh-import-modal__dialog',
+            'role' => 'dialog',
+            'aria-modal' => 'true',
+            'aria-labelledby' => 'sceh-activity-replace-title',
+        ]);
+        echo html_writer::tag('h5', get_string('confirmactivityreplace_title', 'local_sceh_importer'), [
+            'id' => 'sceh-activity-replace-title',
+            'class' => 'mb-3',
+        ]);
+        echo html_writer::tag('p', get_string('confirmactivityreplace', 'local_sceh_importer'), ['class' => 'mb-4']);
+        echo html_writer::start_tag('div', ['class' => 'sceh-import-modal__actions']);
+        echo html_writer::tag('button', get_string('confirmactivityreplace_cancel', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-secondary',
+            'id' => 'sceh-activity-replace-cancel',
+        ]);
+        echo html_writer::tag('button', get_string('confirmactivityreplace_continue', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-primary',
+            'id' => 'sceh-activity-replace-confirm',
+        ]);
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+
+        $PAGE->requires->js_init_code(
+            "(() => {
+                const form = document.getElementById('sceh-import-selection-form');
+                if (!form) { return; }
+                const submit = document.getElementById('sceh-import-submit');
+                const hint = document.getElementById('sceh-import-selection-hint');
+                const allowActivityReplace = document.getElementById('sceh-import-allow-activity-replace');
+                const modal = document.getElementById('sceh-activity-replace-modal');
+                const cancelBtn = document.getElementById('sceh-activity-replace-cancel');
+                const confirmBtn = document.getElementById('sceh-activity-replace-confirm');
+                const backdrop = document.getElementById('sceh-activity-replace-backdrop');
+                const boxes = Array.from(form.querySelectorAll('input[name=\"selectedactivityids[]\"]'));
+                let confirmedActivityReplace = false;
+
+                const closeModal = () => {
+                    if (!modal) { return; }
+                    modal.hidden = true;
+                    modal.setAttribute('aria-hidden', 'true');
+                };
+
+                const openModal = () => {
+                    if (!modal) { return; }
+                    modal.hidden = false;
+                    modal.setAttribute('aria-hidden', 'false');
+                    if (cancelBtn) { cancelBtn.focus(); }
+                };
+
+                const sync = () => {
+                    const any = boxes.some((cb) => cb.checked);
+                    if (submit) { submit.disabled = !any; }
+                    if (hint) { hint.style.display = any ? 'none' : ''; }
+                };
+                boxes.forEach((cb) => cb.addEventListener('change', sync));
+                sync();
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', () => {
+                        confirmedActivityReplace = false;
+                        if (allowActivityReplace) { allowActivityReplace.value = '0'; }
+                        closeModal();
+                    });
+                }
+                if (backdrop) {
+                    backdrop.addEventListener('click', () => {
+                        confirmedActivityReplace = false;
+                        if (allowActivityReplace) { allowActivityReplace.value = '0'; }
+                        closeModal();
+                    });
+                }
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', () => {
+                        confirmedActivityReplace = true;
+                        if (allowActivityReplace) { allowActivityReplace.value = '1'; }
+                        closeModal();
+                        if (form.requestSubmit) {
+                            form.requestSubmit(submit || undefined);
+                        } else {
+                            form.submit();
+                        }
+                    });
+                }
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && modal && !modal.hidden) {
+                        confirmedActivityReplace = false;
+                        if (allowActivityReplace) { allowActivityReplace.value = '0'; }
+                        closeModal();
+                    }
+                });
+                form.addEventListener('submit', (event) => {
+                    const selectedExistingActivity = boxes.some((cb) => cb.checked && cb.dataset.existingactivity === '1');
+                    if (!selectedExistingActivity) {
+                        confirmedActivityReplace = false;
+                        if (allowActivityReplace) { allowActivityReplace.value = '0'; }
+                        return;
+                    }
+                    if (!confirmedActivityReplace) {
+                        if (allowActivityReplace) { allowActivityReplace.value = '0'; }
+                        event.preventDefault();
+                        openModal();
+                        return;
+                    }
+                    confirmedActivityReplace = false;
+                    if (allowActivityReplace) { allowActivityReplace.value = '1'; }
+                });
+            })();"
+        );
     } else {
         echo html_writer::tag('button', get_string('importdisabled', 'local_sceh_importer'), [
             'class' => 'btn btn-secondary',
@@ -453,11 +754,77 @@ if ($preview !== null) {
 }
 
 if ($execution !== null) {
+    $createdcount = count($execution['created'] ?? []);
+    $replacedcount = count($execution['replaced'] ?? []);
+    $addedcount = max(0, $createdcount - $replacedcount);
+    $totaluploadedactivities = (int)($execution['totaluploadedactivities'] ?? 0);
+    $skippeddisplay = $totaluploadedactivities > 0
+        ? max(0, $totaluploadedactivities - $replacedcount - $addedcount)
+        : count($execution['skipped'] ?? []);
+
     echo $OUTPUT->heading(get_string('executedheading', 'local_sceh_importer'), 3);
     if (!empty($execution['blocked'])) {
         echo $OUTPUT->notification(get_string('executionblocked', 'local_sceh_importer'), core\output\notification::NOTIFY_WARNING);
     } else {
         echo $OUTPUT->notification(get_string('executionok', 'local_sceh_importer'), core\output\notification::NOTIFY_SUCCESS);
+        echo html_writer::start_tag('div', [
+            'id' => 'sceh-import-success-modal',
+            'class' => 'sceh-import-modal',
+            'hidden' => 'hidden',
+            'aria-hidden' => 'true',
+        ]);
+        echo html_writer::tag('div', '', ['class' => 'sceh-import-modal__backdrop']);
+        echo html_writer::start_tag('div', [
+            'class' => 'sceh-import-modal__dialog',
+            'role' => 'dialog',
+            'aria-modal' => 'true',
+            'aria-labelledby' => 'sceh-import-success-title',
+        ]);
+        echo html_writer::tag('h5', get_string('executionok_title', 'local_sceh_importer'), [
+            'id' => 'sceh-import-success-title',
+            'class' => 'mb-3',
+        ]);
+        echo html_writer::tag('p', get_string('executionok_body', 'local_sceh_importer'), ['class' => 'mb-3']);
+        echo html_writer::tag(
+            'p',
+            get_string('executedadded', 'local_sceh_importer') . ': ' . $addedcount .
+            ' | ' . get_string('executedskipped', 'local_sceh_importer') . ': ' . $skippeddisplay .
+            ' | ' . get_string('executedreplaced', 'local_sceh_importer') . ': ' . $replacedcount,
+            ['class' => 'text-muted mb-4']
+        );
+        echo html_writer::tag('button', get_string('executionok_cta', 'local_sceh_importer'), [
+            'type' => 'button',
+            'class' => 'btn btn-primary',
+            'id' => 'sceh-import-success-close',
+        ]);
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+
+        $PAGE->requires->js_init_code(
+            "(() => {
+                const modal = document.getElementById('sceh-import-success-modal');
+                const closeBtn = document.getElementById('sceh-import-success-close');
+                if (!modal || !closeBtn) { return; }
+                modal.hidden = false;
+                modal.setAttribute('aria-hidden', 'false');
+                closeBtn.focus();
+                const close = () => {
+                    modal.hidden = true;
+                    modal.setAttribute('aria-hidden', 'true');
+                };
+                closeBtn.addEventListener('click', close);
+                modal.addEventListener('click', (event) => {
+                    if (event.target && event.target.classList && event.target.classList.contains('sceh-import-modal__backdrop')) {
+                        close();
+                    }
+                });
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && !modal.hidden) {
+                        close();
+                    }
+                });
+            })();"
+        );
     }
 
     if (!empty($execution['warnings'])) {
@@ -468,18 +835,23 @@ if ($execution !== null) {
 
     $executiontable = new html_table();
     $executiontable->head = [get_string('summary', 'local_sceh_importer'), get_string('importer', 'local_sceh_importer')];
-    $executiontable->data[] = [get_string('executedcreated', 'local_sceh_importer'), count($execution['created'])];
-    $executiontable->data[] = [get_string('executedskipped', 'local_sceh_importer'), count($execution['skipped'])];
+    $executiontable->data[] = [get_string('executedadded', 'local_sceh_importer'), $addedcount];
+    $executiontable->data[] = [get_string('executedskipped', 'local_sceh_importer'), $skippeddisplay];
+    $executiontable->data[] = [get_string('executedreplaced', 'local_sceh_importer'), $replacedcount];
     $executiontable->data[] = [get_string('executedwarnings', 'local_sceh_importer'), count($execution['warnings'])];
     echo html_writer::table($executiontable);
 
     if (!empty($execution['created'])) {
-        echo html_writer::tag('h5', get_string('executedcreated', 'local_sceh_importer'));
+        echo html_writer::tag('h5', get_string('executedadded', 'local_sceh_importer'));
         echo html_writer::alist($execution['created']);
     }
     if (!empty($execution['skipped'])) {
         echo html_writer::tag('h5', get_string('executedskipped', 'local_sceh_importer'));
         echo html_writer::alist($execution['skipped']);
+    }
+    if (!empty($execution['replaced'])) {
+        echo html_writer::tag('h5', get_string('executedreplaced', 'local_sceh_importer'));
+        echo html_writer::alist($execution['replaced']);
     }
 }
 

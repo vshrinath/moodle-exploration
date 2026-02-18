@@ -29,7 +29,7 @@ class import_executor {
      * @param int $userid
      * @param string $extractdir
      * @param array $manifest
-     * @return array{created:array,skipped:array,warnings:array}
+     * @return array{created:array,skipped:array,replaced:array,warnings:array}
      */
     public function execute(int $courseid, int $userid, string $extractdir, array $manifest): array {
         global $CFG;
@@ -59,6 +59,7 @@ class import_executor {
         $result = [
             'created' => [],
             'skipped' => [],
+            'replaced' => [],
             'warnings' => [],
         ];
         $this->persist_program_linkage($courseid, $userid, $manifest);
@@ -103,18 +104,25 @@ class import_executor {
                 } else {
                     $topicsectionidnumber = (string)($topic['section_idnumber'] ?? $sectionidnumber);
                     $topicsectionnum = $sectionmap[$topicsectionidnumber] ?? $sectionnum;
-                    $topicstatus = $this->ensure_topic_label($course, $topic, $topicsectionnum, $mode);
-                    if ($topicstatus === 'created') {
-                        $result['created'][] = $topicidnumber . ' (topic marker)';
-                    } else if ($topicstatus === 'skipped') {
-                        $result['skipped'][] = $topicidnumber . ' (topic marker already exists)';
-                    }
+                    $this->ensure_topic_label($course, $topic, $topicsectionnum, $mode);
                     $renderedtopics[$topicidnumber] = true;
                 }
             }
 
             $cm = $this->create_activity($course, $userid, $extractdir, $activity, $sectionnum, $result['warnings']);
             if ($cm !== null) {
+                if (!empty($activity['archive_existing_activity']['cmid'])) {
+                    $archivecmid = (int)$activity['archive_existing_activity']['cmid'];
+                    $archiveidnumber = (string)($activity['archive_existing_activity']['idnumber'] ?? '');
+                    $archivemodname = (string)($activity['archive_existing_activity']['modname'] ?? '');
+                    if ($this->archive_existing_activity($archivecmid, $archiveidnumber, $archivemodname, $result['warnings'])) {
+                        $label = $archiveidnumber !== '' ? $archiveidnumber : ('cmid ' . $archivecmid);
+                        if ($archivemodname !== '') {
+                            $label .= ' (' . $archivemodname . ')';
+                        }
+                        $result['replaced'][] = $label;
+                    }
+                }
                 $result['created'][] = $idnumber . ' (cmid ' . $cm->id . ')';
             }
         }
@@ -538,6 +546,74 @@ class import_executor {
             'courseid' => $courseid,
             'idnumber' => $idnumber,
         ]) ?: null;
+    }
+
+    /**
+     * Archive an existing activity module before importing a versioned replacement.
+     *
+     * @param int $cmid
+     * @param string $originalidnumber
+     * @param string $originalmodname
+     * @param array $warnings
+     * @return bool
+     */
+    private function archive_existing_activity(int $cmid, string $originalidnumber, string $originalmodname, array &$warnings): bool {
+        global $DB;
+
+        if ($cmid <= 0) {
+            return false;
+        }
+
+        $cm = $DB->get_record_sql(
+            "SELECT cm.id, cm.instance, m.name AS modulename
+               FROM {course_modules} cm
+               JOIN {modules} m ON m.id = cm.module
+              WHERE cm.id = :cmid",
+            ['cmid' => $cmid]
+        );
+        if (!$cm) {
+            return false;
+        }
+
+        set_coursemodule_visible((int)$cm->id, 0);
+
+        $modname = (string)$cm->modulename;
+        $modtable = $this->resolve_module_table_for_name($modname);
+        if ($modtable !== null) {
+            $record = $DB->get_record($modtable, ['id' => (int)$cm->instance], 'id,name');
+            if ($record && isset($record->name)) {
+                $archivedprefix = '[Archived ' . userdate(time(), '%Y-%m-%d') . '] ';
+                $currentname = trim((string)$record->name);
+                if (strpos($currentname, $archivedprefix) !== 0) {
+                    $newname = $archivedprefix . $currentname;
+                    if (\core_text::strlen($newname) > 255) {
+                        $newname = \core_text::substr($newname, 0, 255);
+                    }
+                    $record->name = $newname;
+                    $DB->update_record($modtable, $record);
+                }
+            }
+        }
+
+        $label = $originalidnumber !== '' ? $originalidnumber : ('cmid ' . $cmid);
+        $displaymodname = $originalmodname !== '' ? $originalmodname : $modname;
+        $warnings[] = $label . ': archived existing ' . $displaymodname . ' before importing new version.';
+        return true;
+    }
+
+    /**
+     * Resolve Moodle activity module name to its instance table.
+     *
+     * @param string $modname
+     * @return string|null
+     */
+    private function resolve_module_table_for_name(string $modname): ?string {
+        $map = [
+            'quiz' => 'quiz',
+            'resource' => 'resource',
+            'assign' => 'assign',
+        ];
+        return $map[$modname] ?? null;
     }
 
     /**

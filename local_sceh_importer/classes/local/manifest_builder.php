@@ -24,6 +24,18 @@ defined('MOODLE_INTERNAL') || die();
 class manifest_builder {
     /** @var string */
     private const IDNUMBER_PATTERN = '/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/';
+    /** @var string[] */
+    private const SUPPORTED_INLINE_QUIZ_TYPES = [
+        'mcq',
+        'multichoice',
+        'singlechoice',
+        'true_false',
+        'truefalse',
+        'tf',
+        'short_answer',
+        'shortanswer',
+        'sa',
+    ];
 
     /**
      * Build manifest array from scanned package artifacts.
@@ -243,6 +255,13 @@ class manifest_builder {
                 $errors[] = 'Quiz source file not found in package: ' . $activity['quiz_source']['path'];
             }
 
+            if (($activity['type'] ?? '') === 'quiz' && (($activity['quiz_source']['format'] ?? '') === 'inline')) {
+                $inlineerrors = $this->validate_inline_quiz_rows((string)$idnumber, (array)($activity['quiz_source']['rows'] ?? []));
+                foreach ($inlineerrors as $inlineerror) {
+                    $errors[] = $inlineerror;
+                }
+            }
+
         }
 
         if (($manifest['import']['mode'] ?? '') === 'replace' && trim((string)($manifest['change_note'] ?? '')) === '') {
@@ -280,6 +299,86 @@ class manifest_builder {
      */
     private function is_valid_idnumber(string $idnumber): bool {
         return preg_match(self::IDNUMBER_PATTERN, $idnumber) === 1;
+    }
+
+    /**
+     * Validate inline quiz rows at preview time.
+     *
+     * @param string $activityidnumber
+     * @param array $rows
+     * @return string[]
+     */
+    private function validate_inline_quiz_rows(string $activityidnumber, array $rows): array {
+        $errors = [];
+        if (empty($rows)) {
+            $errors[] = 'Inline quiz has no questions: ' . $activityidnumber;
+            return $errors;
+        }
+
+        foreach ($rows as $index => $row) {
+            if (!is_array($row)) {
+                $errors[] = 'Inline quiz row is invalid at question #' . ($index + 1) . ': ' . $activityidnumber;
+                continue;
+            }
+            $qid = trim((string)($row['question_id'] ?? 'Q' . ($index + 1)));
+            $qtype = strtolower(trim((string)($row['question_type'] ?? '')));
+            $qtext = trim((string)($row['question_text'] ?? ''));
+            $correct = trim((string)($row['correct_option'] ?? ''));
+            $prefix = $activityidnumber . ' / ' . $qid . ': ';
+
+            if ($qtext === '') {
+                $errors[] = $prefix . 'question_text is required.';
+            }
+            if ($correct === '') {
+                $errors[] = $prefix . 'correct_option is required.';
+            }
+            if ($qtype === '') {
+                $errors[] = $prefix . 'question_type is required.';
+                continue;
+            }
+            if (!in_array($qtype, self::SUPPORTED_INLINE_QUIZ_TYPES, true)) {
+                $errors[] = $prefix . 'unsupported question_type "' . $qtype . '".';
+                continue;
+            }
+
+            if (in_array($qtype, ['mcq', 'multichoice', 'singlechoice'], true)) {
+                $options = [
+                    'A' => trim((string)($row['option_a'] ?? '')),
+                    'B' => trim((string)($row['option_b'] ?? '')),
+                    'C' => trim((string)($row['option_c'] ?? '')),
+                    'D' => trim((string)($row['option_d'] ?? '')),
+                    'E' => trim((string)($row['option_e'] ?? '')),
+                ];
+                $filled = array_filter($options, static fn($text): bool => $text !== '');
+                if (count($filled) < 2) {
+                    $errors[] = $prefix . 'mcq requires at least 2 options.';
+                    continue;
+                }
+
+                $normalizedcorrect = strtoupper($correct);
+                $matcheslabel = array_key_exists($normalizedcorrect, $options) && $options[$normalizedcorrect] !== '';
+                $matchestext = false;
+                foreach ($filled as $optiontext) {
+                    if (strcasecmp($optiontext, $correct) === 0) {
+                        $matchestext = true;
+                        break;
+                    }
+                }
+                if (!$matcheslabel && !$matchestext) {
+                    $errors[] = $prefix . 'correct_option must match an option label (A-E) or option text.';
+                }
+            }
+
+            if (in_array($qtype, ['true_false', 'truefalse', 'tf'], true)) {
+                $normalized = strtoupper($correct);
+                $valid = in_array($normalized, ['T', 'TRUE', '1', 'YES', 'F', 'FALSE', '0', 'NO'], true);
+                if (!$valid) {
+                    $errors[] = $prefix . 'true/false correct_option must be TRUE/FALSE (or T/F, 1/0, YES/NO).';
+                }
+            }
+        }
+
+        return $errors;
     }
 
     /**

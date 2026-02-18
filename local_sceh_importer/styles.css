@@ -16,3 +16,41 @@
 .sceh-import-selection-table tbody tr td {
     vertical-align: middle;
 }
+
+.sceh-import-selection-table tbody tr.sceh-import-group-row td {
+    background: #eef3f8;
+    border-top: 2px solid #d8e2ee;
+    padding: 0.75rem 1rem;
+}
+
+.sceh-import-modal[hidden] {
+    display: none !important;
+}
+
+.sceh-import-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+}
+
+.sceh-import-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 33, 45, 0.5);
+}
+
+.sceh-import-modal__dialog {
+    position: relative;
+    max-width: 560px;
+    margin: 12vh auto 0;
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.sceh-import-modal__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}

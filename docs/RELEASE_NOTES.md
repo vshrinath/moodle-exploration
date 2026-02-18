@@ -4,6 +4,38 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Generalize replacement flow across activities and align import summary semantics
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Expanded replacement behavior from quiz-only to all existing selected activity types (resource, lesson plan, roleplay, assignment, quiz).
+- Added a generic replacement confirmation modal before import when selected rows include existing activities.
+- Added replacement archiving support in executor:
+  - Existing activity is hidden before new version import.
+  - Name is prefixed as archived where module table supports `name`.
+- Fixed execution path to run the selected/modified preview manifest (instead of stale saved manifest).
+- Added case-insensitive idnumber matching for existing-activity detection and replacement processing.
+- Updated post-import success summary semantics:
+  - `Added` = net new additions from uploaded set.
+  - `Skipped` = uploaded activities not applied in this run.
+  - `Replaced` = activities explicitly replaced.
+- Excluded topic-marker bookkeeping from activity summary counts so metrics match user-selected rows.
+- Added preview-time inline quiz row validation (question type/options/correct answer checks) to fail loudly before import.
+
+### Why
+Program owners need replacements to behave consistently across all content types, not just quizzes. Summary counts also need to reflect user intent from the uploaded package so import outcomes are immediately understandable.
+
+### Files touched
+- `local_sceh_importer/index.php` — Generalized replacement selection/confirmation flow, fixed manifest execution source, and updated summary metric calculation
+- `local_sceh_importer/classes/local/import_executor.php` — Added generic activity archiving/replacement tracking and removed topic-marker impact from summary counts
+- `local_sceh_importer/classes/local/manifest_builder.php` — Added inline quiz row validation in preview stage
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added replacement confirmation and summary label strings
+- `local_sceh_importer/styles.css` — Added grouped-row and modal styling used by replacement confirmation UX
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add activity-selection step before import with status-based defaults
 
 **Commit**: `PENDING` on branch `front-end-explorations`
