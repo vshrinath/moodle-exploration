@@ -4,6 +4,41 @@
 
 Reference for the mock accounts created for role-based dashboard/RBAC validation in the local Docker environment.
 
+## Apply Workflow Simulation Baseline (Recommended)
+
+Run this idempotent script to re-apply the WF-01 to WF-04 baseline in one step:
+
+```bash
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
+```
+
+What this script enforces:
+- Mock users exist with stable unique `idnumber` values
+- Required role assignments for sysadmin/trainer/learner
+- Program Owner scoped to `allied-health` category (no system-level assignment)
+- Program Owner workflow capabilities for course/quiz review and management
+- `mock-allied-2026` cohort baseline with `mock.trainer` and `mock.learner`
+
+### Production safety mode
+
+Use real-environment verification mode to check prerequisites without mutating data:
+
+```bash
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=verify-real-env --dry-run --category-idnumber=allied-health
+```
+
+Apply real-environment role/capability baseline (no mock users/cohorts):
+
+```bash
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health
+```
+
+Notes:
+- `--mode=verify-real-env` is verify-only and skips mock-user/cohort mutations.
+- `--mode=apply-real-env` applies only role/capability baseline and cache purge.
+- `--dry-run` prints intended actions without applying changes.
+- `--category-idnumber` is required in real-environment modes.
+
 ## Current Mock Users
 
 | Username | Display Name | System Role Assignment | Expected Dashboard Role |

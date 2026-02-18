@@ -26,6 +26,13 @@ php scripts/verify/verify_competency_framework_structure.php
 ### Configuration Scripts (config/)
 Set up Moodle features and plugins. Run these to initialize system components.
 
+Example (workflow simulation baseline):
+```bash
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=verify-real-env --dry-run --category-idnumber=allied-health
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=allied-health
+```
+
 ### Verification Scripts (verify/)
 Validate that configurations are correct and features are working as expected.
 

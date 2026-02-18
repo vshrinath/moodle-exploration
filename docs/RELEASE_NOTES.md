@@ -4,6 +4,31 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add mode-safe workflow baseline setup for local and real environments
+
+### What changed
+- Added a new baseline script for workflow simulation setup:
+  - `scripts/config/configure_workflow_simulation_baseline.php`
+- Added explicit execution modes:
+  - `local` (default): applies mock/test baseline for WF-01 to WF-04
+  - `verify-real-env`: read-only checks for real environments
+  - `apply-real-env`: applies only real-environment role/capability baseline
+- Added `--dry-run` support and hard guardrails:
+  - skips mock-user and mock-cohort mutations in real-environment modes
+  - requires `--category-idnumber` for real-environment modes
+- Updated setup documentation with mode-specific command examples.
+
+### Why
+This separates test-environment setup from real-environment validation, so teams can run mock workflows safely in development while using controlled, non-mock baseline checks/applies in staging or production.
+
+### Files touched
+- `scripts/config/configure_workflow_simulation_baseline.php` — New idempotent baseline setup script with mode guards
+- `docs/MOCK_USERS_SETUP.md` — Added local/real-environment usage instructions
+- `scripts/README.md` — Added script mode examples
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Add workflow simulation checklist and golden test suite logs
 
 ### What changed
