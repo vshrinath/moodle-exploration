@@ -4,6 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Refine import completion metrics and remove expected archive notices from warnings
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Updated import completion summary semantics:
+  - `Added` now reports imported selected activities (including replacements).
+  - `Skipped` now reports uploaded activities not applied from the uploaded set.
+  - `Replaced` remains explicit replacement count.
+- Stopped treating successful archive-before-replace steps as execution warnings.
+- Kept warning channel focused on actionable issues only.
+
+### Why
+The completion screen should reflect operator intent directly. Replacements are planned behavior and should not appear as warnings, while summary numbers must align with what was selected from the ZIP.
+
+### Files touched
+- `local_sceh_importer/index.php` — Adjusted completion summary math and display labels
+- `local_sceh_importer/classes/local/import_executor.php` — Removed archive success messages from warning output
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Generalize replacement flow across activities and align import summary semantics
 
 **Commit**: `PENDING` on branch `front-end-explorations`

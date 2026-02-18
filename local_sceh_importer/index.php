@@ -756,10 +756,10 @@ if ($preview !== null) {
 if ($execution !== null) {
     $createdcount = count($execution['created'] ?? []);
     $replacedcount = count($execution['replaced'] ?? []);
-    $addedcount = max(0, $createdcount - $replacedcount);
+    $addedcount = $createdcount;
     $totaluploadedactivities = (int)($execution['totaluploadedactivities'] ?? 0);
     $skippeddisplay = $totaluploadedactivities > 0
-        ? max(0, $totaluploadedactivities - $replacedcount - $addedcount)
+        ? max(0, $totaluploadedactivities - $addedcount)
         : count($execution['skipped'] ?? []);
 
     echo $OUTPUT->heading(get_string('executedheading', 'local_sceh_importer'), 3);

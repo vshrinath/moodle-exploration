@@ -115,7 +115,7 @@ class import_executor {
                     $archivecmid = (int)$activity['archive_existing_activity']['cmid'];
                     $archiveidnumber = (string)($activity['archive_existing_activity']['idnumber'] ?? '');
                     $archivemodname = (string)($activity['archive_existing_activity']['modname'] ?? '');
-                    if ($this->archive_existing_activity($archivecmid, $archiveidnumber, $archivemodname, $result['warnings'])) {
+                    if ($this->archive_existing_activity($archivecmid, $archiveidnumber, $archivemodname)) {
                         $label = $archiveidnumber !== '' ? $archiveidnumber : ('cmid ' . $archivecmid);
                         if ($archivemodname !== '') {
                             $label .= ' (' . $archivemodname . ')';
@@ -554,10 +554,9 @@ class import_executor {
      * @param int $cmid
      * @param string $originalidnumber
      * @param string $originalmodname
-     * @param array $warnings
      * @return bool
      */
-    private function archive_existing_activity(int $cmid, string $originalidnumber, string $originalmodname, array &$warnings): bool {
+    private function archive_existing_activity(int $cmid, string $originalidnumber, string $originalmodname): bool {
         global $DB;
 
         if ($cmid <= 0) {
@@ -595,9 +594,6 @@ class import_executor {
             }
         }
 
-        $label = $originalidnumber !== '' ? $originalidnumber : ('cmid ' . $cmid);
-        $displaymodname = $originalmodname !== '' ? $originalmodname : $modname;
-        $warnings[] = $label . ': archived existing ' . $displaymodname . ' before importing new version.';
         return true;
     }
 
