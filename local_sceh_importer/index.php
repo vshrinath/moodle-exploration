@@ -404,6 +404,13 @@ if ($data = $mform->get_data()) {
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('importpage', 'local_sceh_importer'));
+echo html_writer::tag('div', 
+    html_writer::tag('a', get_string('updateexisting', 'local_sceh_importer'), [
+        'href' => new moodle_url('/local/sceh_importer/update.php'),
+        'class' => 'btn btn-secondary btn-sm',
+    ]),
+    ['class' => 'mb-3']
+);
 echo $OUTPUT->notification(get_string('importintro', 'local_sceh_importer'), core\output\notification::NOTIFY_INFO);
 foreach ($pageerrors as $pageerror) {
     echo $OUTPUT->notification($pageerror, core\output\notification::NOTIFY_ERROR);

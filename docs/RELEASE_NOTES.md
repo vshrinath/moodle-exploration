@@ -4,6 +4,31 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add incremental update feature for targeted file replacement
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added new update page showing existing course structure with replace buttons per activity
+- Added individual file replacement flow with preview and confirmation
+- Added bulk update option that redirects to main import page with course pre-selected
+- Made archive_existing_activity method public for reuse in file replacement
+- Both bulk and individual updates use same versioning and archiving behavior
+
+### Why
+Program Owners need an easy way to update individual files without re-uploading entire course packages. The unified entry point handles both targeted and bulk updates.
+
+### Files touched
+- `local_sceh_importer/update.php` — New course update page with structure view
+- `local_sceh_importer/update_file.php` — Individual file replacement with preview
+- `local_sceh_importer/classes/form/file_upload_form.php` — File upload form
+- `local_sceh_importer/classes/local/import_executor.php` — Made archive method public
+- `local_sceh_importer/index.php` — Added link to update page
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added update page strings
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Improve importer UX with plain-language errors, bulk controls, and collapsible groups
 
 **Commit**: `PENDING` on branch `front-end-explorations`

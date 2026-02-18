@@ -556,7 +556,15 @@ class import_executor {
      * @param string $originalmodname
      * @return bool
      */
-    private function archive_existing_activity(int $cmid, string $originalidnumber, string $originalmodname): bool {
+    /**
+     * Archive an existing activity by hiding it and prefixing its name.
+     *
+     * @param int $cmid
+     * @param string $originalidnumber
+     * @param string $originalmodname
+     * @return bool
+     */
+    public function archive_existing_activity(int $cmid, string $originalidnumber, string $originalmodname): bool {
         global $DB;
 
         if ($cmid <= 0) {
