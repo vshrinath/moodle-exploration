@@ -4,6 +4,56 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Fix critical bugs in individual file replacement
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Fixed data loss risk: new activity is created first, then old one is archived (not vice versa)
+- Fixed section mapping: now reads correct section number from course_sections table
+- Restricted individual replace to resource modules only (quiz/assign not supported)
+- Implemented courseid preselection when navigating from update page to bulk import
+- Removed duplicate docblock in import_executor.php
+
+### Why
+Critical fixes prevent data loss if creation fails, ensure activities are placed in correct sections, and prevent broken modules from being created. Courseid preselection improves UX when switching between individual and bulk update modes.
+
+### Files touched
+- `local_sceh_importer/update_file.php` — Create before archive, fix section mapping, restrict to resource modules
+- `local_sceh_importer/update.php` — Only show replace button for resource modules
+- `local_sceh_importer/index.php` — Accept and pass courseid parameter to form
+- `local_sceh_importer/classes/form/upload_form.php` — Use preselected courseid if provided
+- `local_sceh_importer/classes/local/import_executor.php` — Removed duplicate docblock
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added error_unsupportedmoduletype string
+
+---
+
+## [2026-02-18] — Add YouTube and external link support via links.csv
+
+**Commit**: `e23ee8f` on branch `front-end-explorations`
+
+### What changed
+- Added links.csv support for YouTube videos and external URLs in any content folder
+- CSV format: order, title, url, type, audience, notes
+- YouTube videos are automatically embedded, other URLs open in new window
+- Links sorted by order column with row number as tiebreaker
+- No URL validation (format or reachability) - accepts any URL
+- Type column is metadata only (not enforced)
+- Added example links.csv to downloadable template
+- Updated README with links.csv documentation
+
+### Why
+Users can now add YouTube videos and external resources without uploading files. Keeps links organized alongside related content in each folder.
+
+### Files touched
+- `local_sceh_importer/classes/local/package_scanner.php` — Added parse_links_csv method, detect and process links.csv files
+- `local_sceh_importer/classes/local/import_executor.php` — Added build_url_moduleinfo method, create URL activities
+- `local_sceh_importer/templates/course-package-template/links.csv` — Example CSV with YouTube and external links
+- `local_sceh_importer/templates/course-package-template/README.txt` — Added links.csv documentation
+- `local_sceh_importer/templates/course-package-template.zip` — Updated template with links.csv
+
+---
+
 ## [2026-02-18] — Fix critical security and validation issues
 
 **Commit**: `PENDING` on branch `front-end-explorations`
@@ -48,6 +98,7 @@ Users no longer need to delete README.txt or worry about OS metadata files. Temp
 - `local_sceh_importer/classes/local/package_scanner.php` — Auto-ignore metadata files
 - `local_sceh_importer/index.php` — Show template version after validation
 - `local_sceh_importer/lang/en/local_sceh_importer.php` — Added template version string
+
 - `local_sceh_importer/templates/course-package-template.zip` — Regenerated with updates
 - `docs/RELEASE_NOTES.md` — Added this release entry
 

@@ -143,14 +143,22 @@ if (empty($structure)) {
                     html_writer::tag('small', s($activity['idnumber']), ['class' => 'text-muted']);
             }
             
-            $replaceurl = new moodle_url('/local/sceh_importer/update_file.php', [
-                'courseid' => $courseid,
-                'cmid' => $activity['cmid'],
-            ]);
-            $replacebutton = html_writer::tag('a', get_string('replace', 'local_sceh_importer'), [
-                'href' => $replaceurl,
-                'class' => 'btn btn-sm btn-secondary',
-            ]);
+            // Only show replace button for resource modules
+            $replacebutton = '';
+            if ($activity['modname'] === 'resource') {
+                $replaceurl = new moodle_url('/local/sceh_importer/update_file.php', [
+                    'courseid' => $courseid,
+                    'cmid' => $activity['cmid'],
+                ]);
+                $replacebutton = html_writer::tag('a', get_string('replace', 'local_sceh_importer'), [
+                    'href' => $replaceurl,
+                    'class' => 'btn btn-sm btn-secondary',
+                ]);
+            } else {
+                $replacebutton = html_writer::tag('span', get_string('notsupported', 'moodle'), [
+                    'class' => 'text-muted small',
+                ]);
+            }
             
             $table->data[] = [
                 $sectioncell,

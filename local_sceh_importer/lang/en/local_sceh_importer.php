@@ -137,6 +137,7 @@ $string['backtoupdate'] = 'Back to update page';
 $string['error_archivefailed'] = 'Could not archive the existing activity. Please try again.';
 $string['error_invalidfiletype'] = 'File type ".{$a}" is not allowed. Please upload a PDF, Word, PowerPoint, CSV, or media file.';
 $string['error_filetoobig'] = 'File is too large. Maximum size is {$a}.';
+$string['error_unsupportedmoduletype'] = 'Individual file replacement is only supported for resource modules. Module type "{$a}" cannot be replaced this way.';
 $string['updateexisting'] = 'Update existing course';
 $string['downloadtemplate'] = 'Download folder template';
 $string['downloadtemplatehelp'] = 'Use this template to organize your files before zipping';

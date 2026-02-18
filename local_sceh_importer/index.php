@@ -75,11 +75,15 @@ foreach ($courses as $course) {
     $coursefullnames[] = trim((string)$course->fullname);
 }
 
+// Get preselected courseid from URL parameter
+$preselectedcourseid = optional_param('courseid', 0, PARAM_INT);
+
 $mform = new upload_form(null, [
     'courses' => $courseoptions,
     'programs' => $programoptions,
     'programnames' => $programnames,
     'coursefullnames' => $coursefullnames,
+    'preselectedcourseid' => $preselectedcourseid,
 ]);
 
 if ($mform->is_cancelled()) {

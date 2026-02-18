@@ -31,6 +31,7 @@ class upload_form extends \moodleform {
         $mform = $this->_form;
         $courses = $this->_customdata['courses'] ?? [];
         $programs = $this->_customdata['programs'] ?? [];
+        $preselectedcourseid = (int)($this->_customdata['preselectedcourseid'] ?? 0);
         $courseoptions = [0 => get_string('selecttargetcourse', 'local_sceh_importer')] + $courses;
         $programoptions = $programs;
 
@@ -51,7 +52,11 @@ class upload_form extends \moodleform {
         $mform->setDefault('coursemode', !empty($courses) ? 'existing' : 'new');
 
         $mform->addElement('select', 'targetcourseid', get_string('targetcourse', 'local_sceh_importer'), $courseoptions);
-        $mform->setDefault('targetcourseid', !empty($courses) ? (int)array_key_first($courses) : 0);
+        // Use preselected courseid if provided and valid, otherwise use first course
+        $defaultcourseid = ($preselectedcourseid > 0 && isset($courses[$preselectedcourseid])) 
+            ? $preselectedcourseid 
+            : (!empty($courses) ? (int)array_key_first($courses) : 0);
+        $mform->setDefault('targetcourseid', $defaultcourseid);
         $mform->hideIf('targetcourseid', 'coursemode', 'eq', 'new');
 
         $mform->addElement('text', 'newcoursefullname', get_string('newcoursefullname', 'local_sceh_importer'), ['size' => 80]);

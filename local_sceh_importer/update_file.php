@@ -66,14 +66,14 @@ if ($confirm && confirm_sesskey()) {
         throw new moodle_exception('error_importexpired', 'local_sceh_importer');
     }
     
+    // Only support resource module replacement
+    if ($cm->modname !== 'resource') {
+        throw new moodle_exception('error_unsupportedmoduletype', 'local_sceh_importer', '', $cm->modname);
+    }
+    
     try {
         $executor = new import_executor();
         $versionedidnumber = $cm->idnumber . '-V' . time();
-        
-        $archived = $executor->archive_existing_activity($cmid, $cm->idnumber, $cm->modname);
-        if (!$archived) {
-            throw new moodle_exception('error_archivefailed', 'local_sceh_importer');
-        }
         
         $usercontext = context_user::instance($USER->id);
         $fs = get_file_storage();
@@ -88,10 +88,13 @@ if ($confirm && confirm_sesskey()) {
         $filepath = $tempdir . '/' . $uploadedfile->get_filename();
         $uploadedfile->copy_content_to($filepath);
         
+        // Get correct section number from course_sections table
+        $section = $DB->get_record('course_sections', ['id' => $cm->section], 'section', MUST_EXIST);
+        
         $moduleinfo = new stdClass();
         $moduleinfo->course = $courseid;
         $moduleinfo->coursemodule = 0;
-        $moduleinfo->section = $cm->sectionnum;
+        $moduleinfo->section = (int)$section->section;
         $moduleinfo->module = $cm->module;
         $moduleinfo->modulename = $cm->modname;
         $moduleinfo->instance = 0;
@@ -104,14 +107,18 @@ if ($confirm && confirm_sesskey()) {
         $moduleinfo->visible = $cm->visible;
         $moduleinfo->visibleoncoursepage = $cm->visibleoncoursepage;
         $moduleinfo->cmidnumber = $versionedidnumber;
+        $moduleinfo->files = $savedpreview['draftitemid'];
+        $moduleinfo->display = RESOURCELIB_DISPLAY_AUTO;
+        $moduleinfo->printintro = 0;
         
-        if ($cm->modname === 'resource') {
-            $moduleinfo->files = $savedpreview['draftitemid'];
-            $moduleinfo->display = RESOURCELIB_DISPLAY_AUTO;
-            $moduleinfo->printintro = 0;
-        }
-        
+        // Create new module first
         $newcm = create_module($moduleinfo);
+        
+        // Only archive after successful creation
+        $archived = $executor->archive_existing_activity($cmid, $cm->idnumber, $cm->modname);
+        if (!$archived) {
+            debugging('Failed to archive old activity cmid=' . $cmid, DEBUG_DEVELOPER);
+        }
         
         $execution = [
             'success' => true,

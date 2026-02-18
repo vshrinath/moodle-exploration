@@ -586,14 +586,6 @@ class import_executor {
     }
 
     /**
-     * Archive an existing activity module before importing a versioned replacement.
-     *
-     * @param int $cmid
-     * @param string $originalidnumber
-     * @param string $originalmodname
-     * @return bool
-     */
-    /**
      * Archive an existing activity by hiding it and prefixing its name.
      *
      * @param int $cmid
