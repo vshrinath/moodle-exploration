@@ -313,3 +313,108 @@ Shared execution log for workflow simulations with consistent pass/fail criteria
 - Severity: Low
 - Owner: Test automation scripts
 - Notes: For CLI `add_moduleinfo` quiz creation in this environment, using `quizpassword` is required; setting `password` directly still produced `NULL` on insert. UI flow is expected to set the correct field.
+
+### WF-05: Program Owner Learning Design Configuration
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass (after fix)
+
+**Pass Criteria**
+- [x] Competencies can be configured and linked to course context.
+- [x] Completion settings can be configured and persisted.
+- [x] Badge rules can be configured and persisted.
+- [x] Stream-choice logic can be configured (choice activity created).
+
+**Execution Notes**
+1. Baseline capability checks showed Program Owner could not configure competencies, badges, or stream-choice logic.
+2. Applied missing Program Owner capabilities for WF-05:
+   - competency management (`moodle/competency:*` subset)
+   - choice activity creation (`mod/choice:addinstance`)
+   - badge configuration (`moodle/badges:*` subset)
+3. Encountered competency linking blocker:
+   - `add_competency_to_course` returned `Course or activity not accessible`.
+4. Applied minimal fix path:
+   - Created narrow system role `sceh_program_owner_competency` with only competency capabilities.
+   - Assigned that role to `mock.programowner` at system context.
+   - Assigned `editingteacher` role to `mock.programowner` at test course context for API access checks.
+5. Configured WF-05 artifacts on course `WF04_DRAFT_20260218-160045-R1` (`courseid=1841`):
+   - enabled course completion
+   - linked competency to course
+   - created stream-choice activity
+   - created course badge with criteria
+
+**Evidence**
+- Capability baseline:
+  - Before fix: `DENY` for key WF-05 actions (`competencymanage`, `mod/choice:addinstance`, badge config caps).
+  - After fix: `ALLOW` at course context for:
+    - `moodle/competency:coursecompetencymanage`
+    - `moodle/competency:coursecompetencyconfigure`
+    - `mod/choice:addinstance`
+    - `moodle/badges:createbadge`
+    - `moodle/badges:configurecriteria`
+- Completion:
+  - `COURSE_COMPLETION_UPDATED COURSE=1841`
+  - persisted: `ENABLECOMPL=1`, `NOTIFY=1`
+- Competency link:
+  - initial error: `LINK_ERR Course or activity not accessible.`
+  - after role-context fix: `COURSE_COMP_LINKED COURSE=1841 COMP=1`
+  - persisted: `COURSE_COMP_COUNT 1` (`COMP=1`)
+- Stream-choice logic:
+  - first attempt failed due missing module visibility field
+  - fixed payload and created choice:
+    - `CHOICE_CREATED CMID=224 INSTANCE=2`
+  - persisted: `CHOICE_COUNT 1` (recent choice activity in course)
+- Badge rules:
+  - created course badge + criteria:
+    - `BADGE_CREATED ID=104 CRIT=161 COURSE=1841`
+  - persisted: `BADGE_COUNT 1` and `CRIT=1`
+
+**Defects/Blockers**
+- ID: `WF05-001`
+- Severity: High
+- Owner: Role/context model for Program Owner competency workflow
+- Notes: Category-scoped Program Owner role alone was insufficient for competency linking APIs; required additional system-level competency capability path and course-context access.
+
+- ID: `WF05-002`
+- Severity: Medium
+- Owner: Test harness payload defaults
+- Notes: `choice` module creation via CLI failed initially due missing `visible` in module payload; fixed by setting explicit visibility fields.
+
+### WF-05: Program Owner Learning Design Configuration (Re-run: Competency Creation Verification)
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Program Owner can create a competency framework.
+- [x] Program Owner can create competencies under that framework.
+- [x] Program Owner can link created competencies to managed course.
+
+**Execution Notes**
+1. Verified `mock.programowner` system-context competency capabilities were `ALLOW`.
+2. Executed framework creation as Program Owner.
+3. Executed competency creation as Program Owner.
+4. Linked newly created competency to managed course `1841`.
+5. Queried persisted records in `competency_framework`, `competency`, and `competency_coursecomp`.
+
+**Evidence**
+- Capability verification:
+  - `SYS_CAP moodle/competency:competencymanage ALLOW`
+  - `SYS_CAP moodle/competency:competencyview ALLOW`
+  - `SYS_CAP moodle/competency:coursecompetencymanage ALLOW`
+  - `SYS_CAP moodle/competency:coursecompetencyconfigure ALLOW`
+- Program Owner creation run:
+  - `PO_FRAMEWORK_CREATED ID=7 IDNUMBER=WF05-PO-FRAMEWORK-20260218-112130`
+  - `PO_COMP_CREATED ID=326 IDNUMBER=WF05-PO-COMP-20260218-112130`
+  - `PO_COMP_LINKED COURSE=1841 COMP=326`
+- Persistence verification:
+  - `VERIFY_FRAMEWORK 7 WF05-PO-FRAMEWORK-20260218-112130`
+  - `VERIFY_COMP 326 FW=7 WF05-PO-COMP-20260218-112130`
+  - `VERIFY_LINK 592 COURSE=1841 COMP=326`
+
+**Defects/Blockers**
+- None for competency creation/link flow after applying the competency role/context fix.
