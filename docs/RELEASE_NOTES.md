@@ -4,6 +4,33 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Add activity-selection step before import with status-based defaults
+
+**Commit**: `PENDING` on branch `front-end-explorations`
+
+### What changed
+- Added a pre-import activity selection step after successful ZIP validation.
+- Added activity status detection against the target course:
+  - `New` activities are pre-selected.
+  - `Existing` activities are unselected by default.
+- Import now applies only selected activity idnumbers from the validation result.
+- Added a guard error when no activities are selected for import.
+- Added visual polish for selection table:
+  - Compact checkbox alignment
+  - Status badges
+  - Existing rows dimmed for clearer replacement decisions
+
+### Why
+Program owners need a clear confirmation step before writing changes, especially when re-importing packages into partially populated courses. This reduces accidental overwrites and makes update intent explicit.
+
+### Files touched
+- `local_sceh_importer/index.php` — Added selection-table rendering, status detection, and selected-idnumber import filtering
+- `local_sceh_importer/lang/en/local_sceh_importer.php` — Added selection/status/error strings
+- `local_sceh_importer/styles.css` — Added selection-table visual styling for status and readability
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-17] — Tighten importer naming checks and remove confusing program dropdown option
 
 **Commit**: `PENDING` on branch `front-end-explorations`

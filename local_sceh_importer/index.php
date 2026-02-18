@@ -33,6 +33,7 @@ $PAGE->set_url(new moodle_url('/local/sceh_importer/index.php'));
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('importpage', 'local_sceh_importer'));
 $PAGE->set_heading(get_string('importpage', 'local_sceh_importer'));
+$PAGE->requires->css(new moodle_url('/local/sceh_importer/styles.css'));
 
 $courses = $DB->get_records_sql(
     'SELECT id, idnumber, shortname, fullname
@@ -108,6 +109,20 @@ if (optional_param('doimport', 0, PARAM_BOOL)) {
         'errors' => (array)($savedpreview['errors'] ?? []),
         'warnings' => (array)($savedpreview['warnings'] ?? []),
     ];
+
+    $selectedactivityids = optional_param_array('selectedactivityids', [], PARAM_ALPHANUMEXT);
+    $selectedlookup = array_fill_keys($selectedactivityids, true);
+    $selectedactivities = [];
+    foreach ((array)$preview['manifest']['activities'] as $activity) {
+        $idnumber = (string)($activity['idnumber'] ?? '');
+        if ($idnumber !== '' && isset($selectedlookup[$idnumber])) {
+            $selectedactivities[] = $activity;
+        }
+    }
+    if (empty($selectedactivities)) {
+        throw new moodle_exception('error_noselectedactivities', 'local_sceh_importer');
+    }
+    $preview['manifest']['activities'] = $selectedactivities;
 
     try {
         $executor = new import_executor();
@@ -268,6 +283,7 @@ if ($data = $mform->get_data()) {
         'yaml' => $manifestbuilder->to_yaml($manifest),
         'errors' => $validation['errors'],
         'warnings' => $validation['warnings'],
+        'targetcourseid' => $targetcourseid,
     ];
 
     $SESSION->$previewkey = [
@@ -304,15 +320,69 @@ if ($preview !== null) {
     }
 
     if (empty($preview['errors'])) {
+        $existingactivityrows = $DB->get_records_sql(
+            'SELECT cm.idnumber
+               FROM {course_modules} cm
+               JOIN {modules} m ON m.id = cm.module
+              WHERE cm.course = :courseid
+                AND cm.deletioninprogress = 0
+                AND cm.idnumber <> \'\'',
+            ['courseid' => (int)($preview['targetcourseid'] ?? 0)]
+        );
+        $existingactivitylookup = [];
+        foreach ($existingactivityrows as $row) {
+            $existingactivitylookup[(string)$row->idnumber] = true;
+        }
+
         $importurl = new moodle_url('/local/sceh_importer/index.php');
-        $importbutton = html_writer::tag('button', get_string('importbutton', 'local_sceh_importer'), [
-            'type' => 'submit',
-            'class' => 'btn btn-primary',
-        ]);
+        echo $OUTPUT->heading(get_string('selectactivitiesheading', 'local_sceh_importer'), 4);
+
+        $selectiontable = new html_table();
+        $selectiontable->attributes['class'] = 'generaltable sceh-import-selection-table';
+        $selectiontable->head = ['', get_string('activities', 'local_sceh_importer'), 'Type', get_string('status', 'local_sceh_importer')];
+        foreach ((array)$preview['manifest']['activities'] as $activity) {
+            $idnumber = (string)($activity['idnumber'] ?? '');
+            $title = (string)($activity['title'] ?? $idnumber);
+            $type = (string)($activity['type'] ?? get_string('empty', 'local_sceh_importer'));
+            $isexisting = $idnumber !== '' && !empty($existingactivitylookup[$idnumber]);
+            $statuslabel = $isexisting ? get_string('status_existing', 'local_sceh_importer') : get_string('status_new', 'local_sceh_importer');
+            $checkboxattrs = [
+                'type' => 'checkbox',
+                'name' => 'selectedactivityids[]',
+                'value' => $idnumber,
+            ];
+            if (!$isexisting) {
+                $checkboxattrs['checked'] = 'checked';
+            }
+            $checkbox = html_writer::empty_tag('input', $checkboxattrs);
+            $titlehtml = s($title) . html_writer::empty_tag('br') . html_writer::tag('small', s($idnumber), ['class' => 'text-muted']);
+            $statusbadgeclass = $isexisting ? 'badge rounded-pill text-bg-secondary' : 'badge rounded-pill text-bg-success';
+            $statusbadge = html_writer::tag('span', s($statuslabel), ['class' => $statusbadgeclass]);
+
+            $checkboxcell = new html_table_cell($checkbox);
+            $checkboxcell->attributes['class'] = 'sceh-import-select-cell';
+            $titlecell = new html_table_cell($titlehtml);
+            $typecell = new html_table_cell(s($type));
+            $statuscell = new html_table_cell($statusbadge);
+
+            $row = new html_table_row([$checkboxcell, $titlecell, $typecell, $statuscell]);
+            if ($isexisting) {
+                $row->attributes['class'] = 'sceh-import-existing-row';
+            } else {
+                $row->attributes['class'] = 'sceh-import-new-row';
+            }
+            $selectiontable->data[] = $row;
+        }
+
         echo html_writer::start_tag('form', ['method' => 'post', 'action' => $importurl->out(false)]);
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'doimport', 'value' => 1]);
-        echo $importbutton;
+        echo html_writer::table($selectiontable);
+        echo html_writer::tag('div', get_string('selectactivitieshelp', 'local_sceh_importer'), ['class' => 'text-muted mb-3']);
+        echo html_writer::tag('button', get_string('importbutton', 'local_sceh_importer'), [
+            'type' => 'submit',
+            'class' => 'btn btn-primary',
+        ]);
         echo html_writer::end_tag('form');
     } else {
         echo html_writer::tag('button', get_string('importdisabled', 'local_sceh_importer'), [
