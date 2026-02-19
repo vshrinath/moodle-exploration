@@ -48,10 +48,10 @@
 SERVICE_FEATURE_DETAIL
 
 Examples:
-SUPABASE_JWT_SECRET
-MEILISEARCH_HOST
-AWS_S3_BUCKET_NAME
-ZOHO_CAMPAIGNS_API_KEY
+JWT_SECRET
+SEARCH_HOST
+STORAGE_BUCKET_NAME
+EMAIL_API_KEY
 ```
 
 ### Required documentation
@@ -87,7 +87,7 @@ docker compose down -v        # Stop and remove volumes (destructive)
 ### What to monitor
 - **Application:** Error rate, response time (p50, p95, p99), request volume
 - **Infrastructure:** CPU, memory, disk usage, container health
-- **External services:** Meilisearch reachability, Supabase auth, S3 availability
+- **External services:** Search engine, auth provider, storage availability
 - **User-facing:** Core Web Vitals (LCP, CLS, FID), uptime
 
 ### Alerting rules

@@ -4,6 +4,32 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Add and align local skills library for Moodle workflow execution
+
+### What changed
+- Added a broader local `skills/` library for coding, quality, ops, product decomposition, and autonomous execution support.
+- Updated core implementation/testing skills to reflect this Moodle setup:
+  - `@dev`: Moodle plugin APIs, script patterns, Docker execution defaults
+  - `@qa`: workflow-first validation using `scripts/config`, `scripts/verify`, and `scripts/test`
+  - `@frontend-perf`: Moodle block/plugin frontend constraints and AMD-focused guidance
+  - `@performance`: Moodle backend/plugin performance priorities
+- Expanded skill index and README for discoverability and cross-skill sequencing.
+
+### Why
+Workflow simulation, role-based validation, and plugin-centric changes now drive day-to-day development in this repository. Skill guidance needed to match the actual Moodle stack and execution model so implementation and testing decisions remain consistent across contributors/tools.
+
+### Files touched
+- `skills/INDEX.md` — Added index and workflow mapping for local skills
+- `skills/README.md` — Added skills system overview and usage patterns
+- `skills/coding/dev.md` — Added Moodle project profile and execution defaults
+- `skills/coding/qa.md` — Added Moodle-specific testing layers and role/workflow checks
+- `skills/coding/frontend-performance.md` — Added Moodle frontend profile for performance work
+- `skills/coding/performance.md` — Added Moodle backend profile for performance work
+- `skills/*` (additional coding/meta/ops/product files) — Added supporting skill references
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-19] — Implement Advanced Deep-Linking and High-Fidelity Backend Redesign
 
 ### What changed
