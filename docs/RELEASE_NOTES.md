@@ -4,6 +4,23 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Switch to manual trainer unlock model for Allied Health workflow
+
+### What changed
+- Changed Allied Health workflow from automatic attendance-based unlock to manual trainer control
+- All quizzes, assignments, and assessments now start hidden and Trainer shows them via eye icon
+- Removed Restrict Access conditions from module activities (quizzes, assignments, OJT assessments, Final Assessment)
+- Trainer marks attendance AND manually shows/hides activities based on attendance status and session readiness
+- Updated workflow documentation throughout: setup steps, trainer workflow, learner journey, access logic table, troubleshooting, and checklist
+
+### Why
+Attendance timing is variable (may be recorded during session, after session, or elsewhere). Manual unlock gives Trainer control over when content becomes available regardless of when attendance is recorded, avoiding unintended unlocks for absent/late/excused learners and supporting flexible attendance workflows.
+
+### Files touched
+- `docs/ALLIED_HEALTH_FOUNDATIONAL_COURSE_WORKFLOW.md` — Updated Steps 6, 8, 9, 10, 11, Trainer workflow section, Learner journey section, Access/unlock logic table, troubleshooting section, and first-time setup checklist to reflect manual unlock model
+
+---
+
 ## [2026-02-19] — Grant trainer visibility control permissions
 
 ### What changed

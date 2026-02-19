@@ -13,14 +13,14 @@
 | Delivery | Instructor-Led Training (ILT) with online and offline assessments |
 | Attendance tracking | Moodle Attendance plugin (presence recording only) |
 | Session scheduling | Outside Moodle — email, calendar, or notice board |
-| Quiz/Assignment access | Unlocked by Trainer via attendance marking (Restrict Access) |
+| Quiz/Assignment access | Manually shown by Trainer after marking attendance (visibility control) |
 | Trainer resources | Lesson plans, roleplay scripts, facilitator guides — always hidden from learners |
 | Learner content | Teaching material, reference guides — Trainer controls when to release |
 | External resources | YouTube videos, URLs — embedded or linked within modules |
 | Cross-module assessments | OJT/practical evaluations spanning multiple modules, scanned reports uploaded as feedback |
 | Cohort model | One permanent course, cohorts enrolled and unenrolled each cycle |
 | Roles involved | Program Owner, Trainer, Learner, System Admin |
-| Completion leads to | Stream course unlock (Nursing / OT / Optometry Tech) |
+| Completion leads to | Stream course access (Nursing / OT / Optometry Tech) |
 
 ---
 
@@ -41,7 +41,7 @@ Allied Health — Foundational  [one permanent course]
 │     ├── 🔗 Pre-session: Introduction to Eye Anatomy (YouTube — Embed)
 │     ├── Attendance: Eye Anatomy Class
 │     ├── 🔗 Post-session: Eye Anatomy Reference Chart (URL — New tab)
-│     └── Quiz: Eye Anatomy MCQ  🔒 unlocks when attendance marked
+│     └── Quiz: Eye Anatomy MCQ  🔒 Trainer shows after marking attendance
 │
 ├── Module 2: Patient Handling
 │     ├── 📁 Trainer Resources        👁 Trainer only — always invisible to learners
@@ -54,11 +54,11 @@ Allied Health — Foundational  [one permanent course]
 │     │     └── Reference: WHO Safe Patient Handling Guidelines (URL)
 │     ├── 🔗 Pre-session: Safe Patient Handling Video (YouTube — Embed)
 │     ├── Attendance: Patient Handling Class
-│     └── Assignment: Practical Checklist  🔒 unlocks when attendance marked
+│     └── Assignment: Practical Checklist  🔒 Trainer shows after marking attendance
 │
 ├── ── Cross-Module Assessment 1: Modules 1 + 2 ──────────────────
 │     └── Assignment: OJT Assessment — Eye Anatomy & Patient Handling
-│           🔒 unlocks when Module 1 Quiz AND Module 2 Assignment complete
+│           🔒 Trainer shows when Module 1 Quiz AND Module 2 Assignment complete
 │           📎 Trainer uploads scanned OJT report as feedback file
 │
 ├── Module 3: Infection Control
@@ -71,7 +71,7 @@ Allied Health — Foundational  [one permanent course]
 │     │     └── Reference: WHO Hand Hygiene Guidelines (URL)
 │     ├── 🔗 Pre-session: Infection Control in Clinical Settings (YouTube — Embed)
 │     ├── Attendance: Infection Control Class
-│     └── Quiz: Infection Control MCQ  🔒 unlocks when attendance marked
+│     └── Quiz: Infection Control MCQ  🔒 Trainer shows after marking attendance
 │
 ├── Module 4: Documentation & Compliance
 │     ├── 📁 Trainer Resources        👁 Trainer only — always invisible to learners
@@ -83,15 +83,15 @@ Allied Health — Foundational  [one permanent course]
 │     │     └── Reference: Compliance Checklist (PDF)
 │     ├── 🔗 Pre-session: Documentation Standards Overview (URL — New tab)
 │     ├── Attendance: Documentation Class
-│     └── Assignment: Sample Form Completion  🔒 unlocks when attendance marked
+│     └── Assignment: Sample Form Completion  🔒 Trainer shows after marking attendance
 │
 ├── ── Cross-Module Assessment 2: Modules 3 + 4 ──────────────────
 │     └── Assignment: OJT Assessment — Infection Control & Documentation
-│           🔒 unlocks when Module 3 Quiz AND Module 4 Assignment complete
+│           🔒 Trainer shows when Module 3 Quiz AND Module 4 Assignment complete
 │           📎 Trainer uploads scanned OJT report as feedback file
 │
 └── Final Assessment
-      └── Quiz: Foundational Final MCQ  🔒 unlocks when all modules and OJT assessments complete
+      └── Quiz: Foundational Final MCQ  🔒 Trainer shows when all modules and OJT assessments complete
 ```
 
 ---
@@ -152,7 +152,7 @@ First item in each module section — above all learner-facing content.
 
 > Completely invisible to learners — no lock icon shown. Program Owner can update files at any time without changing settings.
 
-> **Permission check:** Trainers need the `editingteacher` role (or equivalent with `moodle/course:manageactivities` capability) to show/hide the Module Content folders in Step 4. This is standard in Moodle — no additional capability configuration needed.
+> **Permission check:** Your `sceh_trainer` role must include `moodle/course:activityvisibility` and `moodle/course:manageactivities` so Trainers can show/hide Module Content folders and activities using the eye icon.
 
 ### Step 4 — Add Module Content Folder (one per module)
 
@@ -184,7 +184,7 @@ For each module, add pre-session and post-session reference materials:
      - **Open in new tab** — for external websites, PDFs, or guidelines
 3. Completion tracking: optional — set "Learner must view" if tracking is needed, leave untracked if supplementary
 
-**YouTube embed note:** Use full YouTube URLs (`https://www.youtube.com/watch?v=VIDEO_ID`), not shortened `youtu.be` links. Moodle auto-detects and embeds the player when Display is set to Embed.
+**YouTube embed note:** Use full YouTube URLs (`https://www.youtube.com/watch?v=VIDEO_ID`) for best compatibility. Shortened `youtu.be` links also work but may require manual embed code in some Moodle versions. Moodle auto-detects and embeds the player when Display is set to Embed.
 
 ### Step 6 — Add Attendance Activities (one per module)
 
@@ -196,8 +196,10 @@ For each of the 4 modules:
    - Grade: pass/fail
    - Student recording: **Disabled**
 3. Statuses: P = Present, A = Absent, L = Late, E = Excused
-4. Completion tracking: **Student must receive a grade**
+4. Completion tracking: **Student must receive a grade to complete this activity**
 5. Save — Trainer adds sessions before each class
+
+> **Note:** Attendance activities are used for tracking and reporting only. Trainers manually show/hide quizzes/assignments after marking attendance, giving them control over when content becomes visible regardless of attendance status.
 
 ### Step 7 — Build Question Bank
 
@@ -213,9 +215,11 @@ For each of the 4 modules:
    - Open/close dates: **leave blank**
    - Time limit: 30 minutes, Attempts: 2, Pass grade: 60%
    - Review: show answers only after all attempts used
+   - Availability: **Hide from learners** (Trainer will show after marking attendance)
 3. Add 20 random questions from category pool
 4. Completion tracking: must achieve passing grade
-5. **Restrict access → Activity completion → corresponding Attendance activity must be complete**
+
+> **Note:** Quizzes start hidden. Trainer shows them after marking attendance, giving control over when learners can attempt based on attendance status and session readiness.
 
 ### Step 9 — Add Module Assignment Activities (Modules 2 and 4)
 
@@ -223,9 +227,11 @@ For each of the 4 modules:
 2. Configure:
    - Submission type: **None**
    - Grading method: Rubric (recommended), Pass grade: 60%
+   - Availability: **Hide from learners** (Trainer will show after marking attendance)
 3. Define rubric criteria per module
 4. Completion tracking: must receive a grade
-5. **Restrict access → Activity completion → corresponding Attendance activity must be complete**
+
+> **Note:** Assignments start hidden. Trainer shows them after marking attendance, giving control over when learners can be evaluated based on attendance status and session readiness.
 
 ### Step 10 — Add Cross-Module OJT Assessment Activities
 
@@ -240,18 +246,14 @@ Place these in the dedicated Cross-Module Assessment sections.
    - Submission type: **None** — Trainer evaluates and uploads scanned report
    - Grading method: **Rubric** spanning criteria from both Module 1 and Module 2
    - Maximum grade: 100, Pass grade: 60%
+   - Availability: **Hide from learners** (Trainer will show when learners are ready)
 3. Completion tracking: must receive a grade
-4. **Restrict access → All of the following must be complete:**
-   - Module 1 Quiz (Eye Anatomy MCQ) ✅
-   - Module 2 Assignment (Practical Checklist) ✅
+
+> **Note:** OJT assessments start hidden. Trainer shows them when both prerequisite module activities are complete and learners are ready for cross-module evaluation.
 
 **Cross-Module Assessment 2 (after Module 4):**
 
-Same setup, spanning Module 3 and Module 4 criteria.
-
-- **Restrict access → All of the following must be complete:**
-  - Module 3 Quiz (Infection Control MCQ) ✅
-  - Module 4 Assignment (Sample Form Completion) ✅
+Same setup, spanning Module 3 and Module 4 criteria. Start hidden, Trainer shows when Module 3 and Module 4 activities are complete.
 
 ### Step 11 — Add Final Assessment Quiz
 
@@ -260,15 +262,11 @@ Same setup, spanning Module 3 and Module 4 criteria.
    - Name: `Foundational Final Assessment`
    - Open/close dates: **leave blank**
    - Time limit: 45 minutes, Attempts: 2, Pass grade: 60%
+   - Availability: **Hide from learners** (Trainer will show when all prerequisites complete)
 3. Add 30 random questions drawing from all 4 question bank categories
 4. Completion tracking: must achieve passing grade
-5. **Restrict access → All of the following must be complete:**
-   - Module 1 Quiz ✅
-   - Module 2 Assignment ✅
-   - Cross-Module OJT Assessment 1 ✅
-   - Module 3 Quiz ✅
-   - Module 4 Assignment ✅
-   - Cross-Module OJT Assessment 2 ✅
+
+> **Note:** Final Assessment starts hidden. Trainer shows it when all module activities and both OJT assessments are complete, giving control over final assessment timing.
 
 ### Step 12 — Configure Gradebook
 
@@ -339,13 +337,14 @@ To release: Course → Turn editing on → click the **eye icon** on the Module 
 
 To hide again if needed: click the eye icon again — folder returns to hidden state.
 
-### On the Day — Mark Attendance
-
-**This triggers quiz/assignment unlock for each learner.**
+### On the Day — Mark Attendance and Show Content
 
 1. Attendance activity → open the session → mark each learner: P / A / L / E → save
-2. Learners marked Present → relevant quiz or assignment unlocks immediately
-3. Learners marked Absent → stays locked until makeup session
+2. After marking attendance, manually show/hide quizzes and assignments:
+   - Turn editing on → click eye icon on quiz/assignment to make visible
+   - Eye icon visibility is activity-wide (applies to all enrolled learners)
+   - If absentees need a delayed attempt, keep the activity hidden for everyone until makeup, or use a separate makeup activity/attempt policy
+3. This gives Trainer control over when content becomes visible regardless of attendance status
 
 ### Grading Module Assignments (Modules 2 and 4)
 
@@ -373,7 +372,7 @@ To hide again if needed: click the eye icon again — folder returns to hidden s
 **What the learner sees:**
 - OJT Assignment grade and feedback comment
 - Downloadable scanned report PDF
-- If passed: Final Assessment unlocks (if all other prerequisites are also met)
+- If passed: Final Assessment becomes available (if all other prerequisites are also met)
 
 ### Monitoring Quiz Performance
 
@@ -401,7 +400,7 @@ Course → Quiz → **Results → Statistics** — question-level failure analys
 
 - Attend at communicated date, time, and room
 - No Moodle action required
-- Trainer marks attendance → quiz or assignment for that module unlocks automatically
+- Trainer marks attendance and manually shows quiz or assignment when ready
 
 ### Step 4 — Access Module Content as Reference
 
@@ -411,26 +410,26 @@ Course → Quiz → **Results → Statistics** — question-level failure analys
 
 ### Step 5 — Attempt Module Quiz (Modules 1 and 3)
 
-- Unlocks after attendance is marked
+- Trainer shows quiz after marking attendance
 - 30-minute limit, 2 attempts, 60% pass grade
 - Score shown immediately after submission
 
 ### Step 6 — Practical Assignment (Modules 2 and 4)
 
-- Unlocks after attendance is marked
+- Trainer shows assignment after marking attendance
 - Trainer observes and grades — no learner submission
 - Learner receives email with score and rubric feedback once graded
 
 ### Step 7 — Cross-Module OJT Assessment
 
-- Unlocks after both prerequisite module activities are complete
+- Trainer shows OJT assessment when both prerequisite module activities are complete
 - Learner participates in OJT or simulation (scheduled outside Moodle)
 - Trainer grades and uploads scanned evaluation report in Moodle
 - Learner receives email notification → can view grade, feedback, and download the scanned report
 
 ### Step 8 — Final Assessment
 
-- Unlocks only after all module activities and both OJT assessments are complete
+- Trainer shows Final Assessment when all module activities and both OJT assessments are complete
 - 45-minute limit, 2 attempts, 60% pass grade
 - Draws from all 4 topic areas
 
@@ -460,7 +459,7 @@ After completing the Foundational course, learners choose their specialization s
 | Module Content | Open folder → add/replace files | Immediate — visible to learners if folder is already released |
 | URL resources | Edit activity → update URL | Immediate |
 | Question bank | Question Bank → add/edit questions | Applies to next quiz attempt |
-| OJT rubric criteria | Assignment settings → edit rubric | Applies to ungrades submissions |
+| OJT rubric criteria | Assignment settings → edit rubric | Applies to ungraded submissions |
 
 ### During Cohort — Regular Monitoring
 
@@ -473,12 +472,13 @@ After completing the Foundational course, learners choose their specialization s
 | Situation | Action |
 |---|---|
 | Module Content folder not yet released | Check with Trainer — learners can't access reference material |
-| Attendance not marked after session | Follow up with Trainer — all downstream activities stay locked |
-| OJT assessment not graded | Follow up with Trainer — Final Assessment remains locked for affected learners |
+| Attendance not marked after session | Follow up with Trainer — Trainer needs attendance record to decide when to show activities |
+| Quiz/assignment still hidden after attendance marked | Check with Trainer — manual visibility control may be intentional (e.g., waiting for makeup session) |
+| OJT assessment not graded | Follow up with Trainer — Final Assessment can't be shown until OJT is complete |
 | Scanned report not uploaded | Remind Trainer — learner grade is complete but report is missing from record |
 | Assignment not graded | Follow up with Trainer |
 | Learner failed quiz twice | Allow additional attempt (System Admin) or flag for remediation |
-| Learner absent | Arrange makeup session — all locks clear after makeup attendance is marked |
+| Learner absent | Arrange makeup session — Trainer shows quiz/assignment after makeup attendance is marked |
 
 ### End of Cohort
 
@@ -504,11 +504,16 @@ After completing the Foundational course, learners choose their specialization s
 
 ### Common Issues and Solutions
 
-**Learner says quiz is still locked after attendance marked:**
-- Verify attendance was saved (not just previewed in "Take attendance" screen)
-- Check learner was marked Present (P) — Absent (A) or Late (L) won't unlock
+**Learner says quiz is still hidden after attendance marked:**
+- Verify Trainer has clicked the eye icon to show the quiz (attendance marking alone doesn't make it visible)
+- Check quiz is set to visible (eye icon should be open, not crossed out)
 - Refresh learner's browser (Ctrl+F5 or Cmd+Shift+R)
-- Check Restrict Access conditions on quiz: Attendance activity must show "complete"
+- Verify learner is enrolled in the course
+
+**Quiz visible for absent learner:**
+- Manual visibility model means Trainer controls visibility regardless of attendance status
+- This is expected behavior — Trainer can choose to show content to absent learners if needed
+- If this was unintentional, Trainer can hide the quiz again by clicking the eye icon
 
 **Module Content folder not visible to learners:**
 - Trainer must click the eye icon to release (folder is hidden by default)
@@ -521,14 +526,14 @@ After completing the Foundational course, learners choose their specialization s
 - Upload in **Feedback files** section, not in Comments field
 - Ensure file is selected before clicking "Save changes"
 
-**Final Assessment not unlocking:**
-- All 6 prerequisites must show green checkmark in Restrict Access section
-- Check both OJT assessments are graded (not just submitted — no submission required)
-- Verify all module quizzes show passing grade (≥60%)
-- Verify all module assignments are graded
+**Final Assessment not visible:**
+- Verify Trainer has clicked the eye icon to show the Final Assessment
+- Check all 6 prerequisites are complete (module quizzes, assignments, and both OJT assessments)
+- Trainer controls when Final Assessment becomes visible — may be intentionally waiting for all learners to complete prerequisites
 
 **Trainer can't see Trainer Resources folder:**
-- Verify Trainer has `editingteacher` role (not just `teacher`)
+- Verify user has `sceh_trainer` role and is enrolled in course
+- Verify role capabilities include `moodle/course:activityvisibility` and `moodle/course:manageactivities`
 - Check folder has correct Restrict Access: User profile → Role contains Trainer
 - Trainer must be enrolled in course with correct role
 
@@ -595,13 +600,13 @@ Use this checklist when setting up the course for the first time:
 - [ ] Questions reviewed for accuracy and clarity
 
 ### Restrict Access Conditions
-- [ ] Module 1 Quiz: unlocks when Module 1 Attendance complete
-- [ ] Module 2 Assignment: unlocks when Module 2 Attendance complete
-- [ ] Module 3 Quiz: unlocks when Module 3 Attendance complete
-- [ ] Module 4 Assignment: unlocks when Module 4 Attendance complete
-- [ ] Cross-Module OJT 1: unlocks when Module 1 Quiz AND Module 2 Assignment complete
-- [ ] Cross-Module OJT 2: unlocks when Module 3 Quiz AND Module 4 Assignment complete
-- [ ] Final Assessment: unlocks when all 6 prerequisites complete
+- [ ] Module 1 Quiz: set to Hidden (Trainer shows after attendance)
+- [ ] Module 2 Assignment: set to Hidden (Trainer shows after attendance)
+- [ ] Module 3 Quiz: set to Hidden (Trainer shows after attendance)
+- [ ] Module 4 Assignment: set to Hidden (Trainer shows after attendance)
+- [ ] Cross-Module OJT 1: set to Hidden (Trainer shows when Module 1 + 2 complete)
+- [ ] Cross-Module OJT 2: set to Hidden (Trainer shows when Module 3 + 4 complete)
+- [ ] Final Assessment: set to Hidden (Trainer shows when all prerequisites complete)
 
 ### Grading Configuration
 - [ ] Gradebook aggregation set to Weighted mean
@@ -625,7 +630,7 @@ Use this checklist when setting up the course for the first time:
 ### Testing (Critical)
 - [ ] Test as Trainer: can see Trainer Resources, can toggle Module Content visibility
 - [ ] Test as Learner: cannot see Trainer Resources, Module Content shows as hidden
-- [ ] Test unlock flow: create test attendance session → mark test learner Present → verify quiz unlocks
+- [ ] Test manual visibility flow: create test attendance session → mark test learner Present → Trainer shows quiz via eye icon → verify learner can access
 - [ ] Test OJT workflow: grade OJT assignment → upload test PDF as feedback file → verify learner can download
 - [ ] Test completion: mark all activities complete for test learner → verify badge awarded
 
@@ -656,7 +661,7 @@ Use this checklist when setting up the course for the first time:
 | Release Module Content folder to learners | | ✅ | | |
 | Add attendance sessions each cycle | | ✅ | | |
 | Conduct training and OJT assessments | | ✅ | | |
-| Mark attendance (triggers unlock) | | ✅ | | |
+| Mark attendance and show/hide activities | | ✅ | | |
 | Grade module assignments | | ✅ | | |
 | Grade OJT assessments + upload scanned report | | ✅ | | |
 | View pre/post-session reference materials | | | ✅ | |
@@ -690,19 +695,18 @@ Use this checklist when setting up the course for the first time:
 
 ---
 
-## Access and Unlock Logic
+## Access and Visibility Logic
 
 | Event | Trigger | Result |
 |---|---|---|
-| Trainer marks attendance — Present | Attendance activity graded | Module quiz or assignment unlocks for that learner |
-| Trainer marks attendance — Absent | Attendance activity graded | Quiz/assignment stays locked |
-| Makeup session attended | Trainer marks Present in makeup session | Quiz/assignment unlocks |
+| Trainer marks attendance | Attendance activity graded | Attendance recorded — no automatic visibility change |
+| Trainer shows quiz/assignment | Eye icon toggled to visible after attendance | Module quiz or assignment becomes visible to learners |
+| Makeup session attended | Trainer marks Present in makeup session | Trainer can show the activity for the cohort once makeup is complete, or use separate makeup activity/attempt handling |
 | Trainer releases Module Content folder | Eye icon toggled to visible | Folder and all contents become visible to learners |
-| Module 1 Quiz + Module 2 Assignment complete | Both activities complete | Cross-Module OJT Assessment 1 unlocks |
-| Module 3 Quiz + Module 4 Assignment complete | Both activities complete | Cross-Module OJT Assessment 2 unlocks |
-| All modules + both OJT assessments complete | All activity completions recorded | Final Assessment unlocks |
+| Trainer shows OJT assessment | Eye icon toggled to visible | Cross-Module OJT Assessment becomes visible when Trainer determines learners are ready |
+| Trainer shows Final Assessment | Eye icon toggled to visible | Final Assessment becomes visible when Trainer determines all prerequisites are complete |
 | Final Assessment passed | Grade ≥ 60% | Course complete, badge awarded, stream course access granted (after enrollment) |
-| New cohort enrolled | Previous cohort unenrolled | Same course, clean slate — content folders revert to saved visibility state |
+| New cohort enrolled | Previous cohort unenrolled | Same course, clean slate — all activities revert to hidden state |
 
 ---
 
