@@ -835,6 +835,70 @@ Shared execution log for workflow simulations with consistent pass/fail criteria
 **Defects/Blockers**
 - `WF13-001`: Closed. Initial finding was based on capability snapshot only; direct access-path validation confirms Trainer Coach route is usable via cohort-based access logic.
 
+### WF-14: Program Owner Dashboard Tab Click-through Mapping
+
+**Run date:** 2026-02-18  
+**Tester:** Codex + Shri  
+**Environment:** Local Docker (`moodlehq-dev-moodle-1`, `moodlehq-dev-mysql-1`)  
+**Status:** Fail (permission mismatches found)
+
+**Pass Criteria**
+- [x] Every Program Owner tab/sub-tab has a concrete target route.
+- [x] Every Status and Monitoring sub-card has a concrete target route.
+- [ ] Program Owner capabilities align with all linked routes.
+
+**Execution Notes**
+1. Extracted Program Owner dashboard quick actions and status-card step links directly from `block_sceh_dashboard` for `mock.programowner`.
+2. Captured route map for:
+   - `Manage Programs`, `Manage Courses`, `Manage Competencies`, `Assign Trainers`
+   - `Courses/Programs`, `Cohorts`, `Learners`, `Trainer Assignment`, `Content Pipeline` step links
+3. Ran capability matrix against key linked pages at category/course/system contexts.
+4. Found multiple route-to-capability mismatches that can produce dead-end clicks for Program Owner.
+
+**Evidence**
+- Route extraction command:
+  - `docker exec moodlehq-dev-moodle-1 php -d display_errors=1 -r '... ReflectionMethod(get_program_owner_quick_actions/get_program_owner_status_cards) ...'`
+- Observed quick-action targets:
+  - `Manage Programs -> /course/index.php`
+  - `Add New Program -> /course/editcategory.php?parent=7`
+  - `Manage Courses -> /course/index.php`
+  - `Create Course -> /course/edit.php?category=7`
+  - `Edit Course -> /course/management.php?categoryid=7`
+  - `Bulk Import -> /local/sceh_importer/index.php?courseid=1838`
+  - `Validate Courses -> /local/sceh_rules/stream_setup_check.php`
+  - `Publish Courses -> /course/management.php?categoryid=7`
+  - `Manage Competencies -> /admin/tool/lp/competencyframeworks.php?pagecontextid=1`
+  - `Add Framework -> /admin/tool/lp/competencyframeworks.php?pagecontextid=1&action=edit`
+  - `View Frameworks -> /admin/tool/lp/competencyframeworks.php?pagecontextid=1`
+  - `Assign Trainers -> /enrol/users.php?id=1838`
+- Observed status-step targets:
+  - `Courses/Programs`: `/course/index.php`, `/local/sceh_rules/stream_setup_check.php`
+  - `Cohorts`: `/cohort/index.php`
+  - `Learners`: `/local/sceh_rules/stream_progress.php`
+  - `Trainer Assignment`: `/course/index.php`, `/enrol/users.php?id=1838`, `/my/courses.php`
+  - `Content Pipeline`: `/local/sceh_importer/index.php`, `/local/sceh_rules/stream_setup_check.php`, `/course/index.php`
+- Capability matrix command:
+  - `docker exec moodlehq-dev-moodle-1 php -r '... has_capability checks ...'`
+- Observed capability highlights:
+  - `ALLOW`: `moodle/course:create`, `moodle/course:view`, `moodle/course:update`, `moodle/competency:competencyview`, `moodle/competency:competencymanage`
+  - `DENY`: `moodle/category:manage` (needed by add program route), `enrol/manual:enrol`, `moodle/role:assign` (needed by assign-trainers route), `moodle/cohort:view`, `moodle/cohort:manage` (needed by cohort routes)
+
+**Defects/Blockers**
+- ID: `WF14-001`
+- Severity: High
+- Owner: Program Owner route/permission alignment
+- Notes: `Add New Program` currently links to category edit route requiring `moodle/category:manage`, but Program Owner is denied.
+
+- ID: `WF14-002`
+- Severity: High
+- Owner: Program Owner trainer assignment model
+- Notes: `Assign Trainers` route points to `/enrol/users.php`, but Program Owner lacks enrollment/role assignment capabilities (`enrol/manual:enrol`, `moodle/role:assign`).
+
+- ID: `WF14-003`
+- Severity: Medium
+- Owner: Program Owner cohort monitoring routing
+- Notes: `Cohorts` status routes to `/cohort/index.php`, but Program Owner lacks `moodle/cohort:view`; click-through is likely inaccessible in current policy.
+
 ## Parked Decisions
 
 ### Program Owner Enrollment Autonomy (Pending Team Decision)

@@ -914,6 +914,7 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_program_owner_quick_actions(int $userid): array {
+        $categories = $this->get_program_owner_categories($userid);
         $categoryids = $this->get_program_owner_category_ids($userid);
         $primarycategoryid = $categoryids[0] ?? 0;
         $courseids = $this->get_program_owner_course_ids($userid);
@@ -923,52 +924,49 @@ class block_sceh_dashboard extends block_base {
             'moodle/cohort:manage',
         ], context_system::instance(), $userid);
 
-        $actions = [
+        $managecoursechildren = [
             [
-                'title' => get_string('pomanageprograms', 'block_sceh_dashboard'),
-                'icon' => 'fa-layer-group',
-                'color' => 'teal',
+                'title' => get_string('poallcourses', 'block_sceh_dashboard'),
                 'url' => new moodle_url('/course/index.php'),
-                'children' => [
-                    [
-                        'title' => get_string('poallprograms', 'block_sceh_dashboard'),
-                        'url' => new moodle_url('/course/index.php'),
-                    ],
-                    [
-                        'title' => get_string('poaddnewprogram', 'block_sceh_dashboard'),
-                        'url' => new moodle_url('/course/editcategory.php', ['parent' => $primarycategoryid]),
-                    ],
-                ],
             ],
+        ];
+
+        foreach ($categories as $category) {
+            $categoryname = format_string($category->name);
+            $managecoursechildren[] = [
+                'title' => get_string('pocreateincategory', 'block_sceh_dashboard', $categoryname),
+                'url' => new moodle_url('/course/edit.php', ['category' => (int)$category->id]),
+            ];
+            $managecoursechildren[] = [
+                'title' => get_string('poeditincategory', 'block_sceh_dashboard', $categoryname),
+                'url' => new moodle_url('/course/management.php', ['categoryid' => (int)$category->id]),
+            ];
+        }
+
+        $managecoursechildren[] = [
+            'title' => get_string('pobulkimport', 'block_sceh_dashboard'),
+            'url' => $primarycourseid > 0
+                ? new moodle_url('/local/sceh_importer/index.php', ['courseid' => $primarycourseid])
+                : new moodle_url('/local/sceh_importer/index.php'),
+        ];
+        $managecoursechildren[] = [
+            'title' => get_string('povalidatecourses', 'block_sceh_dashboard'),
+            'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php'),
+        ];
+        $managecoursechildren[] = [
+            'title' => get_string('popublishcourses', 'block_sceh_dashboard'),
+            'url' => $primarycategoryid > 0
+                ? new moodle_url('/course/management.php', ['categoryid' => $primarycategoryid])
+                : new moodle_url('/course/index.php'),
+        ];
+
+        $actions = [
             [
                 'title' => get_string('pomanagecourses', 'block_sceh_dashboard'),
                 'icon' => 'fa-book-open',
                 'color' => 'indigo',
                 'url' => new moodle_url('/course/index.php'),
-                'children' => [
-                    [
-                        'title' => get_string('pocreatecourse', 'block_sceh_dashboard'),
-                        'url' => new moodle_url('/course/edit.php', ['category' => $primarycategoryid]),
-                    ],
-                    [
-                        'title' => get_string('poeditcourse', 'block_sceh_dashboard'),
-                        'url' => new moodle_url('/course/management.php', ['categoryid' => $primarycategoryid]),
-                    ],
-                    [
-                        'title' => get_string('pobulkimport', 'block_sceh_dashboard'),
-                        'url' => $primarycourseid > 0
-                            ? new moodle_url('/local/sceh_importer/index.php', ['courseid' => $primarycourseid])
-                            : new moodle_url('/local/sceh_importer/index.php'),
-                    ],
-                    [
-                        'title' => get_string('povalidatecourses', 'block_sceh_dashboard'),
-                        'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php'),
-                    ],
-                    [
-                        'title' => get_string('popublishcourses', 'block_sceh_dashboard'),
-                        'url' => new moodle_url('/course/management.php', ['categoryid' => $primarycategoryid]),
-                    ],
-                ],
+                'children' => $managecoursechildren,
             ],
             [
                 'title' => get_string('pomanagecompetencies', 'block_sceh_dashboard'),

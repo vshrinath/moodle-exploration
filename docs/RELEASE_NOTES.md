@@ -4,6 +4,28 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-18] — Simplify Program Owner course navigation for multi-category ownership
+
+### What changed
+- Removed `Manage Programs` from Program Owner quick actions to align with current governance model.
+- Updated `Manage Courses` sub-actions to support multi-category Program Owners:
+  - `All Courses`
+  - `Create in <Category>`
+  - `Manage in <Category>`
+- Kept course operations under `Manage Courses` (`Bulk Import`, `Validate Courses`, `Publish Courses`).
+- Logged a dedicated dashboard click-through mapping run (`WF-14`) with route/capability findings in the golden suite.
+
+### Why
+Program/category administration remains a Sysadmin responsibility. This update removes misleading category-management paths from Program Owner UX and improves clarity for owners assigned to multiple categories (for example, AOP + Optometry).
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Removed Manage Programs action and added multi-category Manage Courses links
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added category-aware Manage Courses labels
+- `docs/WORKFLOW_SIMULATION_GOLDEN_TEST_SUITE.md` — Added WF-14 click-through mapping results and blockers
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Refine Program Owner Status and Monitoring interaction
 
 ### What changed
