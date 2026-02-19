@@ -4,6 +4,26 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Grant trainer visibility control permissions
+
+### What changed
+- Granted `sceh_trainer` role minimum capabilities to show/hide Module Content folders and activities
+- Added capabilities:
+  - `moodle/course:activityvisibility` - Show/hide activities using eye icon
+  - `moodle/course:manageactivities` - Required for visibility toggle to work
+- Trainers can now release Module Content folders during sessions without Program Owner involvement
+- Trainers still CANNOT add, delete, or edit activities - only control visibility
+
+### Why
+Allied Health workflow requires trainers to release Module Content folders at appropriate times (before, during, or after sessions). Without these capabilities, trainers couldn't use the eye icon, blocking the documented workflow. This grants minimum permissions needed for content release while maintaining course structure control with Program Owner.
+
+### Files touched
+- `scripts/config/configure_trainer_visibility_permissions.php` — New idempotent script to grant trainer visibility capabilities
+- `docs/ALLIED_HEALTH_FOUNDATIONAL_COURSE_WORKFLOW.md` — Updated permission check note to reflect correct capabilities
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-18] — Simplify Program Owner course navigation for multi-category ownership
 
 ### What changed
