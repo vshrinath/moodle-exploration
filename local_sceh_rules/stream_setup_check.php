@@ -164,6 +164,11 @@ $checks[] = [
     'detail' => $hascommon
         ? get_string('streamsetupcheck_detail_common_pass', 'local_sceh_rules')
         : get_string('streamsetupcheck_detail_common_fail', 'local_sceh_rules'),
+    'actions' => !$hascommon ? [[
+        'text' => get_string('streamsetupcheck_action_fix', 'local_sceh_rules'),
+        'url' => new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1]),
+        'style' => 'primary',
+    ]] : [],
 ];
 
 // Check 2: Stream sections.
@@ -175,6 +180,11 @@ $checks[] = [
     'detail' => $hasstreams
         ? get_string('streamsetupcheck_detail_stream_pass', 'local_sceh_rules', count($streamsections))
         : get_string('streamsetupcheck_detail_stream_fail', 'local_sceh_rules'),
+    'actions' => !$hasstreams ? [[
+        'text' => get_string('streamsetupcheck_action_fix', 'local_sceh_rules'),
+        'url' => new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1]),
+        'style' => 'primary',
+    ]] : [],
 ];
 
 // Check 3: Stream choice with options.
@@ -209,6 +219,11 @@ $checks[] = [
             'count' => (int)$validchoice->optioncount,
         ])
         : get_string('streamsetupcheck_detail_choice_fail', 'local_sceh_rules'),
+    'actions' => !$haschoice ? [[
+        'text' => get_string('streamsetupcheck_action_add_choice', 'local_sceh_rules'),
+        'url' => new moodle_url('/course/modedit.php', ['add' => 'choice', 'course' => $selectedcourseid, 'section' => 0]),
+        'style' => 'primary',
+    ]] : [],
 ];
 
 echo html_writer::start_div('sceh-rules-grid');
@@ -233,8 +248,28 @@ foreach ($checks as $check) {
             'title' => get_string('streamsetupcheck_details', 'local_sceh_rules'),
             'content' => $check['detail'],
         ]],
+        'actions' => $check['actions'] ?? [],
     ]);
 }
 echo html_writer::end_div();
+
+// Direct course edit button if any failures exist.
+$allpass = true;
+foreach ($checks as $check) {
+    if (empty($check['pass'])) {
+        $allpass = false;
+        break;
+    }
+}
+
+if (!$allpass) {
+    echo html_writer::start_div('mt-4 text-center');
+    echo html_writer::link(
+        new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1]),
+        get_string('streamsetupcheck_edit_course', 'local_sceh_rules', format_string($course->fullname)),
+        ['class' => 'btn btn-primary btn-lg']
+    );
+    echo html_writer::end_div();
+}
 
 echo $OUTPUT->footer();
