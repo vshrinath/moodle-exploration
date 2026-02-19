@@ -250,7 +250,55 @@ Acceptance criteria:
 
 ## Example: Complete Feature Breakdown
 
-**Feature:** User can bookmark articles
+**Feature:** Trainer can manually show/hide quizzes after marking attendance (Moodle)
+
+### Task 1: Grant trainer visibility capabilities
+- **Effort:** 1 hour
+- **Dependencies:** None
+- **Acceptance:**
+  - [ ] `sceh_trainer` role has `moodle/course:activityvisibility` capability
+  - [ ] `sceh_trainer` role has `moodle/course:manageactivities` capability
+  - [ ] Script is idempotent (safe to re-run)
+  - [ ] Verification script confirms capabilities granted
+  - [ ] Trainer CANNOT add/delete/edit activities (boundary check)
+
+### Task 2: Update workflow documentation
+- **Effort:** 2 hours
+- **Dependencies:** Task 1
+- **Acceptance:**
+  - [ ] All "unlocks when" language changed to "Trainer shows"
+  - [ ] Restrict Access conditions removed from setup steps
+  - [ ] Trainer workflow includes manual show/hide steps
+  - [ ] Learner journey reflects manual visibility control
+  - [ ] Troubleshooting updated for manual model
+  - [ ] Terminology consistent (no "unlock" references)
+
+### Task 3: Create workflow validation test
+- **Effort:** 2 hours
+- **Dependencies:** Task 1, Task 2
+- **Acceptance:**
+  - [ ] Test creates quiz in hidden state
+  - [ ] Test marks attendance (Present)
+  - [ ] Test verifies quiz still hidden (no auto-unlock)
+  - [ ] Test has trainer show quiz via visibility toggle
+  - [ ] Test verifies student can now access quiz
+  - [ ] Test passes in Docker environment
+
+### Task 4: Update release notes
+- **Effort:** 30 minutes
+- **Dependencies:** Task 1, Task 2, Task 3
+- **Acceptance:**
+  - [ ] Release notes document capability changes
+  - [ ] Release notes document workflow model change
+  - [ ] Files touched listed
+  - [ ] Why section explains manual control rationale
+
+**Total effort:** 5.5 hours
+**Can be done in parallel:** Task 2 (while Task 1 is being reviewed)
+
+---
+
+**Feature:** User can bookmark articles (Generic example)
 
 ### Task 1: Add Bookmark model
 - **Effort:** 1 hour

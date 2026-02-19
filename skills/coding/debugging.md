@@ -226,6 +226,58 @@ if errors:
 
 ## Common Bug Patterns
 
+### Moodle-Specific Patterns
+
+**Capability not granted:**
+```php
+// ❌ Assumes role has capability
+$cm = get_coursemodule_from_id('quiz', $cmid);
+set_coursemodule_visible($cm->id, 1);  // Fails silently if no capability
+
+// ✅ Check capability first
+$context = context_module::instance($cm->id);
+if (!has_capability('moodle/course:activityvisibility', $context)) {
+    throw new required_capability_exception($context, 'moodle/course:activityvisibility', 'nopermissions', '');
+}
+set_coursemodule_visible($cm->id, 1);
+```
+
+**Context level mismatch:**
+```php
+// ❌ Wrong context level
+$systemcontext = context_system::instance();
+has_capability('moodle/category:manage', $systemcontext);  // Too broad
+
+// ✅ Correct context level
+$categorycontext = context_coursecat::instance($category->id);
+has_capability('moodle/category:manage', $categorycontext);  // Category-scoped
+```
+
+**Restrict Access vs Visibility:**
+```php
+// ❌ Confusing Restrict Access with visibility
+// Restrict Access = conditional availability (shows lock icon)
+// Visibility = hidden/shown (eye icon)
+
+// ✅ Use visibility for manual control
+set_coursemodule_visible($cm->id, 0);  // Hidden (no lock icon)
+set_coursemodule_visible($cm->id, 1);  // Shown
+
+// ✅ Use Restrict Access for conditional logic
+$availability = '{"op":"&","c":[{"type":"completion","cm":123}]}';
+$DB->set_field('course_modules', 'availability', $availability, ['id' => $cm->id]);
+```
+
+**Role assignment scope:**
+```php
+// ❌ System-wide role assignment (too broad)
+role_assign($roleid, $userid, context_system::instance()->id);
+
+// ✅ Category-scoped role assignment
+$categorycontext = context_coursecat::instance($category->id);
+role_assign($roleid, $userid, $categorycontext->id);
+```
+
 ### Off-by-One Errors
 
 ```python
@@ -301,6 +353,60 @@ text = response.content.decode('utf-8', errors='replace')
 ---
 
 ## Debugging Tools
+
+### Moodle Debugging Tools
+
+**Enable debugging in config.php:**
+```php
+// Show all errors
+$CFG->debug = (E_ALL | E_STRICT);
+$CFG->debugdisplay = 1;
+
+// Show SQL queries
+$CFG->debug = DEBUG_DEVELOPER;
+$CFG->debugdisplay = 1;
+
+// Performance info
+$CFG->perfdebug = 15;  // Shows DB queries, memory, time
+$CFG->perfinfo = true;
+```
+
+**CLI debugging:**
+```bash
+# Run script with verbose output
+docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/verify/verify_trainer_permissions.php
+
+# Check Moodle logs
+docker exec moodlehq-dev-moodle-1 tail -f /var/www/html/public/moodledata/error.log
+
+# Database queries
+docker exec moodlehq-dev-mariadb-1 mysql -u moodle -pmoodle moodle -e "SHOW PROCESSLIST;"
+```
+
+**Check capabilities:**
+```php
+// Debug capability check
+$context = context_course::instance($courseid);
+$capabilities = get_user_capabilities_in_context($userid, $context);
+var_dump($capabilities);  // See all capabilities for user in context
+
+// Check specific capability with debugging
+$hascap = has_capability('moodle/course:activityvisibility', $context, $userid, true);
+// true parameter shows debugging info if capability check fails
+```
+
+**Verify role assignments:**
+```php
+// Get all roles for user in context
+$roles = get_user_roles($context, $userid);
+foreach ($roles as $role) {
+    echo "Role: {$role->shortname} in context {$context->contextlevel}\n";
+}
+
+// Check role capabilities
+$role = $DB->get_record('role', ['shortname' => 'sceh_trainer']);
+$capabilities = $DB->get_records('role_capabilities', ['roleid' => $role->id]);
+```
 
 ### Python Debugger (pdb)
 

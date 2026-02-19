@@ -43,6 +43,44 @@ For this repository, prioritize these test layers:
 - Confirm category-scoped Program Owner behavior (`allied-health`) and no unintended system-wide privilege bleed.
 - Prefer pass/fail logs with concrete evidence in workflow suite docs.
 
+### Moodle-specific test patterns
+
+**Capability testing:**
+```php
+// Verify role has required capability
+$context = context_course::instance($course->id);
+$this->assertTrue(has_capability('moodle/course:activityvisibility', $context, $trainer));
+
+// Verify role lacks capability (boundary check)
+$this->assertFalse(has_capability('moodle/course:update', $context, $trainer));
+```
+
+**Workflow validation:**
+```php
+// Test visibility control workflow
+$quiz = $this->create_quiz($course, ['visible' => 0]); // Hidden
+$this->assertFalse($this->is_visible_to_student($quiz, $student));
+
+// Trainer shows quiz
+$this->setUser($trainer);
+set_coursemodule_visible($quiz->cmid, 1);
+
+// Verify student can now see it
+$this->assertTrue($this->is_visible_to_student($quiz, $student));
+```
+
+**Attendance plugin testing:**
+```php
+// Test attendance marking doesn't auto-unlock
+$attendance = $this->create_attendance($course);
+$session = $this->add_session($attendance);
+$this->mark_attendance($session, $student, 'P'); // Present
+
+// Quiz should still be hidden (manual unlock model)
+$quiz = $this->get_quiz($course);
+$this->assertFalse($this->is_visible_to_student($quiz, $student));
+```
+
 ## Test conventions
 - Before writing tests, read the project's conventions file (CONVENTIONS.md, CONTRIBUTING.md, or equivalent) to understand the testing framework, test location, and naming patterns in use; if none exists, look at 2–3 existing test files and match their structure exactly
 - Build test data in setup methods — use whatever fixture/factory approach the project already uses (factories, fixtures, setUp constructors, etc.)

@@ -153,6 +153,10 @@ Second item in each day block — below Trainer Resources, above optional day UR
 > **Trainer releases this folder** by clicking the eye icon on the activity when they choose — before, during, or after the session. Once visible, learners can use it as a reference while completing assessments. Program Owner can also release it if needed.
 
 > Unlike Trainer Resources (which uses Role restriction and is permanently hidden), the Content folder uses simple show/hide — Trainer controls timing, not permanent access.
+>
+> **Visibility Responsibility Split:**
+> - **Program Owner:** Responsible for Course Visibility (Hidden during setup, Visible when cohort starts).
+> - **Trainer:** Responsible for Activity/Folder Visibility (Show/Hide individual resources as per lesson flow).
 
 ### Step 5 — Add Day URL/Video Resources
 

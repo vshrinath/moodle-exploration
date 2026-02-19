@@ -20,6 +20,43 @@
 
 ## Self-Review Checklist
 
+### 0. Moodle-Specific Checks (if applicable)
+
+- [ ] Role capabilities verified (no privilege escalation)
+- [ ] Category-scoped permissions respected
+- [ ] Visibility control follows manual unlock model
+- [ ] Attendance marking doesn't auto-unlock content
+- [ ] CLI scripts are idempotent (safe to re-run)
+- [ ] Docker exec commands use correct container name
+- [ ] Workflow documentation matches implementation
+- [ ] Mock users have correct role assignments
+
+**Moodle-specific checks:**
+```php
+// ✓ Capability check before action
+if (!has_capability('moodle/course:activityvisibility', $context)) {
+    throw new required_capability_exception($context, 'moodle/course:activityvisibility', 'nopermissions', '');
+}
+
+// ✓ Category-scoped permission
+$categorycontext = context_coursecat::instance($category->id);
+if (!has_capability('moodle/category:manage', $categorycontext)) {
+    // Deny access
+}
+
+// ✓ Idempotent script (safe to re-run)
+$role = $DB->get_record('role', ['shortname' => 'sceh_trainer']);
+if (!$role) {
+    // Create role
+} else {
+    // Update existing role
+}
+
+// ✓ Manual visibility control (no automatic unlock)
+// Activities start hidden, trainer shows via eye icon
+// No Restrict Access conditions based on attendance
+```
+
 ### 1. Does It Work?
 
 - [ ] All tests pass locally
