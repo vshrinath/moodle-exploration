@@ -4,6 +4,27 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Audit Program Owner dashboard and implement UX enhancements
+
+### What changed
+- Renamed "Courses/Programs" card to **"Courses"** in dashboard status cards for better model alignment.
+- Relaxed permission checks in `local_sceh_rules` and `local_sceh_importer` to support category-level Program Owner roles.
+- Implemented intelligent deep-linking for draft and "Needs Changes" statuses, pointing directly to course settings if only a single item is involved.
+- Applied "organic" visual polish to Moodle administrative pages (course edit, participants) to match the SCEH dashboard aesthetic.
+- Updated Allied Health workflow automation to include Program Owner visibility control validation.
+
+### Why
+Initial audit revealed that category-scoped Program Owners were blocked by system-level capability checks on custom pages. Navigation was also too generic, requiring multiple clicks to reach actionable items. Visual integration improves perceived quality and reduces cognitive load during backend transitions.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Renamed status label, implemented deep-linking logic, and added category-issue helper
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Updated string for "Courses"
+- `block_sceh_dashboard/styles.css` — Added organic backend integration styles
+- `local_sceh_importer/index.php` — Relaxed permission check for category Program Owners
+- `local_sceh_rules/stream_setup_check.php` — Relaxed permission check and supported direct course links
+- `scripts/test/test_allied_health_quiz_workflow.php` — Validated Program Owner visibility control in workflow automation
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
 ## [2026-02-19] — Add Allied Health workflow spec update and shared test content package
 
 ### What changed

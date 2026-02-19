@@ -504,7 +504,13 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function build_program_owner_queue($userid) {
-        $streamissues = $this->count_program_owner_stream_issues($userid);
+        $issueids = $this->get_program_owner_stream_issue_course_ids($userid);
+        $streamissues = count($issueids);
+        $streamissuesurl = new moodle_url('/local/sceh_rules/stream_setup_check.php');
+        if ($streamissues === 1) {
+            $streamissuesurl->param('id', reset($issueids));
+        }
+
         $upcomingevents = $this->count_user_upcoming_events($userid, 7);
         $categorycount = count($this->get_program_owner_categories($userid));
 
@@ -519,7 +525,7 @@ class block_sceh_dashboard extends block_base {
                         'fa-tasks',
                         get_string('workflowstreamissues', 'block_sceh_dashboard', $streamissues),
                         get_string('workflowstreamissuesdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/local/sceh_rules/stream_setup_check.php'),
+                        $streamissuesurl,
                         true
                     ),
                 ]),
@@ -805,11 +811,21 @@ class block_sceh_dashboard extends block_base {
      * @return int
      */
     private function count_program_owner_stream_issues($userid) {
+        return count($this->get_program_owner_stream_issue_course_ids($userid));
+    }
+
+    /**
+     * Get IDs of courses with stream setup issues in program-owner categories.
+     *
+     * @param int $userid
+     * @return int[]
+     */
+    private function get_program_owner_stream_issue_course_ids($userid) {
         global $DB;
 
         $categories = $this->get_program_owner_categories($userid);
         if (empty($categories)) {
-            return 0;
+            return [];
         }
 
         $categoryids = array_map(function($category) {
@@ -818,7 +834,7 @@ class block_sceh_dashboard extends block_base {
         list($catsql, $catparams) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
 
         $courses = $DB->get_records_select('course', 'category ' . $catsql, $catparams, '', 'id');
-        $issues = 0;
+        $issuecourseids = [];
 
         foreach ($courses as $course) {
             $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($course->id);
@@ -837,11 +853,11 @@ class block_sceh_dashboard extends block_base {
             );
 
             if (empty($streamsections) || !$haschoiceoptions) {
-                $issues++;
+                $issuecourseids[] = (int)$course->id;
             }
         }
 
-        return $issues;
+        return $issuecourseids;
     }
 
     /**
@@ -1111,22 +1127,38 @@ class block_sceh_dashboard extends block_base {
 
         $draft = 0;
         $live = 0;
+        $draftids = [];
         if (!empty($courseids)) {
             list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'cid');
-            $draft = (int)$DB->count_records_select('course', 'id ' . $insql . ' AND visible = 0', $params);
+            $draftrecords = $DB->get_records_select('course', 'id ' . $insql . ' AND visible = 0', $params, '', 'id');
+            $draftids = array_keys($draftrecords);
+            $draft = count($draftids);
             $live = (int)$DB->count_records_select('course', 'id ' . $insql . ' AND visible = 1', $params);
         }
 
-        $needschanges = $this->count_program_owner_stream_issues($userid);
+        $issueids = $this->get_program_owner_stream_issue_course_ids($userid);
+        $needschanges = count($issueids);
         $pendingapproval = max(0, $draft - $needschanges);
         $warn = ($needschanges > 0 || $draft > 0);
 
         $baseurl = new moodle_url('/course/index.php');
+        
+        // Deep linking logic.
+        $drafturl = $baseurl;
+        if ($draft === 1) {
+            $drafturl = new moodle_url('/course/edit.php', ['id' => reset($draftids)]);
+        }
+
+        $needschangesurl = new moodle_url('/local/sceh_rules/stream_setup_check.php');
+        if ($needschanges === 1) {
+            $needschangesurl->param('id', reset($issueids));
+        }
+
         return [
             'status' => $warn ? 'warning' : 'success',
             'steps' => [
-                ['label' => get_string('postepdraft', 'block_sceh_dashboard'), 'count' => $draft, 'desc' => get_string('postepdraftdesc', 'block_sceh_dashboard'), 'url' => $baseurl],
-                ['label' => get_string('postepneedschanges', 'block_sceh_dashboard'), 'count' => $needschanges, 'desc' => get_string('postepneedschangesdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php')],
+                ['label' => get_string('postepdraft', 'block_sceh_dashboard'), 'count' => $draft, 'desc' => get_string('postepdraftdesc', 'block_sceh_dashboard'), 'url' => $drafturl],
+                ['label' => get_string('postepneedschanges', 'block_sceh_dashboard'), 'count' => $needschanges, 'desc' => get_string('postepneedschangesdesc', 'block_sceh_dashboard'), 'url' => $needschangesurl],
                 ['label' => get_string('posteppendingapproval', 'block_sceh_dashboard'), 'count' => $pendingapproval, 'desc' => get_string('posteppendingapprovaldesc', 'block_sceh_dashboard'), 'url' => $baseurl],
                 ['label' => get_string('posteplive', 'block_sceh_dashboard'), 'count' => $live, 'desc' => get_string('posteplivedesc', 'block_sceh_dashboard'), 'url' => $baseurl],
             ],

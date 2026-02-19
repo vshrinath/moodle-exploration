@@ -23,12 +23,30 @@ $courseid = optional_param('id', 0, PARAM_INT);
 require_login();
 
 $systemcontext = context_system::instance();
-if (!has_any_capability([
+$has_po_capability = has_any_capability([
     'local/sceh_rules:programowner',
     'local/sceh_rules:systemadmin',
     'moodle/site:config',
-], $systemcontext)) {
-    throw new required_capability_exception($systemcontext, 'local/sceh_rules:programowner', 'nopermissions', '');
+], $systemcontext);
+
+if (!$has_po_capability) {
+    // Fallback: check if user has a program owner role in any category.
+    $sql = "SELECT DISTINCT ra.id
+              FROM {role_assignments} ra
+              JOIN {role} r ON r.id = ra.roleid
+              JOIN {context} ctx ON ctx.id = ra.contextid
+             WHERE ra.userid = :userid
+               AND ctx.contextlevel = :contextlevel
+               AND r.shortname IN (:short1, :short2)";
+    $has_role = $DB->record_exists_sql($sql, [
+        'userid' => $USER->id,
+        'contextlevel' => CONTEXT_COURSECAT,
+        'short1' => 'sceh_program_owner',
+        'short2' => 'programowner',
+    ]);
+    if (!$has_role) {
+        throw new required_capability_exception($systemcontext, 'local/sceh_rules:programowner', 'nopermissions', '');
+    }
 }
 
 $PAGE->set_context($systemcontext);

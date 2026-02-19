@@ -58,8 +58,8 @@ $options = getopt('', [
 ]);
 
 $categoryidnumber = trim((string)($options['category-idnumber'] ?? 'allied-health'));
-$courseshortname = trim((string)($options['course-shortname'] ?? 'AHW-FOUND-AUTO'));
-$coursefullname = trim((string)($options['course-fullname'] ?? 'Allied Health - Foundational (Automation)'));
+$courseshortname = trim((string)($options['course-shortname'] ?? ('AHW-FOUND-AUTO-' . date('Ymd-Hi'))));
+$coursefullname = trim((string)($options['course-fullname'] ?? ('Allied Health - Foundational (Automation) ' . date('Y-m-d H:i'))));
 $contentroot = trim((string)($options['content-root'] ?? $defaultcontentroot));
 $programownerusername = trim((string)($options['program-owner'] ?? 'mock.programowner'));
 $trainerusername = trim((string)($options['trainer'] ?? 'mock.trainer'));
@@ -822,8 +822,8 @@ try {
         fail_exit($results, 'Missing sample modules for visibility assertions');
     }
 
-    ensure_manual_enrolment($course, (int)$trainer->id, 'editingteacher');
-    log_check($results, 'AHW-AT-10', true, 'Trainer enrolled with editingteacher role');
+    ensure_manual_enrolment($course, (int)$trainer->id, 'sceh_trainer');
+    log_check($results, 'AHW-AT-10', true, 'Trainer enrolled with sceh_trainer role');
 
     $cohort = ensure_cohort($cohortidnumber, 'Mock Allied Cohort 2026');
     ensure_cohort_member((int)$cohort->id, (int)$learner->id);
@@ -833,6 +833,11 @@ try {
 
     $learnerenrolled = is_enrolled(context_course::instance((int)$course->id), (int)$learner->id, '', true);
     log_check($results, 'AHW-AT-11', $learnerenrolled, 'Learner enrolled via cohort sync');
+
+    // Program Owner must make the course visible for the learner to see it.
+    set_script_user($programowner);
+    update_course((object)['id' => $course->id, 'visible' => 1]);
+    log_check($results, 'AHW-AT-11V', true, 'Program Owner set course to VISIBLE');
 
     $prequiz = get_cm_uservisible((int)$course->id, (int)$learner->id, $samplequizcmid);
     $precontent = get_cm_uservisible((int)$course->id, (int)$learner->id, $samplecontentcmid);

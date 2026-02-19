@@ -31,7 +31,27 @@ if (!defined('LOCAL_SCEH_IMPORTER_SESSION_TIMEOUT')) {
 require_login();
 
 $systemcontext = context_system::instance();
-require_capability('local/sceh_importer:manage', $systemcontext);
+$has_importer_cap = has_capability('local/sceh_importer:manage', $systemcontext);
+
+if (!$has_importer_cap) {
+    // Fallback: check if user has a program owner role in any category.
+    $sql = "SELECT DISTINCT ra.id
+              FROM {role_assignments} ra
+              JOIN {role} r ON r.id = ra.roleid
+              JOIN {context} ctx ON ctx.id = ra.contextid
+             WHERE ra.userid = :userid
+               AND ctx.contextlevel = :contextlevel
+               AND r.shortname IN (:short1, :short2)";
+    $has_role = $DB->record_exists_sql($sql, [
+        'userid' => $USER->id,
+        'contextlevel' => CONTEXT_COURSECAT,
+        'short1' => 'sceh_program_owner',
+        'short2' => 'programowner',
+    ]);
+    if (!$has_role) {
+        require_capability('local/sceh_importer:manage', $systemcontext);
+    }
+}
 
 $PAGE->set_context($systemcontext);
 $PAGE->set_url(new moodle_url('/local/sceh_importer/index.php'));
