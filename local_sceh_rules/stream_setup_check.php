@@ -19,6 +19,8 @@ require_once(__DIR__ . '/../../config.php');
 use local_sceh_rules\output\sceh_card;
 
 $courseid = optional_param('id', 0, PARAM_INT);
+$categoryid = optional_param('categoryid', 0, PARAM_INT);
+$filterissues = optional_param('filter', '', PARAM_ALPHA) === 'issues';
 
 require_login();
 
@@ -50,7 +52,11 @@ if (!$has_po_capability) {
 }
 
 $PAGE->set_context($systemcontext);
-$PAGE->set_url('/local/sceh_rules/stream_setup_check.php', ['id' => $courseid]);
+$PAGE->set_url('/local/sceh_rules/stream_setup_check.php', [
+    'id' => $courseid,
+    'categoryid' => $categoryid,
+    'filter' => $filterissues ? 'issues' : '',
+]);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('streamsetupcheck', 'local_sceh_rules'));
 $PAGE->set_heading(get_string('streamsetupcheck', 'local_sceh_rules'));
@@ -64,6 +70,18 @@ if (has_capability('moodle/site:config', $systemcontext)) {
           ORDER BY fullname";
     $courses = $DB->get_records_sql($sql, ['sitecourseid' => 1]);
 } else {
+    $params = [
+        'contextlevel' => CONTEXT_COURSECAT,
+        'userid' => $USER->id,
+        'shortname' => 'sceh_program_owner',
+        'fallbackshortname' => 'programowner',
+    ];
+    $filtersql = "";
+    if ($categoryid > 0) {
+        $filtersql = " AND cc.id = :categoryid";
+        $params['categoryid'] = $categoryid;
+    }
+
     $sql = "SELECT DISTINCT c.id, c.fullname
               FROM {course} c
               JOIN {course_categories} cc ON cc.id = c.category
@@ -72,13 +90,33 @@ if (has_capability('moodle/site:config', $systemcontext)) {
               JOIN {role} r ON r.id = ra.roleid
              WHERE ra.userid = :userid
                AND r.shortname IN (:shortname, :fallbackshortname)
+               {$filtersql}
           ORDER BY c.fullname";
-    $courses = $DB->get_records_sql($sql, [
-        'contextlevel' => CONTEXT_COURSECAT,
-        'userid' => $USER->id,
-        'shortname' => 'sceh_program_owner',
-        'fallbackshortname' => 'programowner',
-    ]);
+    $courses = $DB->get_records_sql($sql, $params);
+}
+
+// If filter=issues is active, filter the course list to only those with setup problems.
+if ($filterissues) {
+    $issuecourses = [];
+    foreach ($courses as $id => $acourse) {
+        // Simple issue check (mirrors dashboard logic).
+        $hascommon = \local_sceh_rules\helper\stream_helper::has_named_common_foundation_section($id);
+        $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($id);
+        
+        // Check for stream choice with options.
+        $haschoice = $DB->record_exists_sql(
+            "SELECT c.id FROM {choice} c 
+               JOIN {choice_options} co ON co.choiceid = c.id 
+              WHERE c.course = :courseid 
+                AND (LOWER(c.name) LIKE :streamname OR LOWER(c.name) LIKE :specializationname)",
+            ['courseid' => $id, 'streamname' => '%stream%', 'specializationname' => '%specialization%']
+        );
+
+        if (!$hascommon || empty($streamsections) || !$haschoice) {
+            $issuecourses[$id] = $acourse;
+        }
+    }
+    $courses = $issuecourses;
 }
 
 echo $OUTPUT->header();
@@ -109,7 +147,10 @@ echo html_writer::select(
     $selectedcourseid,
     false,
     [
-        'onchange' => "window.location.href='" . (new moodle_url('/local/sceh_rules/stream_setup_check.php'))->out(false) . "?id='+this.value",
+        'onchange' => "window.location.href='" . (new moodle_url('/local/sceh_rules/stream_setup_check.php', [
+            'categoryid' => $categoryid,
+            'filter' => $filterissues ? 'issues' : '',
+        ]))->out(false) . "&id='+this.value",
     ]
 );
 

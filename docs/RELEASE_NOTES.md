@@ -4,6 +4,25 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Implement Advanced Deep-Linking and High-Fidelity Backend Redesign
+
+### What changed
+- **Advanced Drill-Down (Phase 6)**: Enhanced `stream_setup_check.php` with `categoryid` and `filter=issues` parameters. Dashboard now automatically scopes navigational links to a single assigned category if detected.
+- **Dashboard Cleanup (Phase 7)**: Removed "Manage Cohorts" quick action from the Program Owner dashboard to focus the role on curriculum and content management.
+- **Premium Backend Restyling (Phase 8)**: Implemented a global SCEH-branded surface background with radial gradients for administrative pages. Restyled primary/secondary buttons, hero-style headings, and enhanced `#region-main` with soft shadows and increased padding for a "dashboard-like" look and feel across core Moodle pages.
+- **Improved Filter Logic**: Added automatic issue filtering for "Needs Changes" dashboard cards.
+
+### Why
+Advanced deep-linking reduces navigational friction by allowing Program Owners to jump directly to filtered issue lists. Removing redundant administrative actions (Cohorts) streamlines the user experience. The high-fidelity redesign provides a premium, cohesive brand experience that bridges the gap between the custom dashboard and Moodle's administrative backend.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Implemented category scoping and removed Manage Cohorts action.
+- `block_sceh_dashboard/styles.css` — Added high-fidelity backend restyling and premium CSS variables.
+- `local_sceh_rules/stream_setup_check.php` — Added category and issue filtering logic.
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-19] — Audit Program Owner dashboard and implement UX enhancements
 
 ### What changed

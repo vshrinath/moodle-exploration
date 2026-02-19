@@ -935,10 +935,7 @@ class block_sceh_dashboard extends block_base {
         $primarycategoryid = $categoryids[0] ?? 0;
         $courseids = $this->get_program_owner_course_ids($userid);
         $primarycourseid = $courseids[0] ?? 0;
-        $canmanagecohorts = has_any_capability([
-            'moodle/cohort:view',
-            'moodle/cohort:manage',
-        ], context_system::instance(), $userid);
+        $canmanagecohorts = false; // Phase 7: Remove cohort management for Program Owners.
 
         $managecoursechildren = [
             [
@@ -948,14 +945,16 @@ class block_sceh_dashboard extends block_base {
         ];
 
         foreach ($categories as $category) {
-            $categoryname = format_string($category->name);
+            $catname = format_string($category->name);
+            $catparams = ['categoryid' => (int)$category->id];
+            
             $managecoursechildren[] = [
-                'title' => get_string('pocreateincategory', 'block_sceh_dashboard', $categoryname),
+                'title' => get_string('pocreateincategory', 'block_sceh_dashboard', $catname),
                 'url' => new moodle_url('/course/edit.php', ['category' => (int)$category->id]),
             ];
             $managecoursechildren[] = [
-                'title' => get_string('poeditincategory', 'block_sceh_dashboard', $categoryname),
-                'url' => new moodle_url('/course/management.php', ['categoryid' => (int)$category->id]),
+                'title' => get_string('poeditincategory', 'block_sceh_dashboard', $catname),
+                'url' => new moodle_url('/course/management.php', $catparams),
             ];
         }
 
@@ -976,12 +975,15 @@ class block_sceh_dashboard extends block_base {
                 : new moodle_url('/course/index.php'),
         ];
 
+        // Contextual params if there is only one category.
+        $singlecatparams = (count($categoryids) === 1) ? ['categoryid' => $primarycategoryid] : [];
+
         $actions = [
             [
                 'title' => get_string('pomanagecourses', 'block_sceh_dashboard'),
                 'icon' => 'fa-book-open',
                 'color' => 'indigo',
-                'url' => new moodle_url('/course/index.php'),
+                'url' => new moodle_url('/course/index.php', $singlecatparams),
                 'children' => $managecoursechildren,
             ],
             [
@@ -990,7 +992,7 @@ class block_sceh_dashboard extends block_base {
                 'color' => 'green',
                 'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
                     'pagecontextid' => context_system::instance()->id,
-                ]),
+                ] + $singlecatparams),
                 'children' => [
                     [
                         'title' => get_string('poaddframework', 'block_sceh_dashboard'),
@@ -1038,11 +1040,38 @@ class block_sceh_dashboard extends block_base {
      * @return array
      */
     private function get_program_owner_status_cards(int $userid): array {
+        $categoryids = $this->get_program_owner_category_ids($userid);
         $courseids = $this->get_program_owner_course_ids($userid);
         $courseids = array_map('intval', $courseids);
 
+        // Contextual params.
+        $singlecatparams = (count($categoryids) === 1) ? ['categoryid' => reset($categoryids)] : [];
+
         $publishing = $this->get_program_owner_publishing_status($userid, $courseids);
+        
+        // Apply issue filter and single category scoping to publishing links.
+        foreach ($publishing['steps'] as &$step) {
+            $labelkey = str_replace('postep', '', $step['label']);
+            if (strpos($step['url']->out(), 'stream_setup_check.php') !== false) {
+                if ($step['count'] > 1) {
+                    $step['url']->param('filter', 'issues');
+                }
+                if (!empty($singlecatparams)) {
+                    $step['url']->params($singlecatparams);
+                }
+            } else if (strpos($step['url']->out(), 'course/index.php') !== false) {
+                if (!empty($singlecatparams)) {
+                    $step['url']->params($singlecatparams);
+                }
+            }
+        }
+
         $cohorts = $this->get_program_owner_cohort_status($courseids);
+        foreach ($cohorts['steps'] as &$step) {
+            if (!empty($singlecatparams)) {
+                $step['url']->params($singlecatparams);
+            }
+        }
         $learners = $this->get_program_owner_learner_status($courseids);
         $trainers = $this->get_program_owner_trainer_status($userid, $courseids);
         $content = $this->get_program_owner_content_pipeline_status($userid, $courseids);

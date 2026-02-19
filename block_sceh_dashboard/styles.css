@@ -76,13 +76,13 @@
     overflow: hidden;
 }
 
-.sceh-po-card-accordion > summary {
+.sceh-po-card-accordion>summary {
     list-style: none;
     cursor: pointer;
     padding: 24px 16px 14px;
 }
 
-.sceh-po-card-accordion > summary::-webkit-details-marker {
+.sceh-po-card-accordion>summary::-webkit-details-marker {
     display: none;
 }
 
@@ -468,16 +468,16 @@
         gap: 15px;
         padding: 15px;
     }
-    
+
     .sceh-card {
         padding: 20px 15px;
         min-height: 150px;
     }
-    
+
     .sceh-card-icon i {
         font-size: 2em !important;
     }
-    
+
     .sceh-card-title {
         font-size: 14px;
     }
@@ -489,51 +489,124 @@
    -------------------------------------------------------------------------- */
 
 /* Smoother background and container for administrative pages */
-body.path-course-edit, 
-body.path-course-management, 
+body.path-course-edit,
+body.path-course-management,
 body.path-enrol-users,
 body.path-local-sceh-rules,
-body.path-local-sceh-importer {
-    background-color: #f1f5f9 !important; /* light slate surface */
+body.path-local-sceh-importer,
+body.path-admin-tool-lp,
+body.path-cohort {
+    background: #f1f5f9;
+    background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(192, 38, 53, 0.05) 0, transparent 50%) !important;
+    background-attachment: fixed !important;
 }
 
-body.path-course-edit #region-main, 
+body.path-course-edit #region-main,
+body.path-course-management #region-main,
 body.path-enrol-users #region-main,
 body.path-local-sceh-rules #region-main,
-body.path-local-sceh-importer #region-main {
-    border-radius: 16px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+body.path-local-sceh-importer #region-main,
+body.path-admin-tool-lp #region-main,
+body.path-cohort #region-main {
+    border-radius: 20px;
+    border: 1px solid rgba(226, 232, 240, 1);
+    box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
     background: #ffffff;
-    padding: 2rem !important;
+    padding: 2.5rem !important;
+    margin-top: 1.5rem !important;
 }
 
-/* SCEH Accent Color Integration for Tabs and Links */
-.nav-tabs .nav-link.active,
-.nav-pills .nav-link.active {
-    border-bottom: 3px solid #6366f1 !important; /* SCEH Indigo */
-    color: #4338ca !important;
-    background: transparent !important;
+/* Hero Headings for Backend Pages */
+.page-header-headings h1 {
+    font-size: 2.25rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.025em !important;
+    color: #0f172a !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.breadcrumb-item a {
+    color: #64748b !important;
+    font-weight: 500;
+}
+
+.breadcrumb-item.active {
+    color: #1e293b !important;
     font-weight: 600;
 }
 
+/* SCEH Accent Color Integration for Tabs and Links */
+.nav-tabs .nav-link,
+.nav-pills .nav-link {
+    transition: all 0.2s ease;
+    border-radius: 8px 8px 0 0;
+}
+
+.nav-tabs .nav-link.active,
+.nav-pills .nav-link.active {
+    border-bottom: 3px solid #6366f1 !important;
+    /* SCEH Indigo */
+    color: #4338ca !important;
+    background: rgba(99, 102, 241, 0.04) !important;
+    font-weight: 700;
+}
+
 .nav-tabs .nav-link:hover {
-    border-bottom: 3px solid rgba(99, 102, 241, 0.3);
+    background: rgba(99, 102, 241, 0.04) !important;
+    border-bottom-color: rgba(99, 102, 241, 0.3);
 }
 
 /* Button Refinement to match SCEH aesthetic */
 .btn-primary {
     background-color: #6366f1 !important;
     border-color: #6366f1 !important;
-    border-radius: 8px !important;
-    padding: 0.5rem 1.25rem !important;
+    border-radius: 10px !important;
+    padding: 0.625rem 1.5rem !important;
+    font-weight: 600 !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
 }
 
 .btn-primary:hover {
     background-color: #4f46e5 !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #475569 !important;
+    border-radius: 10px !important;
+    padding: 0.625rem 1.5rem !important;
+    font-weight: 600 !important;
+}
+
+.btn-secondary:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Table styling for management pages */
+.generictable {
+    border: none !important;
+}
+
+.generictable thead th {
+    background: #f8fafc !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    color: #64748b !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 1rem !important;
+}
+
+.generictable tbody td {
+    padding: 1rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
 }
 
 /* Card System consistency for custom pages */
