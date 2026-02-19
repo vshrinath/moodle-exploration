@@ -166,7 +166,7 @@ $checks[] = [
         : get_string('streamsetupcheck_detail_common_fail', 'local_sceh_rules'),
     'actions' => !$hascommon ? [[
         'text' => get_string('streamsetupcheck_action_fix', 'local_sceh_rules'),
-        'url' => new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1]),
+        'url' => new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1, 'sesskey' => sesskey()]),
         'style' => 'primary',
     ]] : [],
 ];
@@ -182,7 +182,7 @@ $checks[] = [
         : get_string('streamsetupcheck_detail_stream_fail', 'local_sceh_rules'),
     'actions' => !$hasstreams ? [[
         'text' => get_string('streamsetupcheck_action_fix', 'local_sceh_rules'),
-        'url' => new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1]),
+        'url' => new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1, 'sesskey' => sesskey()]),
         'style' => 'primary',
     ]] : [],
 ];
@@ -265,7 +265,7 @@ foreach ($checks as $check) {
 if (!$allpass) {
     echo html_writer::start_div('mt-4 text-center');
     echo html_writer::link(
-        new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1]),
+        new moodle_url('/course/view.php', ['id' => $selectedcourseid, 'edit' => 1, 'sesskey' => sesskey()]),
         get_string('streamsetupcheck_edit_course', 'local_sceh_rules', format_string($course->fullname)),
         ['class' => 'btn btn-primary btn-lg']
     );
