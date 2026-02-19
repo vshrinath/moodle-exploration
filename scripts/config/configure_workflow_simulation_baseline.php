@@ -379,6 +379,7 @@ $program_owner_caps = [
     'moodle/course:manageactivities',
     'moodle/question:add',
     'moodle/question:editall',
+    'mod/resource:addinstance',
     'mod/quiz:addinstance',
     'mod/quiz:view',
     'mod/quiz:manage',

@@ -4,6 +4,29 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Add Allied Health phase-2 workflow automation and Program Owner resource authoring
+
+### What changed
+- Added a new automated Allied Health workflow test script covering:
+  - day-folder discovery from test content
+  - day resource creation (`content`, `lesson_plan`, `roleplay`)
+  - day quiz creation
+  - quiz CSV-to-question import and quiz slot attachment
+  - cohort-sync learner enrollment validation
+  - trainer release and learner visibility checks
+- Updated baseline Program Owner capabilities to include resource activity creation.
+- Removed admin fallback from automated test path so content creation is validated under Program Owner permissions.
+
+### Why
+Program Owners need to independently create and manage course content and quizzes for Allied Health workflows. The new automation validates this flow end-to-end using mock roles and catches role-capability gaps early.
+
+### Files touched
+- `scripts/test/test_allied_health_quiz_workflow.php` — New/expanded phase-2 workflow automation for Allied Health quiz-first flow
+- `scripts/config/configure_workflow_simulation_baseline.php` — Added `mod/resource:addinstance` for `sceh_program_owner`
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-19] — Switch to manual trainer unlock model for Allied Health workflow
 
 ### What changed
