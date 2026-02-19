@@ -935,29 +935,43 @@ class block_sceh_dashboard extends block_base {
         $primarycategoryid = $categoryids[0] ?? 0;
         $courseids = $this->get_program_owner_course_ids($userid);
         $primarycourseid = $courseids[0] ?? 0;
-        $canmanagecohorts = false; // Phase 7: Remove cohort management for Program Owners.
+        // Detect single program vs multiple programs.
+        $is_single_program = (count($categoryids) === 1);
+        $singlecatparams = $is_single_program ? ['categoryid' => $primarycategoryid] : [];
 
-        $managecoursechildren = [
-            [
+        $managecoursechildren = [];
+        
+        if ($is_single_program) {
+            // Simplified view for single program owner.
+            $managecoursechildren[] = [
+                'title' => get_string('poallcourses', 'block_sceh_dashboard'),
+                'url' => new moodle_url('/course/index.php', $singlecatparams),
+            ];
+            $managecoursechildren[] = [
+                'title' => get_string('pocreatecourse', 'block_sceh_dashboard'),
+                'url' => new moodle_url('/course/edit.php', ['category' => $primarycategoryid]),
+            ];
+        } else {
+            // Multi-program view (existing logic consolidated).
+            $managecoursechildren[] = [
+                'title' => get_string('poconsole', 'block_sceh_dashboard'),
+                'url' => new moodle_url('/course/management.php'),
+            ];
+            $managecoursechildren[] = [
                 'title' => get_string('poallcourses', 'block_sceh_dashboard'),
                 'url' => new moodle_url('/course/index.php'),
-            ],
-        ];
-
-        foreach ($categories as $category) {
-            $catname = format_string($category->name);
-            $catparams = ['categoryid' => (int)$category->id];
+            ];
             
-            $managecoursechildren[] = [
-                'title' => get_string('pocreateincategory', 'block_sceh_dashboard', $catname),
-                'url' => new moodle_url('/course/edit.php', ['category' => (int)$category->id]),
-            ];
-            $managecoursechildren[] = [
-                'title' => get_string('poeditincategory', 'block_sceh_dashboard', $catname),
-                'url' => new moodle_url('/course/management.php', $catparams),
-            ];
+            foreach ($categories as $category) {
+                $catname = format_string($category->name);
+                $managecoursechildren[] = [
+                    'title' => get_string('pomanagecategory', 'block_sceh_dashboard', $catname),
+                    'url' => new moodle_url('/course/management.php', ['categoryid' => (int)$category->id]),
+                ];
+            }
         }
 
+        // Shared secondary actions.
         $managecoursechildren[] = [
             'title' => get_string('pobulkimport', 'block_sceh_dashboard'),
             'url' => $primarycourseid > 0
@@ -968,15 +982,6 @@ class block_sceh_dashboard extends block_base {
             'title' => get_string('povalidatecourses', 'block_sceh_dashboard'),
             'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php'),
         ];
-        $managecoursechildren[] = [
-            'title' => get_string('popublishcourses', 'block_sceh_dashboard'),
-            'url' => $primarycategoryid > 0
-                ? new moodle_url('/course/management.php', ['categoryid' => $primarycategoryid])
-                : new moodle_url('/course/index.php'),
-        ];
-
-        // Contextual params if there is only one category.
-        $singlecatparams = (count($categoryids) === 1) ? ['categoryid' => $primarycategoryid] : [];
 
         $actions = [
             [
@@ -1014,7 +1019,7 @@ class block_sceh_dashboard extends block_base {
                 'icon' => 'fa-user-check',
                 'color' => 'orange',
                 'url' => $primarycourseid > 0
-                    ? new moodle_url('/enrol/users.php', ['id' => $primarycourseid])
+                    ? new moodle_url('/user/index.php', ['id' => $primarycourseid])
                     : new moodle_url('/course/index.php'),
                 'children' => [],
             ],
@@ -1138,7 +1143,7 @@ class block_sceh_dashboard extends block_base {
         }
 
         list($insql, $params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
-        $records = $DB->get_records_select('course', 'category ' . $insql, $params, 'id ASC', 'id');
+        $records = $DB->get_records_select('course', 'category ' . $insql, $params, 'id DESC', 'id');
         return array_values(array_map(static function($record): int {
             return (int)$record->id;
         }, $records));
@@ -1188,7 +1193,6 @@ class block_sceh_dashboard extends block_base {
             'steps' => [
                 ['label' => get_string('postepdraft', 'block_sceh_dashboard'), 'count' => $draft, 'desc' => get_string('postepdraftdesc', 'block_sceh_dashboard'), 'url' => $drafturl],
                 ['label' => get_string('postepneedschanges', 'block_sceh_dashboard'), 'count' => $needschanges, 'desc' => get_string('postepneedschangesdesc', 'block_sceh_dashboard'), 'url' => $needschangesurl],
-                ['label' => get_string('posteppendingapproval', 'block_sceh_dashboard'), 'count' => $pendingapproval, 'desc' => get_string('posteppendingapprovaldesc', 'block_sceh_dashboard'), 'url' => $baseurl],
                 ['label' => get_string('posteplive', 'block_sceh_dashboard'), 'count' => $live, 'desc' => get_string('posteplivedesc', 'block_sceh_dashboard'), 'url' => $baseurl],
             ],
         ];
@@ -1381,9 +1385,8 @@ class block_sceh_dashboard extends block_base {
             'status' => $warn ? 'warning' : 'success',
             'steps' => [
                 ['label' => get_string('postepunassigned', 'block_sceh_dashboard'), 'count' => $unassigned, 'desc' => get_string('postepunassigneddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/course/index.php')],
-                ['label' => get_string('postepassigned', 'block_sceh_dashboard'), 'count' => $assigned, 'desc' => get_string('postepassigneddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/enrol/users.php', ['id' => $primarycourseid])],
+                ['label' => get_string('postepassigned', 'block_sceh_dashboard'), 'count' => $assigned, 'desc' => get_string('postepassigneddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/user/index.php', ['id' => $primarycourseid])],
                 ['label' => get_string('postepneedsreview', 'block_sceh_dashboard'), 'count' => $needsreview, 'desc' => get_string('postepneedsreviewdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/my/courses.php')],
-                ['label' => get_string('postepontrack', 'block_sceh_dashboard'), 'count' => $ontrack, 'desc' => get_string('postepontrackdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/my/courses.php')],
             ],
         ];
     }
@@ -1434,8 +1437,6 @@ class block_sceh_dashboard extends block_base {
             'steps' => [
                 ['label' => get_string('postepnewimports', 'block_sceh_dashboard'), 'count' => $newimports, 'desc' => get_string('postepnewimportsdesc', 'block_sceh_dashboard'), 'url' => $importurl],
                 ['label' => get_string('postepneedsfixes', 'block_sceh_dashboard'), 'count' => $needsfixed, 'desc' => get_string('postepneedsfixesdesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/local/sceh_rules/stream_setup_check.php')],
-                ['label' => get_string('postepreadyreview', 'block_sceh_dashboard'), 'count' => $readyreview, 'desc' => get_string('postepreadyreviewdesc', 'block_sceh_dashboard'), 'url' => $importurl],
-                ['label' => get_string('postepapproved', 'block_sceh_dashboard'), 'count' => $approved, 'desc' => get_string('postepapproveddesc', 'block_sceh_dashboard'), 'url' => new moodle_url('/course/index.php')],
             ],
         ];
     }
