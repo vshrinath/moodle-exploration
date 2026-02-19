@@ -240,15 +240,15 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 **Pattern:**
 ```
 # Good: Explicit major version constraint
-Django>=4.2,<5.0
+framework-package>=4.2,<5.0
 requests>=2.28,<3.0
 
 # Bad: Unconstrained (any version)
-Django
+framework-package
 requests
 
 # Bad: Overly specific (defeats lock file purpose)
-Django==4.2.28
+framework-package==4.2.28
 ```
 
 **Rules:**
@@ -279,7 +279,6 @@ Django==4.2.28
 ## Language-Specific Implementations
 
 See language-specific guides for detailed examples:
-- [Python/Django](./deploy-python-django.md)
 - [PHP/Composer](./deploy-php-composer.md) — Add when needed
 - [Node.js/npm](./deploy-nodejs-npm.md) — Add when needed
 

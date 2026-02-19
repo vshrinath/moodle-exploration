@@ -56,7 +56,7 @@ Frequency: [Always / Sometimes / Rarely]
 - Application logs
 - Browser DevTools (Console, Network, Performance)
 - Database query logs
-- Server logs (nginx, gunicorn)
+- Server logs (web server, PHP-FPM/Apache)
 - Error tracking (Sentry, Rollbar)
 
 ### 3. Form Hypothesis
@@ -279,11 +279,9 @@ from datetime import datetime
 now = datetime.now()  # What timezone?
 
 # ✅ Timezone-aware datetime
-from django.utils import timezone
 now = timezone.now()  # Always UTC
 
 # ✅ Convert to user's timezone for display
-from django.utils.timezone import localtime
 user_time = localtime(now, user.timezone)
 ```
 
@@ -322,10 +320,10 @@ breakpoint()
 # q (quit): Exit debugger
 ```
 
-### Django Debug Toolbar
+### Moodle Debugging Tools
 
 ```python
-# settings.py
+# debug settings
 INSTALLED_APPS += ['debug_toolbar']
 MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 INTERNAL_IPS = ['127.0.0.1']
@@ -364,7 +362,7 @@ INTERNAL_IPS = ['127.0.0.1']
 ### Logging
 
 ```python
-# Django settings
+# framework debug settings
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -572,5 +570,5 @@ Logs: [Relevant error messages]
 
 - [Debugging: The 9 Indispensable Rules](https://debuggingrules.com/)
 - [The Art of Debugging](https://www.oreilly.com/library/view/the-art-of/9781593271749/)
-- [Python Debugging with pdb](https://realpython.com/python-debugging-pdb/)
+- [Moodle Debugging Docs](https://moodledev.io/docs/5.0/guides/debugging)
 - [Chrome DevTools Documentation](https://developer.chrome.com/docs/devtools/)

@@ -363,7 +363,7 @@ Instead of full context:
 
 ```
 For repeated information:
-"Tech stack: Django 4.2, PostgreSQL, Redis (cached from README)"
+"Tech stack: Moodle 5.x, MariaDB, Docker (cached from README)"
 
 For patterns:
 "Follow standard CRUD pattern (cached from conventions)"

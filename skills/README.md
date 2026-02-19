@@ -46,7 +46,6 @@ skills/
 
 **Language-specific deployment:**
 
-- `deploy-python-django.md` — Python/Django implementation guide
 - `deploy-php-composer.md` — PHP/Composer (add when needed)
 - `deploy-nodejs-npm.md` — Node.js/npm (add when needed)
 
@@ -170,7 +169,7 @@ cp -r skills/ /path/to/new-project/
 **Activate relevant skills:**
 
 1. **Choose language stack:**
-   - Python/Django → Keep `deploy-python-django.md`
+   - PHP/Moodle → Keep `deploy-php-composer.md`
    - PHP/Laravel → Create `deploy-php-laravel.md`
    - Node.js → Create `deploy-nodejs-express.md`
 
@@ -205,7 +204,7 @@ cp -r skills/ /path/to/new-project/
 
 ### Needs Customization
 
-⚠️ Language-specific deployment (Python vs PHP vs Node)
+⚠️ Language-specific deployment (PHP vs Node vs other stacks)
 ⚠️ Cloud-specific deployment (AWS vs Azure vs GCP)
 ⚠️ Domain-specific requirements (SaaS vs e-commerce vs content)
 

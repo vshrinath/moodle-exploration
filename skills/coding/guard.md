@@ -229,44 +229,37 @@ element.innerHTML = userInput;
 
 // ✅ Safe (escaped)
 element.textContent = userInput;
-// Or use framework escaping (React, Django templates)
+// Or use framework escaping (React, Moodle Mustache templates)
 ```
 
 ### CSRF (Cross-Site Request Forgery)
-```python
-# ❌ Missing CSRF protection
-@api_view(['POST'])
-def delete_account(request):
-    request.user.delete()
+```php
+// ❌ Missing CSRF/session validation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    delete_account($userid);
+}
 
-# ✅ CSRF protected
-from django.views.decorators.csrf import csrf_protect
-
-@csrf_protect
-@api_view(['POST'])
-def delete_account(request):
-    request.user.delete()
+// ✅ Safe (Moodle-style)
+require_login();
+require_sesskey();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    delete_account($userid);
+}
 ```
 
 ### Authentication Bypass
-```python
-# ❌ No authentication check
-@api_view(['GET'])
-def user_profile(request, user_id):
-    user = User.objects.get(id=user_id)
-    return Response(user.data)
+```php
+// ❌ No auth check
+$profile = get_user_profile($userid);
+echo json_encode($profile);
 
-# ✅ Authentication required
-from rest_framework.permissions import IsAuthenticated
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def user_profile(request, user_id):
-    # Also check authorization!
-    if request.user.id != user_id and not request.user.is_admin:
-        return Response({'error': 'Forbidden'}, status=403)
-    user = User.objects.get(id=user_id)
-    return Response(user.data)
+// ✅ Auth + authorization check
+require_login();
+if ((int)$USER->id !== (int)$userid && !has_capability('moodle/site:config', context_system::instance())) {
+    throw new required_capability_exception(context_system::instance(), 'moodle/site:config', 'nopermissions', '');
+}
+$profile = get_user_profile($userid);
+echo json_encode($profile);
 ```
 
 ---
@@ -300,4 +293,4 @@ def user_profile(request, user_id):
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)
 - [Code Review Best Practices](https://google.github.io/eng-practices/review/)
-- [Django Security](https://docs.djangoproject.com/en/stable/topics/security/)
+- [Moodle Security Guidelines](https://moodledev.io/docs/5.0/apis/subsystems/security)

@@ -29,7 +29,7 @@
 ```
 # ❌ Not 1NF — array stored in a column
 articles: id | title | tags
-         1  | "Foo" | "python,django,web"
+         1  | "Foo" | "clinical,foundation,ophthalmology"
 
 # ✅ 1NF — separate table
 articles: id | title
@@ -221,7 +221,7 @@ When a migration must transform existing data, write it as a separate migration 
 
 **Using FLOAT for money** — floating point precision errors will cause rounding problems. Use DECIMAL.
 
-**Storing arrays in columns** — `tags = "python,django,web"` violates 1NF and makes querying, filtering, and indexing impossible. Use a join table.
+**Storing arrays in columns** — `tags = "clinical,foundation,ophthalmology"` violates 1NF and makes querying, filtering, and indexing impossible. Use a join table.
 
 **No explicit cascade behavior** — leaving `on_delete` unspecified forces you to guess what happens when a parent record is deleted.
 
@@ -237,7 +237,7 @@ When a migration must transform existing data, write it as a separate migration 
 
 > These sections show how the principles above map to specific tools. The principles are the same; syntax differs.
 
-### Django (Python)
+### ORM Example (Framework-specific)
 
 ```python
 # Relationships
@@ -261,7 +261,7 @@ class Meta:
     ]
 
 # Constraints
-from django.db.models import Q, CheckConstraint, UniqueConstraint
+# framework ORM constraints example
 class Meta:
     constraints = [
         CheckConstraint(check=Q(price__gte=0), name='price_non_negative'),
@@ -293,7 +293,7 @@ Article.objects.only('id', 'title', 'slug')
 Article.objects.defer('content')  # Skip large text field
 
 # Aggregate at DB level
-from django.db.models import Sum, Count
+# framework ORM aggregate example
 Article.objects.aggregate(Sum('views'))
 Article.objects.count()
 Article.objects.filter(slug=slug).exists()  # Not .count() > 0
@@ -334,6 +334,6 @@ const articles = await prisma.article.findMany({
 
 - [Database Normalization](https://en.wikipedia.org/wiki/Database_normalization)
 - [Use The Index, Luke](https://use-the-index-luke.com/) — definitive guide to database indexing
-- [Django Model Field Reference](https://docs.djangoproject.com/en/stable/ref/models/fields/)
+- [Moodle Database API](https://moodledev.io/docs/5.0/apis/core/dml)
 - [Prisma Data Modeling](https://www.prisma.io/docs/concepts/components/prisma-schema/data-model)
 - [The Art of PostgreSQL](https://theartofpostgresql.com/)

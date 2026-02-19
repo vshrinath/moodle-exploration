@@ -307,7 +307,7 @@ Cache-Control: no-store
 
 > These sections show how the principles above apply in specific frameworks. The principles are the same; syntax differs.
 
-### Django (Python)
+### Backend ORM Example (Framework-specific)
 
 ```python
 # Eager loading
@@ -319,13 +319,13 @@ articles = Article.objects.only('id', 'title', 'published_date')
 articles = Article.objects.defer('content')  # Skip large field
 
 # Aggregate at DB level
-from django.db.models import Sum, Count
+# framework ORM aggregate example
 total = Article.objects.aggregate(Sum('views'))['views__sum']
 count = Article.objects.count()
 exists = Article.objects.filter(slug=slug).exists()
 
 # Caching
-from django.core.cache import cache
+# framework cache API example
 result = cache.get('trending')
 if result is None:
     result = compute_trending()
@@ -364,7 +364,7 @@ export const revalidate = 3600; // Revalidate at most every hour
 
 ## Further Reading
 
-- [Django Database Optimization](https://docs.djangoproject.com/en/stable/topics/db/optimization/)
+- [Moodle Performance](https://moodledev.io/docs/5.0/apis/core/dml)
 - [Next.js Performance](https://nextjs.org/docs/app/building-your-application/optimizing)
 - [Web.dev Performance](https://web.dev/performance/)
 - [Use The Index, Luke](https://use-the-index-luke.com/) — database index deep dive

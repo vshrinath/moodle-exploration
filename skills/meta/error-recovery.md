@@ -149,7 +149,7 @@ from myapp.models import Article  # Add import
 **Recovery:**
 ```bash
 # Deployment error example
-Error: django.db.utils.OperationalError: no such column: articles_article.new_field
+Error: Moodle dml_write_exception: Unknown column in plugin table
 
 # Analysis:
 # - Code expects new_field to exist
@@ -517,7 +517,7 @@ except SpecificError as e:
 
 ## Further Reading
 
-- [Error Handling Best Practices](https://docs.python.org/3/tutorial/errors.html)
+- [Moodle Error Handling](https://moodledev.io/docs/5.0/apis/core/dml)
 - [Exponential Backoff](https://en.wikipedia.org/wiki/Exponential_backoff)
 - [Circuit Breaker Pattern](https://martinfowler.com/bliki/CircuitBreaker.html)
 - [Debugging Strategies](https://www.oreilly.com/library/view/the-art-of/9781593271749/)

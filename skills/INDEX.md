@@ -83,7 +83,7 @@ A portable library of role-based AI personas for software development and conten
 | `@ops` | `ops/ops.md` | Deployment, environment management, incident response |
 | — | `ops/cicd-pipelines.md` | GitHub Actions CI/CD setup and configuration |
 | — | `ops/deploy-aws.md` | AWS infrastructure (ECS, RDS, S3, CloudFront, Route 53) |
-| — | `ops/deploy-python-django.md` | Django-specific deployment (Dockerfile, settings, health checks) |
+| — | `ops/deploy-php-composer.md` | PHP/Composer deployment (Dockerfile, config, health checks) |
 | — | `ops/deployment-practices.md` | Universal deployment principles (any stack) |
 
 ---
@@ -159,6 +159,6 @@ These skills are written to be **project-agnostic**. When dropping them into a n
 
 - `@dev` and `@qa` will look for a CONVENTIONS.md, CONTRIBUTING.md, or equivalent file; if none exists, they match existing code patterns
 - `@arch` reads the project's conventions file before proposing structural changes
-- `@data-modeling` and `@performance` and `@frontend-perf` use pseudocode for principles and clearly labeled sections for framework-specific examples (Django, Prisma, Next.js, Astro)
+- `@data-modeling`, `@performance`, and `@frontend-perf` use pseudocode for principles and clearly labeled framework examples where needed
 - `@video` is **Remotion-specific** — it does not apply to other video workflows
 - Ops skills assume Docker + GitHub Actions + AWS as the deployment stack; adapt as needed for other infrastructure

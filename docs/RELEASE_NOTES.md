@@ -4,6 +4,32 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Remove Django-specific drift from local skills and align to Moodle/PHP
+
+### What changed
+- Cleaned local `skills/` content to remove Django-specific references that were misleading for this repository.
+- Replaced framework-specific examples and wording with Moodle/PHP-relevant guidance in security, debugging, API/data/performance, and ops references.
+- Kept generic principles intact while making examples and stack assumptions consistent with current Moodle workflow execution.
+
+### Why
+The repository now uses a Moodle 5 plugin-centric workflow. Django-specific examples in shared skills caused context drift and could lead to incorrect implementation/test decisions. This update keeps skills actionable for current team usage.
+
+### Files touched
+- `skills/INDEX.md` — Updated framework wording in index notes
+- `skills/README.md` — Updated language-stack/deployment guidance for PHP/Moodle context
+- `skills/coding/guard.md` — Replaced Django security examples with Moodle/PHP-style examples
+- `skills/coding/debugging.md` — Updated debugging references for Moodle/PHP stack
+- `skills/coding/api-design.md` — Replaced Django-themed sample payload/search terms
+- `skills/coding/data-modeling.md` — Removed Django-specific wording/examples in framework notes
+- `skills/coding/performance.md` — Removed Django-specific framework examples/links
+- `skills/meta/confidence-scoring.md` — Updated confidence examples to Moodle context
+- `skills/meta/context-strategy.md` — Updated cached stack example to Moodle/MariaDB/Docker
+- `skills/meta/error-recovery.md` — Updated recovery examples to Moodle-style failures
+- `skills/ops/deployment-practices.md` — Removed Django-specific deploy references
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-19] — Add and align local skills library for Moodle workflow execution
 
 ### What changed

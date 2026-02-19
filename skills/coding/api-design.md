@@ -147,7 +147,7 @@ Field Selection:
 /api/articles/?fields=id,title,author
 
 Search:
-/api/articles/?q=django
+/api/articles/?q=clinical
 ```
 
 ---
@@ -164,7 +164,7 @@ Content-Type: application/json
   "title": "My Article",
   "content": "Article content here",
   "category": "tech",
-  "tags": ["django", "python"],
+  "tags": ["clinical", "foundation"],
   "published": true
 }
 ```
@@ -178,7 +178,7 @@ Content-Type: application/json
   "title": "My Article",
   "content": "Article content here",
   "category": "tech",
-  "tags": ["django", "python"],
+  "tags": ["clinical", "foundation"],
   "published": true,
   "created_at": "2024-02-19T10:30:00Z",
   "updated_at": "2024-02-19T10:30:00Z",
@@ -383,7 +383,7 @@ Cons:
 ### Example: JWT Authentication
 
 ```python
-# Django REST Framework
+# Framework implementation example
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 

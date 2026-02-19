@@ -63,7 +63,7 @@ Confidence: 75%
 
 Reasoning:
 ✓ Understand the concept
-✓ Know the library (django-ratelimit)
+✓ Know the library (rate-limiting middleware)
 ? Not sure about exact limits (100/hour? 1000/hour?)
 ? Not sure if per-user or per-IP
 
@@ -171,7 +171,7 @@ Score 0-10:
 Score 0-10:
 
 10: Done this exact thing before
-- "Add field to Django model" (done 100+ times)
+- "Add field to Moodle plugin table/model" (done 100+ times)
 
 7: Done similar things
 - "Add field with custom validation" (done validation, not this exact type)
