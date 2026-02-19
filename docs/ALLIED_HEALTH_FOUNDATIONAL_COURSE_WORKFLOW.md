@@ -16,82 +16,67 @@
 | Quiz/Assignment access | Manually shown by Trainer after marking attendance (visibility control) |
 | Trainer resources | Lesson plans, roleplay scripts, facilitator guides — always hidden from learners |
 | Learner content | Teaching material, reference guides — Trainer controls when to release |
-| External resources | YouTube videos, URLs — embedded or linked within modules |
-| Cross-module assessments | OJT/practical evaluations spanning multiple modules, scanned reports uploaded as feedback |
+| External resources | YouTube videos, URLs — embedded or linked within days |
+| Cross-day assessments | OJT/practical evaluations spanning multiple days, scanned reports uploaded as feedback |
 | Cohort model | One permanent course, cohorts enrolled and unenrolled each cycle |
 | Roles involved | Program Owner, Trainer, Learner, System Admin |
 | Completion leads to | Stream course access (Nursing / OT / Optometry Tech) |
 
 ---
 
+## Automation Test Input (No Bulk Import)
+
+For this phase, use local content directly from:
+
+- `test_content/Allied Health Program`
+
+Do not use bulk import yet. Use the Week/Day folder assets in that path and map them manually in Moodle during test runs with mock roles.
+
+---
+
+## Terminology Mapping (Current Test Phase)
+
+To preserve historical detail while using the new folder pattern, apply this mapping throughout this document:
+
+- `Module [N]` => `Week/Day bundle` (for example `01. Week 1 / 01. Day 1`)
+- `Module Content` => `Day Content`
+- `Cross-Module Assessment` => `Cross-Day Assessment`
+
+For automation and test scripting in this phase, treat **module**, **week**, and **day unit** as the same execution unit.
+When a step references older module labels, execute it against the equivalent Week/Day folder structure.
+
+---
+
 ## Course Structure
 
-```
+```text
 Allied Health — Foundational  [one permanent course]
 │
-├── Module 1: Eye Anatomy
-│     ├── 📁 Trainer Resources        👁 Trainer only — always invisible to learners
-│     │     ├── Lesson Plan: Eye Anatomy (PDF)
-│     │     ├── Roleplay Script: Patient Consultation (PDF)
-│     │     └── Facilitator Guide: Module 1 (PDF)
-│     ├── 📁 Module 1 Content         👁 Hidden until Trainer releases to learners
-│     │     ├── Teaching Slides: Eye Anatomy (PDF)
-│     │     ├── Reference: Eye Anatomy Diagram (PDF)
-│     │     └── Reference: Ocular Terminology Guide (PDF)
-│     ├── 🔗 Pre-session: Introduction to Eye Anatomy (YouTube — Embed)
-│     ├── Attendance: Eye Anatomy Class
-│     ├── 🔗 Post-session: Eye Anatomy Reference Chart (URL — New tab)
-│     └── Quiz: Eye Anatomy MCQ  🔒 Trainer shows after marking attendance
-│
-├── Module 2: Patient Handling
-│     ├── 📁 Trainer Resources        👁 Trainer only — always invisible to learners
-│     │     ├── Lesson Plan: Patient Handling (PDF)
-│     │     ├── Roleplay Script: Transfer Technique (PDF)
-│     │     └── Assessment Rubric Guide (PDF)
-│     ├── 📁 Module 2 Content         👁 Hidden until Trainer releases to learners
-│     │     ├── Teaching Slides: Patient Handling (PDF)
-│     │     ├── Reference: Safe Transfer Techniques (PDF)
-│     │     └── Reference: WHO Safe Patient Handling Guidelines (URL)
-│     ├── 🔗 Pre-session: Safe Patient Handling Video (YouTube — Embed)
-│     ├── Attendance: Patient Handling Class
-│     └── Assignment: Practical Checklist  🔒 Trainer shows after marking attendance
-│
-├── ── Cross-Module Assessment 1: Modules 1 + 2 ──────────────────
-│     └── Assignment: OJT Assessment — Eye Anatomy & Patient Handling
-│           🔒 Trainer shows when Module 1 Quiz AND Module 2 Assignment complete
-│           📎 Trainer uploads scanned OJT report as feedback file
-│
-├── Module 3: Infection Control
-│     ├── 📁 Trainer Resources        👁 Trainer only — always invisible to learners
-│     │     ├── Lesson Plan: Infection Control (PDF)
-│     │     └── Facilitator Guide: Module 3 (PDF)
-│     ├── 📁 Module 3 Content         👁 Hidden until Trainer releases to learners
-│     │     ├── Teaching Slides: Infection Control (PDF)
-│     │     ├── Reference: Hospital Infection Control Protocol (PDF)
-│     │     └── Reference: WHO Hand Hygiene Guidelines (URL)
-│     ├── 🔗 Pre-session: Infection Control in Clinical Settings (YouTube — Embed)
-│     ├── Attendance: Infection Control Class
-│     └── Quiz: Infection Control MCQ  🔒 Trainer shows after marking attendance
-│
-├── Module 4: Documentation & Compliance
-│     ├── 📁 Trainer Resources        👁 Trainer only — always invisible to learners
-│     │     ├── Lesson Plan: Documentation (PDF)
-│     │     └── Sample Completed Forms (PDF)
-│     ├── 📁 Module 4 Content         👁 Hidden until Trainer releases to learners
-│     │     ├── Teaching Slides: Documentation Standards (PDF)
-│     │     ├── Reference: Blank Form Templates (PDF)
-│     │     └── Reference: Compliance Checklist (PDF)
-│     ├── 🔗 Pre-session: Documentation Standards Overview (URL — New tab)
-│     ├── Attendance: Documentation Class
-│     └── Assignment: Sample Form Completion  🔒 Trainer shows after marking attendance
-│
-├── ── Cross-Module Assessment 2: Modules 3 + 4 ──────────────────
-│     └── Assignment: OJT Assessment — Infection Control & Documentation
-│           🔒 Trainer shows when Module 3 Quiz AND Module 4 Assignment complete
-│           📎 Trainer uploads scanned OJT report as feedback file
-│
+├── 01. Week 1/
+│   ├── 01. Day 1/
+│   │   ├── content/
+│   │   ├── lesson_plan/
+│   │   ├── quiz/
+│   │   ├── assignment/
+│   │   ├── roleplay/
+│   │   └── rubric/
+│   └── 02. Day 2/
+│       ├── content/
+│       ├── lesson_plan/
+│       ├── quiz/
+│       ├── assignment/
+│       ├── roleplay/
+│       └── rubric/
+├── 02. Week 2/
+│   └── 01. Day 1/
+│       ├── content/
+│       ├── lesson_plan/
+│       ├── quiz/
+│       ├── assignment/
+│       ├── roleplay/
+│       └── rubric/
 └── Final Assessment
-      └── Quiz: Foundational Final MCQ  🔒 Trainer shows when all modules and OJT assessments complete
+    └── Foundational Final MCQ (Trainer-controlled visibility)
 ```
 
 ---
@@ -100,10 +85,10 @@ Allied Health — Foundational  [one permanent course]
 
 | Component | Weight | Type |
 |---|---|---|
-| Attendance (all 4 sessions) | Completion gate | Pass/Fail |
-| Module quizzes (Modules 1 + 3) | 20% | Online, auto-graded |
-| Practical assignments (Modules 2 + 4) | 20% | Offline, Trainer-graded |
-| Cross-module OJT assessments (x2) | 20% | Offline, Trainer-graded + scanned report |
+| Attendance (all sessions) | Completion gate | Pass/Fail |
+| Day quizzes | 20% | Online, auto-graded |
+| Practical assignments | 20% | Offline, Trainer-graded |
+| Cross-day OJT assessments | 20% | Offline, Trainer-graded + scanned report |
 | Final assessment | 40% | Online, auto-graded |
 
 **Minimum pass grade: 60% overall**
@@ -128,39 +113,37 @@ Allied Health — Foundational  [one permanent course]
    - Start date: leave as today — permanent course, not date-bound
 3. Save and enter the course
 
-### Step 2 — Create Course Sections
+### Step 2 — Create Week/Day Sections
 
-Turn editing on → rename sections:
-- Module 1: Eye Anatomy
-- Module 2: Patient Handling
-- Cross-Module Assessment 1
-- Module 3: Infection Control
-- Module 4: Documentation & Compliance
-- Cross-Module Assessment 2
-- Final Assessment
+Turn editing on and create sections by week:
+- `01. Week 1`
+- `02. Week 2`
+- continue as needed
 
-### Step 3 — Add Trainer Resources Folder (one per module)
+Within each week, add day labels (`01. Day 1`, `02. Day 2`, etc.) and place day resources/activities in that order.
 
-First item in each module section — above all learner-facing content.
+### Step 3 — Add Trainer Resources Folder (one per day)
+
+First item in each day block — above all learner-facing content.
 
 1. **Add activity → Folder**
 2. Configure:
-   - Name: `Trainer Resources — Module [N]`
+   - Name: `Trainer Resources — Week [W] Day [D]`
    - Display: On a separate page
 3. Upload files: lesson plan, roleplay script, facilitator guide
 4. **Restrict access → Add restriction → User profile → Role contains Trainer**
 
 > Completely invisible to learners — no lock icon shown. Program Owner can update files at any time without changing settings.
 
-> **Permission check:** Your `sceh_trainer` role must include `moodle/course:activityvisibility` and `moodle/course:manageactivities` so Trainers can show/hide Module Content folders and activities using the eye icon.
+> **Permission check:** Your `sceh_trainer` role must include `moodle/course:activityvisibility` and `moodle/course:manageactivities` so Trainers can show/hide Day Content folders and activities using the eye icon.
 
-### Step 4 — Add Module Content Folder (one per module)
+### Step 4 — Add Day Content Folder (one per day)
 
-Second item in each module section — below Trainer Resources, above the pre-session URL.
+Second item in each day block — below Trainer Resources, above optional day URLs.
 
 1. **Add activity → Folder**
 2. Configure:
-   - Name: `Module [N] Content`
+   - Name: `Day Content — Week [W] Day [D]`
    - Display: On a separate page
    - Availability: **Hide from learners** (eye icon — set to hidden at setup)
 3. Upload files: teaching slides, reference PDFs
@@ -171,9 +154,9 @@ Second item in each module section — below Trainer Resources, above the pre-se
 
 > Unlike Trainer Resources (which uses Role restriction and is permanently hidden), the Content folder uses simple show/hide — Trainer controls timing, not permanent access.
 
-### Step 5 — Add Learner URL/Video Resources
+### Step 5 — Add Day URL/Video Resources
 
-For each module, add pre-session and post-session reference materials:
+For each day block, add pre-session and post-session reference materials:
 
 1. **Add activity → URL**
 2. Configure:
@@ -186,13 +169,13 @@ For each module, add pre-session and post-session reference materials:
 
 **YouTube embed note:** Use full YouTube URLs (`https://www.youtube.com/watch?v=VIDEO_ID`) for best compatibility. Shortened `youtu.be` links also work but may require manual embed code in some Moodle versions. Moodle auto-detects and embeds the player when Display is set to Embed.
 
-### Step 6 — Add Attendance Activities (one per module)
+### Step 6 — Add Attendance Activities (one per day/session)
 
-For each of the 4 modules:
+For each teachable day/session:
 
 1. **Add activity → Attendance**
 2. Configure:
-   - Name: e.g., `Eye Anatomy Class`
+   - Name: e.g., `Attendance — Week 1 Day 1`
    - Grade: pass/fail
    - Student recording: **Disabled**
 3. Statuses: P = Present, A = Absent, L = Late, E = Excused
@@ -203,12 +186,12 @@ For each of the 4 modules:
 
 ### Step 7 — Build Question Bank
 
-1. Course → **Question Bank → Categories** → create 5 categories:
-   - Eye Anatomy, Patient Handling, Infection Control, Documentation & Compliance, Final Assessment
+1. Course → **Question Bank → Categories** → create categories by week/day and final assessment:
+   - e.g., `Week 1 Day 1`, `Week 1 Day 2`, `Week 2 Day 1`, `Final Assessment`
 2. Add 30–40 questions per category
 3. Question types: Multiple Choice (primary), True/False, Matching
 
-### Step 8 — Add Module Quiz Activities (Modules 1 and 3)
+### Step 8 — Add Day Quiz Activities
 
 1. **Add activity → Quiz**
 2. Configure:
@@ -221,39 +204,37 @@ For each of the 4 modules:
 
 > **Note:** Quizzes start hidden. Trainer shows them after marking attendance, giving control over when learners can attempt based on attendance status and session readiness.
 
-### Step 9 — Add Module Assignment Activities (Modules 2 and 4)
+### Step 9 — Add Day Assignment Activities
 
 1. **Add activity → Assignment**
 2. Configure:
    - Submission type: **None**
    - Grading method: Rubric (recommended), Pass grade: 60%
    - Availability: **Hide from learners** (Trainer will show after marking attendance)
-3. Define rubric criteria per module
+3. Define rubric criteria per day activity
 4. Completion tracking: must receive a grade
 
 > **Note:** Assignments start hidden. Trainer shows them after marking attendance, giving control over when learners can be evaluated based on attendance status and session readiness.
 
-### Step 10 — Add Cross-Module OJT Assessment Activities
+### Step 10 — Add Cross-Day OJT Assessment Activities
 
-Place these in the dedicated Cross-Module Assessment sections.
+Place these after completing the first set of day activities.
 
-**Cross-Module Assessment 1 (after Module 2):**
+**Example: Cross-Day Assessment 1 (after Week 1 Day 2):**
 
 1. **Add activity → Assignment**
 2. Configure:
-   - Name: `OJT Assessment — Eye Anatomy & Patient Handling`
+   - Name: `OJT Assessment — Week 1 (Day 1 + Day 2)`
    - Description: criteria being evaluated, OJT context (on-ward, simulation, etc.)
    - Submission type: **None** — Trainer evaluates and uploads scanned report
-   - Grading method: **Rubric** spanning criteria from both Module 1 and Module 2
+   - Grading method: **Rubric** spanning criteria from both days
    - Maximum grade: 100, Pass grade: 60%
    - Availability: **Hide from learners** (Trainer will show when learners are ready)
 3. Completion tracking: must receive a grade
 
-> **Note:** OJT assessments start hidden. Trainer shows them when both prerequisite module activities are complete and learners are ready for cross-module evaluation.
+> **Note:** OJT assessments start hidden. Trainer shows them when both prerequisite day activities are complete and learners are ready for cross-day evaluation.
 
-**Cross-Module Assessment 2 (after Module 4):**
-
-Same setup, spanning Module 3 and Module 4 criteria. Start hidden, Trainer shows when Module 3 and Module 4 activities are complete.
+**Additional cross-day assessments:** Follow the same pattern for subsequent week/day combinations as needed.
 
 ### Step 11 — Add Final Assessment Quiz
 
@@ -272,19 +253,19 @@ Same setup, spanning Module 3 and Module 4 criteria. Start hidden, Trainer shows
 
 1. Course → **Grades → Gradebook setup**
 2. Set aggregation: **Weighted mean of grades**
-3. Assign weights:
-   - Module quizzes (1 + 3): 20%
-   - Module practical assignments (2 + 4): 20%
-   - Cross-module OJT assessments (x2): 20%
+3. Assign weights based on your program structure:
+   - Day quizzes: 20%
+   - Day practical assignments: 20%
+   - Cross-day OJT assessments: 20%
    - Final assessment: 40%
 
 ### Step 13 — Set Course Completion Conditions
 
 Course → **Course completion** → add conditions:
-- All 4 Attendance activities complete
-- All module quizzes at passing grade
-- All module assignments graded
-- Both OJT cross-module assessments graded
+- All Attendance activities complete
+- All day quizzes at passing grade
+- All day assignments graded
+- All OJT cross-day assessments graded
 - Final assessment at passing grade
 - Overall grade ≥ 60%
 
@@ -320,20 +301,20 @@ Course → **Course completion** → add conditions:
 
 ### Before Each Session
 
-1. Open **Trainer Resources — Module [N]** folder → review lesson plan, roleplay script, facilitator guide
+1. Open **Trainer Resources — Week [W] Day [D]** folder → review lesson plan, roleplay script, facilitator guide
 2. Add session to the **Attendance activity**:
    - Date, time, duration, room description
    - Add separate session for each batch if running simultaneously
 
-### Releasing Module Content to Learners
+### Releasing Day Content to Learners
 
-Trainer decides when to make the **Module [N] Content** folder visible:
+Trainer decides when to make the **Day Content — Week [W] Day [D]** folder visible:
 
 - **Before the session** — learners can preview teaching slides as preparation
 - **During the session** — Trainer reveals content live as a teaching reference
 - **After the session** — content becomes a reference while learners complete assessments
 
-To release: Course → Turn editing on → click the **eye icon** on the Module Content folder → folder becomes visible to learners immediately.
+To release: Course → Turn editing on → click the **eye icon** on the Day Content folder → folder becomes visible to learners immediately.
 
 To hide again if needed: click the eye icon again — folder returns to hidden state.
 
@@ -346,14 +327,14 @@ To hide again if needed: click the eye icon again — folder returns to hidden s
    - If absentees need a delayed attempt, keep the activity hidden for everyone until makeup, or use a separate makeup activity/attempt policy
 3. This gives Trainer control over when content becomes visible regardless of attendance status
 
-### Grading Module Assignments (Modules 2 and 4)
+### Grading Day Assignments
 
 1. Course → Assignment → **View all submissions**
 2. Click learner → select rubric levels → add feedback → save
 3. Or use **Quick grading** for inline entry across the cohort
 4. Learner notified by email
 
-### Conducting and Grading Cross-Module OJT Assessments
+### Conducting and Grading Cross-Day OJT Assessments
 
 **Conducting the OJT:**
 - Schedule the on-job or simulation assessment outside Moodle (ward, clinical setting, simulation lab)
@@ -388,11 +369,11 @@ Course → Quiz → **Results → Statistics** — question-level failure analys
 - Access Moodle via hospital URL
 - Dashboard shows enrolled course with progress bar
 - Trainer Resources folders are completely invisible
-- Module Content folders appear hidden until Trainer releases them
+- Day Content folders appear hidden until Trainer releases them
 
 ### Step 2 — Pre-session Preparation
 
-- If Trainer has released Module Content folder: review teaching slides and reference material
+- If Trainer has released Day Content folder: review teaching slides and reference material
 - Watch pre-session YouTube video if available (plays inline in Moodle)
 - Both are optional — no completion condition on reference materials unless set by Program Owner
 
@@ -402,36 +383,36 @@ Course → Quiz → **Results → Statistics** — question-level failure analys
 - No Moodle action required
 - Trainer marks attendance and manually shows quiz or assignment when ready
 
-### Step 4 — Access Module Content as Reference
+### Step 4 — Access Day Content as Reference
 
-- If Trainer has released the Module Content folder (during or after session): folder is now visible
+- If Trainer has released the Day Content folder (during or after session): folder is now visible
 - Learner can open teaching slides, reference PDFs, external guidelines as ready reference
 - Particularly useful when completing practical assignments — learner can refer to content while Trainer evaluates
 
-### Step 5 — Attempt Module Quiz (Modules 1 and 3)
+### Step 5 — Attempt Day Quiz
 
 - Trainer shows quiz after marking attendance
 - 30-minute limit, 2 attempts, 60% pass grade
 - Score shown immediately after submission
 
-### Step 6 — Practical Assignment (Modules 2 and 4)
+### Step 6 — Practical Assignment
 
 - Trainer shows assignment after marking attendance
 - Trainer observes and grades — no learner submission
 - Learner receives email with score and rubric feedback once graded
 
-### Step 7 — Cross-Module OJT Assessment
+### Step 7 — Cross-Day OJT Assessment
 
-- Trainer shows OJT assessment when both prerequisite module activities are complete
+- Trainer shows OJT assessment when both prerequisite day activities are complete
 - Learner participates in OJT or simulation (scheduled outside Moodle)
 - Trainer grades and uploads scanned evaluation report in Moodle
 - Learner receives email notification → can view grade, feedback, and download the scanned report
 
 ### Step 8 — Final Assessment
 
-- Trainer shows Final Assessment when all module activities and both OJT assessments are complete
+- Trainer shows Final Assessment when all day activities and OJT assessments are complete
 - 45-minute limit, 2 attempts, 60% pass grade
-- Draws from all 4 topic areas
+- Draws from all topic areas
 
 ### Step 9 — Completion and Badge
 
@@ -456,7 +437,7 @@ After completing the Foundational course, learners choose their specialization s
 | Content type | How to update | Effect |
 |---|---|---|
 | Trainer Resources | Open folder → add/replace files | Immediate — Trainer sees updated files |
-| Module Content | Open folder → add/replace files | Immediate — visible to learners if folder is already released |
+| Day Content | Open folder → add/replace files | Immediate — visible to learners if folder is already released |
 | URL resources | Edit activity → update URL | Immediate |
 | Question bank | Question Bank → add/edit questions | Applies to next quiz attempt |
 | OJT rubric criteria | Assignment settings → edit rubric | Applies to ungraded submissions |
@@ -471,7 +452,7 @@ After completing the Foundational course, learners choose their specialization s
 
 | Situation | Action |
 |---|---|
-| Module Content folder not yet released | Check with Trainer — learners can't access reference material |
+| Day Content folder not yet released | Check with Trainer — learners can't access reference material |
 | Attendance not marked after session | Follow up with Trainer — Trainer needs attendance record to decide when to show activities |
 | Quiz/assignment still hidden after attendance marked | Check with Trainer — manual visibility control may be intentional (e.g., waiting for makeup session) |
 | OJT assessment not graded | Follow up with Trainer — Final Assessment can't be shown until OJT is complete |
@@ -494,7 +475,7 @@ After completing the Foundational course, learners choose their specialization s
 2. Enroll new cohort: add new cohort sync
 3. Assign Trainer if changed
 4. Trainer adds new attendance sessions for new cohort dates
-5. Module Content folders revert to their saved state — if hidden, they stay hidden for the new cohort until Trainer releases them again
+5. Day Content folders revert to their saved state — if hidden, they stay hidden for the new cohort until Trainer releases them again
 6. Communicate new schedule outside Moodle
 7. Refresh question bank periodically
 
@@ -515,7 +496,7 @@ After completing the Foundational course, learners choose their specialization s
 - This is expected behavior — Trainer can choose to show content to absent learners if needed
 - If this was unintentional, Trainer can hide the quiz again by clicking the eye icon
 
-**Module Content folder not visible to learners:**
+**Day Content folder not visible to learners:**
 - Trainer must click the eye icon to release (folder is hidden by default)
 - Editing mode must be ON when clicking eye icon
 - Verify folder is not role-restricted (only Trainer Resources should have role restriction)
@@ -528,7 +509,7 @@ After completing the Foundational course, learners choose their specialization s
 
 **Final Assessment not visible:**
 - Verify Trainer has clicked the eye icon to show the Final Assessment
-- Check all 6 prerequisites are complete (module quizzes, assignments, and both OJT assessments)
+- Check all prerequisites are complete (day quizzes, assignments, and OJT assessments)
 - Trainer controls when Final Assessment becomes visible — may be intentionally waiting for all learners to complete prerequisites
 
 **Trainer can't see Trainer Resources folder:**
@@ -567,58 +548,49 @@ Use this checklist when setting up the course for the first time:
 ### Course Structure
 - [ ] Course created in Allied Health Workers category
 - [ ] Course set to Hidden (will be made visible after first cohort enrollment)
-- [ ] 7 sections created and renamed (4 modules + 2 cross-module + 1 final)
+- [ ] Week/Day sections created following folder structure
 - [ ] Completion tracking enabled at course level
 
-### Trainer Resources (one per module)
-- [ ] Module 1 Trainer Resources folder created with role restriction
-- [ ] Module 2 Trainer Resources folder created with role restriction
-- [ ] Module 3 Trainer Resources folder created with role restriction
-- [ ] Module 4 Trainer Resources folder created with role restriction
-- [ ] Test: Trainer can see all 4 folders
+### Trainer Resources (one per day)
+- [ ] Trainer Resources folders created for each day with role restriction
+- [ ] Test: Trainer can see all folders
 - [ ] Test: Learner cannot see any Trainer Resources folders (completely invisible)
 
-### Module Content (one per module)
-- [ ] Module 1 Content folder created and set to Hidden
-- [ ] Module 2 Content folder created and set to Hidden
-- [ ] Module 3 Content folder created and set to Hidden
-- [ ] Module 4 Content folder created and set to Hidden
+### Day Content (one per day)
+- [ ] Day Content folders created for each day and set to Hidden
 - [ ] Test: Trainer can toggle visibility (eye icon works)
 - [ ] Test: Learner sees "Not available" when hidden
 
 ### Activities
-- [ ] 4 Attendance activities created (one per module)
-- [ ] 2 Quiz activities created (Modules 1 and 3)
-- [ ] 2 Assignment activities created (Modules 2 and 4)
-- [ ] 2 OJT Assessment assignments created (cross-module sections)
+- [ ] Attendance activities created (one per day/session)
+- [ ] Quiz activities created as needed per day
+- [ ] Assignment activities created as needed per day
+- [ ] OJT Assessment assignments created (cross-day sections)
 - [ ] 1 Final Assessment quiz created
-- [ ] URL/YouTube resources added per module (optional but recommended)
+- [ ] URL/YouTube resources added per day (optional but recommended)
 
 ### Question Bank
-- [ ] 5 question categories created
-- [ ] 30-40 questions added per category (Eye Anatomy, Patient Handling, Infection Control, Documentation, Final)
+- [ ] Question categories created by week/day and final assessment
+- [ ] 30-40 questions added per category
 - [ ] Questions reviewed for accuracy and clarity
 
-### Restrict Access Conditions
-- [ ] Module 1 Quiz: set to Hidden (Trainer shows after attendance)
-- [ ] Module 2 Assignment: set to Hidden (Trainer shows after attendance)
-- [ ] Module 3 Quiz: set to Hidden (Trainer shows after attendance)
-- [ ] Module 4 Assignment: set to Hidden (Trainer shows after attendance)
-- [ ] Cross-Module OJT 1: set to Hidden (Trainer shows when Module 1 + 2 complete)
-- [ ] Cross-Module OJT 2: set to Hidden (Trainer shows when Module 3 + 4 complete)
+### Activity Visibility Settings
+- [ ] All day quizzes: set to Hidden (Trainer shows after attendance)
+- [ ] All day assignments: set to Hidden (Trainer shows after attendance)
+- [ ] All cross-day OJT assessments: set to Hidden (Trainer shows when prerequisites complete)
 - [ ] Final Assessment: set to Hidden (Trainer shows when all prerequisites complete)
 
 ### Grading Configuration
 - [ ] Gradebook aggregation set to Weighted mean
-- [ ] Weights configured: Module quizzes 20%, Module assignments 20%, OJT assessments 20%, Final 40%
+- [ ] Weights configured: Day quizzes 20%, Day assignments 20%, OJT assessments 20%, Final 40%
 - [ ] Pass grade set to 60% for all graded activities
 - [ ] Course passing grade set to 60%
 
 ### Course Completion
-- [ ] All 4 Attendance activities required
+- [ ] All Attendance activities required
 - [ ] All quizzes require passing grade
 - [ ] All assignments require grade
-- [ ] Both OJT assessments require grade
+- [ ] All OJT assessments require grade
 - [ ] Final assessment requires passing grade
 - [ ] Overall grade ≥60% required
 
@@ -628,8 +600,8 @@ Use this checklist when setting up the course for the first time:
 - [ ] Badge enabled
 
 ### Testing (Critical)
-- [ ] Test as Trainer: can see Trainer Resources, can toggle Module Content visibility
-- [ ] Test as Learner: cannot see Trainer Resources, Module Content shows as hidden
+- [ ] Test as Trainer: can see Trainer Resources, can toggle Day Content visibility
+- [ ] Test as Learner: cannot see Trainer Resources, Day Content shows as hidden
 - [ ] Test manual visibility flow: create test attendance session → mark test learner Present → Trainer shows quiz via eye icon → verify learner can access
 - [ ] Test OJT workflow: grade OJT assignment → upload test PDF as feedback file → verify learner can download
 - [ ] Test completion: mark all activities complete for test learner → verify badge awarded
@@ -639,7 +611,7 @@ Use this checklist when setting up the course for the first time:
 - [ ] Cohort created and enrolled in course
 - [ ] Trainer assigned to course
 - [ ] Course made Visible
-- [ ] Trainer briefed on content release workflow (eye icon for Module Content folders)
+- [ ] Trainer briefed on content release workflow (eye icon for Day Content folders)
 
 ---
 
@@ -649,16 +621,16 @@ Use this checklist when setting up the course for the first time:
 |---|---|---|---|---|
 | Create course structure (one-time) | ✅ | | | |
 | Upload Trainer Resources (lesson plans, roleplay scripts) | ✅ | | | |
-| Upload Module Content (teaching slides, reference PDFs) | ✅ | | | |
+| Upload Day Content (teaching slides, reference PDFs) | ✅ | | | |
 | Add URL and YouTube resources | ✅ | | | |
 | Configure OJT assessment rubrics | ✅ | | | |
-| Configure restrict access conditions (one-time) | ✅ | | | |
+| Configure activity visibility settings (one-time) | ✅ | | | |
 | Configure completion conditions (one-time) | ✅ | | | |
 | Configure badge (one-time) | ✅ | | | |
 | Assign cohort and Trainer each cycle | ✅ | | | |
 | Update course content between cohorts | ✅ | | | |
 | Access Trainer Resources | | ✅ | | |
-| Release Module Content folder to learners | | ✅ | | |
+| Release Day Content folder to learners | | ✅ | | |
 | Add attendance sessions each cycle | | ✅ | | |
 | Conduct training and OJT assessments | | ✅ | | |
 | Mark attendance and show/hide activities | | ✅ | | |
@@ -686,9 +658,9 @@ Use this checklist when setting up the course for the first time:
 | Lesson plan (PDF) | File in Trainer Resources folder | Trainer only (role restriction) | Program Owner | Session delivery guide |
 | Roleplay script (PDF) | File in Trainer Resources folder | Trainer only (role restriction) | Program Owner | Role-based activities |
 | Facilitator guide (PDF) | File in Trainer Resources folder | Trainer only (role restriction) | Program Owner | Timing, facilitation notes |
-| Teaching slides (PDF) | File in Module Content folder | Hidden until Trainer releases | Trainer | In-session and post-session reference |
-| Reference PDFs | File in Module Content folder | Hidden until Trainer releases | Trainer | Learner ready reference for assessments |
-| External reference (URL) | URL in Module Content folder | Hidden until Trainer releases | Trainer | Guidelines, protocols, standards |
+| Teaching slides (PDF) | File in Day Content folder | Hidden until Trainer releases | Trainer | In-session and post-session reference |
+| Reference PDFs | File in Day Content folder | Hidden until Trainer releases | Trainer | Learner ready reference for assessments |
+| External reference (URL) | URL in Day Content folder | Hidden until Trainer releases | Trainer | Guidelines, protocols, standards |
 | YouTube video | URL activity (Embed) | Always visible to learners | Program Owner | Pre/post-session viewing |
 | External article/website | URL activity (New tab) | Always visible to learners | Program Owner | Reading reference |
 | OJT scanned report | Feedback file on Assignment | Learner (own report only) | Trainer | Evaluation record, compliance documentation |
@@ -702,8 +674,8 @@ Use this checklist when setting up the course for the first time:
 | Trainer marks attendance | Attendance activity graded | Attendance recorded — no automatic visibility change |
 | Trainer shows quiz/assignment | Eye icon toggled to visible after attendance | Module quiz or assignment becomes visible to learners |
 | Makeup session attended | Trainer marks Present in makeup session | Trainer can show the activity for the cohort once makeup is complete, or use separate makeup activity/attempt handling |
-| Trainer releases Module Content folder | Eye icon toggled to visible | Folder and all contents become visible to learners |
-| Trainer shows OJT assessment | Eye icon toggled to visible | Cross-Module OJT Assessment becomes visible when Trainer determines learners are ready |
+| Trainer releases Day Content folder | Eye icon toggled to visible | Folder and all contents become visible to learners |
+| Trainer shows OJT assessment | Eye icon toggled to visible | Cross-Day OJT Assessment becomes visible when Trainer determines learners are ready |
 | Trainer shows Final Assessment | Eye icon toggled to visible | Final Assessment becomes visible when Trainer determines all prerequisites are complete |
 | Final Assessment passed | Grade ≥ 60% | Course complete, badge awarded, stream course access granted (after enrollment) |
 | New cohort enrolled | Previous cohort unenrolled | Same course, clean slate — all activities revert to hidden state |
@@ -715,8 +687,8 @@ Use this checklist when setting up the course for the first time:
 | Task | Path |
 |---|---|
 | Add Trainer Resources folder | Add activity → Folder → Restrict access by Trainer role |
-| Add Module Content folder | Add activity → Folder → set Availability to Hidden |
-| Release/hide Module Content | Course → Turn editing on → eye icon on folder |
+| Add Day Content folder | Add activity → Folder → set Availability to Hidden |
+| Release/hide Day Content | Course → Turn editing on → eye icon on folder |
 | Add YouTube/URL resource | Add activity → URL → Display: Embed or New tab |
 | Add Attendance session | Attendance activity → Add session |
 | Mark attendance | Attendance activity → Session → Take attendance |
@@ -734,4 +706,4 @@ Use this checklist when setting up the course for the first time:
 
 ---
 
-*Document version: 1.4 | Shroff Charitable Eye Hospital | Moodle 5.x | Attendance plugin | Single course model*
+*Document version: 1.5 | Shroff Charitable Eye Hospital | Moodle 5.x | Attendance plugin | Single course model*

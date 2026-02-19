@@ -1,0 +1,5 @@
+question_type,question_text,option_a,option_b,option_c,option_d,correct_answer,points
+multichoice,What is 2+2?,3,4,5,6,B,1
+truefalse,The sky is blue,True,False,,,A,1
+shortanswer,What is the capital of France?,,,,,Paris,2
+essay,Describe your learning goals,,,,,, 5

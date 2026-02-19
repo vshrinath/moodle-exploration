@@ -4,6 +4,22 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-19] — Add Allied Health workflow spec update and shared test content package
+
+### What changed
+- Updated the Allied Health foundational workflow document to the current week/day operating model and automation input guidance.
+- Added test content package assets for Allied Health workflow simulation (`test_content/`) including day-wise content, lesson plans, roleplay files, and quiz CSVs.
+
+### Why
+Testers and backend engineers need a shared, reproducible package and a single updated workflow spec to run consistent end-to-end validation before staging/production onboarding.
+
+### Files touched
+- `docs/ALLIED_HEALTH_FOUNDATIONAL_COURSE_WORKFLOW.md` — Updated workflow details and test input guidance
+- `test_content/` — Added Allied Health sample content and templates for simulation runs
+- `docs/RELEASE_NOTES.md` — Added this release entry
+
+---
+
 ## [2026-02-19] — Add Allied Health phase-2 workflow automation and Program Owner resource authoring
 
 ### What changed
