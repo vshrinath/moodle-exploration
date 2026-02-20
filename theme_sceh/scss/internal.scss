@@ -80,3 +80,11 @@ body#page-my-index #region-main {
     max-width: calc(100vw - 1rem);
   }
 }
+
+/* Workaround: Hide the "Enrol users" button on the participants page to avoid the 'redirecterrordetected' error.
+   Enrollment is primarily handled via Cohort Sync in this project. */
+body.path-user .enrolusersbutton,
+body.path-user .enrol_manual_plugin,
+body.path-user input.btn-primary[value="Enrol users"] {
+  display: none !important;
+}
