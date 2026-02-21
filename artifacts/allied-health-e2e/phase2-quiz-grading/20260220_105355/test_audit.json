@@ -1,0 +1,41 @@
+{
+    "test_id": "allied-health-p2-quiz-grading",
+    "timestamp": "2026-02-20T11:18:00Z",
+    "course": "AHW-FOUND-AUTO",
+    "quiz": "01. Normal Eye Quiz",
+    "status": "PASSED",
+    "phases": [
+        {
+            "name": "Learner Attempt",
+            "user": "mock.learner",
+            "result": "SUCCESS",
+            "score": 5.0,
+            "grade": 50.0,
+            "steps": [
+                "Login as mock.learner",
+                "Navigate to course",
+                "Start quiz attempt",
+                "Answer Q1-Q10",
+                "Submit all and finish",
+                "Verify grade summary"
+            ]
+        },
+        {
+            "name": "Trainer Verification",
+            "user": "mock.trainer",
+            "result": "SUCCESS",
+            "steps": [
+                "Login as mock.trainer",
+                "Navigate to quiz results",
+                "Verify learner grade (50.0)",
+                "Verify gradebook entry"
+            ]
+        },
+        {
+            "name": "Permission Boundary",
+            "user": "mock.learner",
+            "result": "SUCCESS",
+            "findings": "Trainer lesson plan correctly hidden from learner view"
+        }
+    ]
+}

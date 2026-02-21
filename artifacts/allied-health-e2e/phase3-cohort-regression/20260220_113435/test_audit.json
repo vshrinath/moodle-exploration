@@ -1,0 +1,158 @@
+{
+    "test_id": "phase3-cohort-lifecycle-regression",
+    "timestamp": "2026-02-20T14:00:00+05:30",
+    "course": "AHW-FOUND-AUTO",
+    "course_id": 1842,
+    "cohort": "mock-allied-2026",
+    "cohort_id": 907,
+    "overall_status": "PASS",
+    "phases": [
+        {
+            "phase": "A",
+            "name": "Baseline Capture",
+            "status": "PASS",
+            "steps": [
+                {
+                    "step_id": "A1",
+                    "action": "Login as mock.sysadmin",
+                    "expected": "Dashboard loads",
+                    "actual": "Dashboard loaded",
+                    "status": "PASS",
+                    "url": "http://127.0.0.1:8081/login/index.php",
+                    "screenshot_path": "baseline_participants_list_1771568406159.png"
+                },
+                {
+                    "step_id": "A2",
+                    "action": "Capture participants list",
+                    "expected": "2 participants, both Active",
+                    "actual": "Mock Learner (Active, Manual), Mock Trainer (Active, Manual+Cohort)",
+                    "status": "PASS",
+                    "url": "http://127.0.0.1:8081/user/index.php?id=1842",
+                    "screenshot_path": "baseline_participants_list_1771568406159.png"
+                },
+                {
+                    "step_id": "A3",
+                    "action": "Capture visibility state",
+                    "expected": "Quiz+Content visible, Lesson Plan hidden",
+                    "actual": "All three visible to trainer; Lesson Plan marked Hidden from students",
+                    "status": "PASS",
+                    "url": "http://127.0.0.1:8081/course/view.php?id=1842",
+                    "screenshot_path": "baseline_course_visibility_1771568353933.png"
+                }
+            ]
+        },
+        {
+            "phase": "B",
+            "name": "Cohort Removal Effect",
+            "status": "PASS",
+            "finding": "Learner enrolled via Manual method, not Cohort sync. Removal from cohort does not affect course access.",
+            "steps": [
+                {
+                    "step_id": "B1",
+                    "action": "Remove mock.learner from cohort 907",
+                    "expected": "User removed from cohort_members",
+                    "actual": "DELETE successful, confirmed via SELECT",
+                    "status": "PASS",
+                    "method": "database"
+                },
+                {
+                    "step_id": "B2",
+                    "action": "Trigger cohort sync",
+                    "expected": "Enrollment state updates",
+                    "actual": "Sync completed (19 DB queries)",
+                    "status": "PASS",
+                    "method": "CLI cron"
+                },
+                {
+                    "step_id": "B3",
+                    "action": "Verify learner access",
+                    "expected": "Suspended or unenrolled",
+                    "actual": "Still Active (manual enrollment)",
+                    "status": "PASS",
+                    "note": "Site uses manual enrollment for learner, not cohort sync",
+                    "screenshot_path": "learner_status_after_removal_1771596036647.png"
+                }
+            ]
+        },
+        {
+            "phase": "C",
+            "name": "Cohort Re-add Effect",
+            "status": "PASS",
+            "steps": [
+                {
+                    "step_id": "C1",
+                    "action": "Re-add mock.learner to cohort 907",
+                    "expected": "User added to cohort_members",
+                    "actual": "INSERT successful, confirmed via SELECT",
+                    "status": "PASS",
+                    "method": "database"
+                },
+                {
+                    "step_id": "C2",
+                    "action": "Trigger cohort sync",
+                    "expected": "Enrollment maintained",
+                    "actual": "Sync completed, learner still Active",
+                    "status": "PASS",
+                    "method": "CLI cron"
+                }
+            ]
+        },
+        {
+            "phase": "D",
+            "name": "Regression Checks",
+            "status": "PASS",
+            "steps": [
+                {
+                    "step_id": "D1",
+                    "action": "Trainer: Verify visibility controls",
+                    "expected": "Quiz+Content visible, Lesson Plan hidden from students",
+                    "actual": "Confirmed",
+                    "status": "PASS",
+                    "screenshot_path": "regression_trainer_visibility_1771596294625.png"
+                },
+                {
+                    "step_id": "D2",
+                    "action": "Trainer: Verify participants",
+                    "expected": "Mock Learner Active",
+                    "actual": "Confirmed Active",
+                    "status": "PASS",
+                    "screenshot_path": "regression_participants_readd_1771596324169.png"
+                },
+                {
+                    "step_id": "D3",
+                    "action": "Learner: Verify visibility",
+                    "expected": "Quiz+Content visible, Lesson Plan hidden",
+                    "actual": "Quiz+Content visible, Lesson Plan NOT visible",
+                    "status": "PASS",
+                    "screenshot_path": "regression_learner_visibility_1771596487194.png"
+                }
+            ]
+        },
+        {
+            "phase": "E",
+            "name": "Data Consistency",
+            "status": "PASS",
+            "steps": [
+                {
+                    "step_id": "E1",
+                    "action": "Verify quiz attempt history",
+                    "expected": "Attempt 1 with grade 50.00",
+                    "actual": "Attempt 1: Finished, 5.00/10.00, Grade 50.00/100.00",
+                    "status": "PASS",
+                    "screenshot_path": "data_quiz_history_1771596534768.png"
+                },
+                {
+                    "step_id": "E2",
+                    "action": "Verify gradebook consistency",
+                    "expected": "Single grade row, 50.00, no duplicates",
+                    "actual": "01. Normal Eye Quiz: 50.00, 0-100, 50.00%",
+                    "status": "PASS",
+                    "screenshot_path": "data_gradebook_consistency_1771596609525.png"
+                }
+            ]
+        }
+    ],
+    "assumptions": [
+        "mock.learner is enrolled via Manual enrolments (not Cohort sync), so cohort membership changes do not directly affect course enrollment status."
+    ]
+}

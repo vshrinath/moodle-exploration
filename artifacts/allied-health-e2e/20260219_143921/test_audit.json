@@ -1,0 +1,45 @@
+{
+  "test_id": "allied_health_e2e_20260219_143921",
+  "status": "PASS",
+  "timestamp": "2026-02-19T14:39:21Z",
+  "environment": "local_moodle",
+  "course": {
+    "name": "Allied Health - Foundational (Automation)",
+    "shortname": "AHW-FOUND-AUTO-PO"
+  },
+  "steps": [
+    {
+      "phase": "A",
+      "name": "Sysadmin Category Verification",
+      "user": "mock.sysadmin",
+      "status": "PASS",
+      "details": "Verified 'Allied Health Programs' category exists."
+    },
+    {
+      "phase": "B",
+      "name": "Program Owner Course Setup",
+      "user": "mock.programowner",
+      "status": "PASS",
+      "details": "Created course and 2 sections with hidden content/lesson/quiz items."
+    },
+    {
+      "phase": "C",
+      "name": "Trainer Selective Release",
+      "user": "mock.trainer",
+      "status": "PASS",
+      "details": "Released quiz and content in Section 1. Kept lesson plan hidden."
+    },
+    {
+      "phase": "D",
+      "name": "Learner Visibility Assertions",
+      "user": "mock.learner",
+      "status": "PASS",
+      "details": "Verified 2 items visible, 1 item hidden."
+    }
+  ],
+  "evidence": {
+    "po_setup": "/Users/shri/.gemini/antigravity/brain/9464dcef-8f00-49f3-ad86-4e6818b61e20/po_course_setup_1771494212702.png",
+    "trainer_release": "/Users/shri/.gemini/antigravity/brain/9464dcef-8f00-49f3-ad86-4e6818b61e20/trainer_release_1771494596056.png",
+    "learner_visibility": "/Users/shri/.gemini/antigravity/brain/9464dcef-8f00-49f3-ad86-4e6818b61e20/learner_visibility_1771495600134.png"
+  }
+}
