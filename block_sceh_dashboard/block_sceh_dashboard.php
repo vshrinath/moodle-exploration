@@ -1601,12 +1601,20 @@ class block_sceh_dashboard extends block_base {
             ];
         }
 
-        // 5. My Competencies.
+        // 5. My Competencies — link to course competencies if active course exists.
+        $competencyurl = new moodle_url('/admin/tool/lp/plans.php', ['userid' => $userid]);
+        $learnercourses = enrol_get_users_courses($userid, true, 'id');
+        if (!empty($learnercourses)) {
+            $firstcourse = reset($learnercourses);
+            $competencyurl = new moodle_url('/admin/tool/lp/coursecompetencies.php', [
+                'courseid' => $firstcourse->id,
+            ]);
+        }
         $cards[] = [
             'title' => get_string('mycompetencies', 'block_sceh_dashboard'),
             'icon' => 'fa-check-circle',
             'color' => 'green',
-            'url' => new moodle_url('/admin/tool/lp/plans.php', ['userid' => $userid]),
+            'url' => $competencyurl,
         ];
 
         // 6. My Badges — with earned count.
