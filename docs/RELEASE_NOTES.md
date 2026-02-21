@@ -4,6 +4,30 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-21] — In-app Help page, completion tracking, stream progress UX
+
+### What changed
+- **Help page**: Role-aware FAQ page at `/local/sceh_rules/help.php` with accordion sections. Learners see course/progress help, trainers see teaching help, sysadmins see admin help. "Help" link injected into primary nav bar.
+- **Completion tracking**: Setup script enables site-wide tracking and configures smart defaults (quiz→grade, resource→view, assign→submit, others→manual). Existing 38 activities updated across all courses.
+- **Stream Progress**: Removed "No stream selected" notice. Added guidance text explaining how to complete activities. Activity cards are now clickable — each links directly to the quiz/resource view page.
+- **My Competencies**: Card now links to course competencies instead of learning plans.
+- **FAQ docs**: USER_FAQ.md and SYSTEM_FAQ.md fully rewritten to reflect current system state.
+
+### Why
+The system should be self-explanatory. Help page gives users role-specific guidance without leaving the app. Completion tracking makes progress pages functional. Clickable cards reduce friction. Updated FAQs prevent confusion from stale references to removed features.
+
+### Files touched
+- `local_sceh_rules/help.php` — [NEW] Role-aware help/FAQ page
+- `scripts/config/configure_completion_tracking.php` — [NEW] Idempotent completion tracking setup
+- `local_sceh_rules/stream_progress.php` — Removed notice, added guidance, added activity URLs
+- `local_sceh_rules/classes/output/sceh_card.php` — URL support in list item renderer
+- `local_sceh_rules/lang/en/local_sceh_rules.php` — Added help_title and guidance strings
+- `block_sceh_dashboard/block_sceh_dashboard.php` — My Competencies link fix, Help nav injection
+- `docs/USER_FAQ.md` — Full rewrite for current state
+- `docs/SYSTEM_FAQ.md` — Updated with nav, completion, help system info
+
+---
+
 ## [2026-02-21] — Dashboard UX parity: cleanup all roles, hide nav clutter
 
 ### What changed
