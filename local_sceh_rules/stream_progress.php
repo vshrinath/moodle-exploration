@@ -73,9 +73,13 @@ if ($streamname) {
         get_string('streamprogress_selected_stream', 'local_sceh_rules', format_string($streamname)),
         'success'
     );
-} else {
-    echo $OUTPUT->notification(get_string('streamprogress_no_stream', 'local_sceh_rules'), 'warning');
 }
+
+// Guidance text for learners.
+echo html_writer::tag('p',
+    get_string('streamprogress_guidance', 'local_sceh_rules'),
+    ['class' => 'text-muted mt-2 mb-3', 'style' => 'font-size: 0.9rem;']
+);
 
 $relevantsections = \local_sceh_rules\helper\stream_helper::get_relevant_section_numbers_for_user($course->id, $USER->id);
 $modinfo = get_fast_modinfo($course->id, $USER->id);

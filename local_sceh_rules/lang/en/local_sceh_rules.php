@@ -78,6 +78,7 @@ $string['streamprogress'] = 'Stream Progress';
 $string['streamprogress_course'] = 'Course: {$a}';
 $string['streamprogress_selected_stream'] = 'Selected stream: {$a}';
 $string['streamprogress_no_stream'] = 'No stream selected yet. Showing Common Foundation only.';
+$string['streamprogress_guidance'] = 'This page shows your progress through your course activities. Open each quiz or resource below to complete it — quizzes are marked done when you receive a grade, and resources when you view them.';
 $string['streamprogress_no_courses'] = 'No enrolled courses found.';
 $string['streamprogress_no_activities'] = 'No visible activities in this section.';
 $string['streamprogress_activity'] = 'Activity';
