@@ -1,6 +1,6 @@
 # User FAQ - Getting Work Done in SCEH LMS
 
-Last updated: 2026-02-14
+Last updated: 2026-02-21
 
 Audience: Program Owners, System Admins, Trainers, Trainer Coaches, Learners
 
@@ -17,7 +17,7 @@ Purpose: Practical answers to "How do I do X?" using the current system.
 5. Cohorts and enrollments
 6. Streams and learner flow
 7. Reporting and monitoring
-8. Workflow Queue questions
+8. Course content import
 9. Troubleshooting
 10. What is configured vs what still needs setup
 
@@ -26,64 +26,53 @@ Purpose: Practical answers to "How do I do X?" using the current system.
 ## 1) Getting Started
 
 ### Q: Where do I log in?
-A: Use your Moodle URL (current dev stack typically `http://127.0.0.1:8081`) and log in with your user account.
+A: Go to your Moodle URL and log in with your account. Click the **SCEH** logo in the top-left corner to return to your dashboard at any time.
 
 ### Q: I see "SCEH" branding. Is this expected?
-A: Yes. Site name and theme are set to SCEH.
+A: Yes. Site name and theme are set to SCEH (Shroff Charitable Eye Hospital).
 
 ### Q: I am new. Which page should I use first?
-A:
-- Learner: Dashboard (`/my/`) and course page.
-- Trainer: Dashboard (`/my/`) and assigned course cards.
-- Program Owner: Dashboard (`/my/`) then program/category management and competency framework.
-- System Admin: Dashboard (`/my/`) then users/cohorts/reports.
+A: Your **Dashboard** (`/my/`) is your home base. It shows cards relevant to your role:
+- **Learner**: Your Stream, Progress, Deadlines, Competencies, Badges.
+- **Trainer**: My Courses (expandable), Attendance Reports, Training Evaluation.
+- **Program Owner**: Competency Framework, Reports, Stream Setup Check, Category courses.
+- **System Admin**: Cohorts, Program Structure, Reports, Training Evaluation, Badges, Competency Framework.
 
-### Q: What is the "Workflow Queue"?
-A: A role-based task panel with 3 buckets:
-- `Do Now` (urgent)
-- `This Week` (planned)
-- `Watchlist` (monitoring/risk)
+### Q: How do I navigate? I don't see "Dashboard" or "My courses" links.
+A: Click the **SCEH** logo in the top-left corner — that's your home button. The header was simplified to reduce clutter.
 
 ---
 
 ## 2) What Each Role Can Do Right Now
 
 ### System Admin
-- Manage cohorts
-- Access competency framework
-- View attendance reports
+- Manage cohorts (create cohorts, add/remove users)
+- Access program structure (course categories)
+- Access custom reports via report builder
 - View training evaluation dashboard
-- Access badge management (site badges)
-- Access program structure and custom reports
-- Manage roster rules (if capability assigned)
-- Use workflow queue for operational tasks
+- Manage site badges
+- Access competency framework
+- Monitor system health: Cron Tasks, Active Users, Overdue Events
 
 ### Program Owner
 - Access competency framework
 - Access custom reports
 - Run stream setup check
-- Access assigned program categories
-- Use workflow queue for design and quality tasks
+- Manage courses in assigned categories
+- Bulk import course content
 
 ### Trainer
-- Access attendance reports
-- Open assigned cohort course(s)
-- Open stream-specific course sections
-- (If in trainer-coaches cohort) access training evaluation dashboard
-- Use workflow queue for grading/delivery follow-up
-
-### Trainer Coach (enhanced trainer)
-- All trainer capabilities
-- Additional evaluation oversight card(s)
-- Workflow queue includes monitoring/intervention-style tasks
+- Access assigned courses (expandable card if multiple courses)
+- View attendance reports
+- (If trainer-coach) Access training evaluation dashboard
 
 ### Learner
-- Access case logbook/course areas
-- View my competencies
-- Track attendance/badges/progress
-- See dynamic "Your Stream: ..." card after stream selection
-- Use workflow queue for next steps and watchlist
-- Timeline remains visible for learners
+- View your stream course content
+- Track progress via **My Progress** card (clickable activities)
+- See upcoming deadlines with count badge
+- View course competencies
+- Track earned badges with count badge
+- Timeline shows upcoming activities
 
 ---
 
@@ -91,26 +80,23 @@ A: A role-based task panel with 3 buckets:
 
 ### Q: How do I create a new program?
 A (Program Owner):
-1. Create or choose course category for the program.
+1. Create or choose a course category for the program.
 2. Create the program course.
 3. Structure sections:
-- `Common Foundation`
-- `STREAM - Front Desk Management` (example)
-- `STREAM - Doctor Assistance`
-- `STREAM - Medical Records`
+   - `Common Foundation`
+   - `STREAM - Front Desk Management` (example)
+   - `STREAM - Doctor Assistance`
+   - `STREAM - Medical Records`
 4. Add a stream choice activity (for learner stream selection).
 5. Add activities/resources in common and stream sections.
 6. Map activities to competencies.
-7. Set completion/assessment/badge criteria.
-8. Run stream setup check and fix issues before launch.
+7. Run stream setup check and fix issues before launch.
 
 ### Q: How do I know program setup is valid?
-A:
-- Use the `Stream Setup Check` page/card.
-- It validates:
-- common section naming,
-- stream section presence,
-- stream choice activity with options.
+A: Use the **Stream Setup Check** page/card. It validates:
+- Common section naming
+- Stream section presence
+- Stream choice activity with options
 
 ### Q: Who launches the program?
 A:
@@ -122,12 +108,10 @@ A:
 
 ## 4) Competency Mapping
 
-### Q: How does competency mapping work here?
+### Q: How does competency mapping work?
 A: Hybrid model.
 - Core Moodle LP is primary for competency framework and activity mappings.
-- `local_sceh_rules` adds rule automation:
-- attendance threshold rules for competency access checks,
-- roster-to-competency evidence automation.
+- `local_sceh_rules` adds rule automation: attendance threshold rules and roster-to-competency evidence automation.
 
 ### Q: How do I map an activity to a competency?
 A (Program Owner):
@@ -137,12 +121,7 @@ A (Program Owner):
 4. Save.
 
 ### Q: Where do learners see competencies?
-A:
-- Learners can open "My Competencies" card.
-- Under the hood this routes to Moodle LP plans (`/admin/tool/lp/plans.php?userid=...`).
-
-### Q: Is competency access hard-blocked by attendance everywhere?
-A: Not universally. Current rules evaluate and log attendance checks and show messages in relevant competency flows. Full hard enforcement depends on access path and should be validated in live content pilots.
+A: Learners click the **My Competencies** card on the dashboard. This opens the competency view for their enrolled course.
 
 ---
 
@@ -150,26 +129,27 @@ A: Not universally. Current rules evaluate and log attendance checks and show me
 
 ### Q: How do I add people to a cohort?
 A (System Admin):
-1. Open `Manage Cohorts`.
-2. Create/select a cohort.
-3. Add users to that cohort.
+1. Click **Manage Cohorts** on the dashboard.
+2. Create or select a cohort.
+3. Click the members icon to add users to that cohort.
 
-### Q: How do I assign a trainer to a cohort?
+### Q: How do I connect a cohort to a course?
 A (System Admin):
-1. Add trainer user to the cohort and assign trainer role (system/context as designed).
-2. Confirm trainer can see assigned course cards on dashboard.
+1. Go to the course via **Program Structure**.
+2. Navigate to course → Participants → Enrollment methods.
+3. Add "Cohort sync" and select the cohort + role (Student or Teacher).
 
-### Q: How do I enroll a cohort into a program?
+### Q: How do I add a trainer?
 A (System Admin):
-1. Use cohort enrollment in the target course.
-2. Select the cohort.
-3. Verify learner and trainer dashboard views after enrollment.
+1. Add the trainer user to a cohort, OR
+2. Go to the course → Participants → Enroll Users → select the person and assign the Teacher role.
 
 ### Q: What if users cannot access expected cards/pages?
 A:
-- Check role assignment and capabilities first.
-- Re-check cohort enrollment.
-- Verify page-level permissions for the target plugin/page.
+1. Check role assignment and capabilities first.
+2. Re-check cohort enrollment.
+3. Verify page-level permissions for the target plugin/page.
+4. Purge caches if recently changed.
 
 ---
 
@@ -180,16 +160,16 @@ A:
 1. Learner completes stream choice activity in course.
 2. System reads choice response.
 3. Response text is matched to `STREAM - ...` section name.
-4. Learner gets dynamic stream card linking to selected stream section.
+4. Learner gets a dynamic stream card on the dashboard linking to selected stream section.
 
-### Q: What if stream card does not appear?
+### Q: What if the stream card does not appear?
 A:
-- Check that stream choice activity exists and has options.
-- Ensure learner submitted a choice.
-- Ensure stream section names match expected naming pattern.
+- Check that a stream choice activity exists and has options.
+- Ensure the learner has submitted a choice.
+- Ensure stream section names match the expected naming pattern (`STREAM - ...`).
 
 ### Q: Can learners switch streams later?
-A: Current workflow treats selection as fixed for progression. If your policy allows changes, handle through admin/program-owner process and re-validate downstream impact.
+A: Currently, selection is treated as fixed for progression. If your policy allows changes, handle through admin/program-owner process.
 
 ---
 
@@ -197,9 +177,8 @@ A: Current workflow treats selection as fixed for progression. If your policy al
 
 ### Q: How do I see reports?
 A:
-- System Admin/Program Owner: use `Custom Reports` card and report builder.
-- Trainer Coach / eligible roles: use `Training Evaluation` dashboard.
-- Trainer/Learner: role-specific cards and workflow queue provide operational visibility.
+- System Admin / Program Owner: click **Custom Reports** on the dashboard.
+- Trainer Coach: click **Training Evaluation** card.
 
 ### Q: What reports should be configured first?
 A:
@@ -209,25 +188,28 @@ A:
 4. At-risk learner list
 
 ### Q: Are automated reports already built?
-A: Supported via Moodle core report builder scheduling. They still need configuration (schedule, recipients, filters, delivery format).
+A: Supported via Moodle's report builder scheduling. They still need configuration (schedule, recipients, filters, delivery format).
 
 ---
 
-## 8) Workflow Queue Questions
+## 8) Course Content Import
 
-### Q: Is Workflow Queue static?
-A: No. It is dynamic and role-based.
+### Q: Can we create courses by uploading content packages?
+A: Yes. Use the **Package Importer** (available to Program Owners and System Admins):
+1. Upload a `.zip` file with the course content folder structure.
+2. System validates and previews the content.
+3. Select which activities to import (new items pre-selected, existing items unselected).
+4. Confirm and import.
 
-### Q: What drives queue items?
-A:
-- Moodle-native signals: events, cohorts, grading backlog, stream checks, task health.
-- Lightweight derived rules for prioritization.
+### Q: What goes in the ZIP file?
+A: Organized folder structure with:
+- Content files (PDF, Word, PowerPoint, media)
+- Quiz CSV files
+- Links CSV for YouTube/external URLs
+- Download the template from the import page for the correct structure.
 
-### Q: Why does learner still see Timeline?
-A: By design. Timeline is retained for learner activity feed. Non-learner roles use workflow-first view.
-
-### Q: Can we tune what appears in Do Now vs This Week vs Watchlist?
-A: Yes. Thresholds and item logic can be adjusted in dashboard helper logic.
+### Q: What about updating existing course content?
+A: Use the Update page to replace individual files, or re-import via the Package Importer for bulk updates.
 
 ---
 
@@ -236,7 +218,7 @@ A: Yes. Thresholds and item logic can be adjusted in dashboard helper logic.
 ### Q: I see default blocks only / no SCEH cards.
 A:
 1. Confirm `theme_sceh` is active.
-2. Confirm `block_sceh_dashboard` is present on dashboard.
+2. Confirm `block_sceh_dashboard` is present on the dashboard.
 3. Verify user role/capability assignment.
 4. Purge caches.
 
@@ -246,22 +228,27 @@ A:
 2. Confirm role assignment in correct context.
 3. Confirm plugin exists and URL route is valid.
 
-### Q: Card click opens missing parameter error.
-A: This usually means required query params are missing from route. Use known-safe dashboard links and validate against regression tests.
+### Q: My Progress shows "Not tracked" on activities.
+A: Completion tracking may not be enabled for those activities. Run the completion tracking setup script:
+```
+php scripts/config/configure_completion_tracking.php --apply
+```
 
-### Q: Attendance/Badge/Rules pages show missing plugin/file.
-A: Verify plugin/module is installed/mounted in current MoodleHQ stack and caches are purged.
+### Q: I can't see a course I'm assigned to.
+A: Check that the course is visible (not hidden) and that cohort enrollment is active. Trainers can see hidden courses; learners cannot.
 
 ---
 
 ## 10) What Is Configured vs What Still Needs Setup
 
 ### Configured in current build
-- Role-based dashboard cards
-- Workflow queue buckets
-- Stream setup checks and stream progress pages
+- Role-based dashboard cards (cleaned up per role)
+- Completion tracking (quiz→grade, resource→view, assign→submit)
+- Stream setup checks and stream progress pages (with clickable activities)
 - Learner stream card behavior
-- Trainer coach enhancement path
+- Trainer expandable course card
+- Simplified header navigation (SCEH logo = home)
+- Course package importer with validation and preview
 - Theme-based login/dashboard UX improvements
 
 ### Needs environment-specific setup before real rollout
@@ -269,30 +256,14 @@ A: Verify plugin/module is installed/mounted in current MoodleHQ stack and cache
 - Communication defaults (forums/announcements/messages)
 - Backup and restore runbooks for deployed infrastructure
 - Competency evidence policy standards
-- KPI threshold tuning for watchlists/interventions
-
----
-
-## 11) Course Package Import (Folder + Manifest)
-
-### Q: Can we create courses by uploading content packages instead of full UI authoring?
-A: Yes. The planned model is:
-1. upload `.zip`,
-2. auto-generate draft manifest,
-3. guided edit,
-4. validate + preview,
-5. import.
-
-### Q: Where is that model documented?
-A: See:
-- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
+- Badge criteria configuration
+- Default activity completion rules for new courses (via course defaults)
 
 ---
 
 ## Related Docs
 
-- `docs/USER_WORKFLOWS.md`
-- `docs/SYSTEM_FAQ.md`
-- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
-- `docs/OPERATIONS_GUIDE.md`
-- `docs/MOCK_USERS_SETUP.md`
+- `docs/SYSTEM_FAQ.md` — Technical system decisions
+- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md` — Import system design
+- `docs/ALLIED_HEALTH_FOUNDATIONAL_COURSE_WORKFLOW.md` — Allied Health workflow
+- `docs/MOCK_USERS_SETUP.md` — Mock user configuration

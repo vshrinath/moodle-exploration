@@ -1,13 +1,11 @@
 # System FAQ - SCEH LMS
 
-Last updated: 2026-02-14
+Last updated: 2026-02-21
 
 ## 1) How does competency mapping work in this system?
-It is hybrid:
-- Core Moodle competency mapping is the primary model. Program Owners map activities to competencies in Moodle LP.
-- `local_sceh_rules` adds rule-based automation:
-- Attendance threshold rules linked to competencies (`competency + course -> threshold`).
-- Roster rules linked to competencies (`rostertype -> competency`) for auto evidence.
+Hybrid model:
+- Core Moodle LP is the primary model. Program Owners map activities to competencies in Moodle LP.
+- `local_sceh_rules` adds rule-based automation: attendance threshold rules linked to competencies and roster rules for auto evidence.
 
 ## 2) Is competency progression fully controlled by custom code?
 No. Core Moodle LP remains the source of truth for competency structures, plans, and activity mapping. Custom rules add operational behavior (attendance checks, roster evidence automation).
@@ -15,52 +13,50 @@ No. Core Moodle LP remains the source of truth for competency structures, plans,
 ## 3) What is the source of truth for stream selection?
 Learner stream choice is read from Moodle Choice responses in-course. The selected option is mapped to a `STREAM - ...` section by name.
 
-## 4) Why do we have both Timeline and Workflow Queue?
-- Timeline is Moodle core activity feed.
-- Workflow Queue is SCEH role-based action prioritization (`Do Now`, `This Week`, `Watchlist`).
-- Current policy: Timeline is shown for learners; hidden for non-learner operational roles.
+## 4) How does the navigation work?
+- The **SCEH logo** in the top-left is the primary home link (goes to `/my/`).
+- "Dashboard" and "My courses" are hidden from the primary nav to reduce clutter.
+- Each role sees only relevant cards on their dashboard — no generic Moodle nav.
 
-## 5) What data drives Workflow Queue items?
-Mostly Moodle-native data:
-- Events (overdue/upcoming),
-- cohorts/enrollments,
-- grading backlog,
-- stream setup checks,
-- task health.
-Some items are lightweight derived rules from this base data.
+## 5) What about Timeline and Workflow Queue?
+- **Timeline**: Visible for all roles as a Moodle core activity feed. Styled with reduced visual weight.
+- **Workflow Queue**: Currently hidden for initial rollout. Will be re-enabled once users are comfortable with the core system. Uncomment line 37 in `block_sceh_dashboard.php` to restore.
 
-## 6) Where is the color scheme defined?
-Theme tokens are centralized in:
+## 6) How does completion tracking work?
+Configured via `scripts/config/configure_completion_tracking.php`:
+- Site-level toggle: enabled.
+- Per-course enablement: auto-enabled on all courses.
+- Smart defaults by activity type:
+  - **Quiz** → automatic (receive a grade)
+  - **Resource/URL** → automatic (view the activity)
+  - **Assignment** → automatic (submit for grading)
+  - **All others** → manual (student marks as done)
+- New courses need default completion configured in course settings or re-run the script.
+
+## 7) Where is the color scheme defined?
+Theme tokens in:
 - `theme_sceh/scss/tokens.scss`
+
 Card/status styles consume those tokens in:
 - `local_sceh_rules/styles/sceh_card_system.css`
 - `block_sceh_dashboard/styles.css`
 
-## 7) Why did the site title say "New Site" before?
-That is Moodle default site course naming. It was updated to `SCEH` (shortname and fullname).
-
 ## 8) Where should process and role-flow questions be documented?
-- Role workflows and composite lifecycle flows: `docs/USER_WORKFLOWS.md`
-- Operations and reporting setup: `docs/OPERATIONS_GUIDE.md`
-- This file (`docs/SYSTEM_FAQ.md`) for quick answers and onboarding clarity.
+- User-facing workflows: `docs/USER_FAQ.md` and in-app Help page (`/local/sceh_rules/help.php`)
+- System/technical decisions: this file (`docs/SYSTEM_FAQ.md`)
+- Course import: `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
 
 ## 9) What is still configuration work vs feature development?
 Mostly configuration/governance:
-- report schedules,
-- communication defaults,
-- backup policy,
-- competency evidence standards,
-- KPI threshold tuning for watchlists.
+- Report schedules and recipients
+- Communication defaults (forums/messages)
+- Backup/restore policy
+- Competency evidence standards
+- Badge criteria per program
+- KPI threshold tuning for future Workflow Queue
 
-## 10) How should we extend this FAQ?
-Add short, decision-focused Q&A entries:
-- what the behavior is,
-- where it is configured,
-- who owns it,
-- and where to change it.
-
-## 11) Where is the folder + manifest import approach documented?
-See:
-- `docs/COURSE_PACKAGE_IMPORT_BLUEPRINT.md`
-
-This document is the implementation reference for import intent, schema, roles, validation, and phased rollout.
+## 10) How do we extend the help system?
+The in-app Help page at `/local/sceh_rules/help.php` renders role-aware FAQ content. To update:
+1. Edit the FAQ arrays in `help.php`.
+2. Copy to container and purge caches.
+3. Content is immediately available to all logged-in users.

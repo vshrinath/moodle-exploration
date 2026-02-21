@@ -33,8 +33,24 @@ class block_sceh_dashboard extends block_base {
             $this->content->text .= $this->render_learner_dashboard($userid);
         }
 
-        // Workflow Queue hidden for initial rollout. Uncomment when users are comfortable.\n        // $this->content->text .= $this->render_workflow_queue($USER->id);
-        
+        // Workflow Queue hidden for initial rollout. Uncomment when users are comfortable.
+        // $this->content->text .= $this->render_workflow_queue($USER->id);
+
+        // Inject "Help" link into primary navigation.
+        $helpurl = (new moodle_url('/local/sceh_rules/help.php'))->out(false);
+        $PAGE->requires->js_amd_inline("
+            require([], function() {
+                var nav = document.querySelector('.primary-navigation .moremenu .nav');
+                if (nav && !document.querySelector('.sceh-help-nav')) {
+                    var li = document.createElement('li');
+                    li.className = 'nav-item sceh-help-nav';
+                    li.innerHTML = '<a class=\"nav-link\" href=\"{$helpurl}\">' +
+                        '<i class=\"fa fa-circle-question me-1\"></i>Help</a>';
+                    nav.appendChild(li);
+                }
+            });
+        ");
+
         return $this->content;
     }
 
