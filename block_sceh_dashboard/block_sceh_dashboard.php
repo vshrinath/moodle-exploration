@@ -20,21 +20,20 @@ class block_sceh_dashboard extends block_base {
         // Reuse shared card styles for workflow queue rendering.
         $PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
 
-        if ($this->is_program_owner_user((int)$USER->id)) {
-            $this->content->text .= $this->render_program_owner_dashboard((int)$USER->id);
-        } else {
-            // Get user role-based cards.
-            $cards = $this->get_dashboard_cards();
+        $context = context_system::instance();
+        $userid = (int) $USER->id;
 
-            // Render cards.
-            $this->content->text .= html_writer::start_div('sceh-dashboard-grid');
-            foreach ($cards as $card) {
-                $this->content->text .= $this->render_card($card);
-            }
-            $this->content->text .= html_writer::end_div();
+        if ($this->is_program_owner_user($userid)) {
+            $this->content->text .= $this->render_program_owner_dashboard($userid);
+        } else if (has_capability('local/sceh_rules:systemadmin', $context)) {
+            $this->content->text .= $this->render_sysadmin_dashboard($userid);
+        } else if (has_capability('local/sceh_rules:trainer', $context)) {
+            $this->content->text .= $this->render_trainer_dashboard($userid);
+        } else {
+            $this->content->text .= $this->render_learner_dashboard($userid);
         }
 
-        $this->content->text .= $this->render_workflow_queue($USER->id);
+        // Workflow Queue hidden for initial rollout. Uncomment when users are comfortable.\n        // $this->content->text .= $this->render_workflow_queue($USER->id);
         
         return $this->content;
     }
@@ -87,6 +86,96 @@ class block_sceh_dashboard extends block_base {
         $html .= html_writer::end_div();
         $html .= $this->render_program_owner_status_panels($statuscards);
 
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Render System Admin dashboard with sections.
+     *
+     * @param int $userid
+     * @return string
+     */
+    private function render_sysadmin_dashboard(int $userid): string {
+        $cards = $this->get_system_admin_cards();
+        $statuscards = $this->get_sysadmin_status_cards($userid);
+
+        $html = html_writer::start_div('sceh-program-owner-dashboard');
+
+        // Quick Actions.
+        $html .= html_writer::tag('h4', get_string('sysadminquickactions', 'block_sceh_dashboard'));
+        $html .= html_writer::start_div('sceh-dashboard-grid sceh-po-quick-actions');
+        foreach ($cards as $card) {
+            $html .= $this->render_card($card);
+        }
+        $html .= html_writer::end_div();
+
+        // Status & Monitoring.
+        $html .= html_writer::tag('h4', get_string('sysadminmonitoring', 'block_sceh_dashboard'), ['class' => 'mt-4']);
+        $html .= html_writer::start_div('sceh-dashboard-grid sceh-po-status-grid');
+        foreach ($statuscards as $statuscard) {
+            $html .= $this->render_program_owner_status_summary_card($statuscard);
+        }
+        $html .= html_writer::end_div();
+        $html .= $this->render_program_owner_status_panels($statuscards);
+
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Render Trainer dashboard with sections.
+     *
+     * @param int $userid
+     * @return string
+     */
+    private function render_trainer_dashboard(int $userid): string {
+        $actions = $this->get_trainer_cards($userid);
+        $statuscards = $this->get_trainer_status_cards($userid);
+
+        $html = html_writer::start_div('sceh-program-owner-dashboard');
+
+        // Quick Actions (with expandable sub-action bar for courses).
+        $html .= html_writer::tag('h4', get_string('trainerquickactions', 'block_sceh_dashboard'));
+        $html .= html_writer::start_div('sceh-dashboard-grid sceh-po-quick-actions');
+        foreach ($actions as $action) {
+            if (!empty($action['children'])) {
+                $html .= $this->render_program_owner_action($action);
+            } else {
+                $html .= $this->render_card($action);
+            }
+        }
+        $html .= html_writer::end_div();
+        $html .= $this->render_program_owner_subactions_bar($actions);
+
+        // Status.
+        $html .= html_writer::tag('h4', get_string('trainerstatus', 'block_sceh_dashboard'), ['class' => 'mt-4']);
+        $html .= html_writer::start_div('sceh-dashboard-grid sceh-po-status-grid');
+        foreach ($statuscards as $statuscard) {
+            $html .= $this->render_program_owner_status_summary_card($statuscard);
+        }
+        $html .= html_writer::end_div();
+        $html .= $this->render_program_owner_status_panels($statuscards);
+
+        $html .= html_writer::end_div();
+        return $html;
+    }
+
+    /**
+     * Render Learner dashboard — flat card grid, no section headings.
+     *
+     * @param int $userid
+     * @return string
+     */
+    private function render_learner_dashboard(int $userid): string {
+        $cards = $this->get_learner_cards($userid);
+
+        $html = html_writer::start_div('sceh-program-owner-dashboard');
+        $html .= html_writer::start_div('sceh-dashboard-grid');
+        foreach ($cards as $card) {
+            $html .= $this->render_card($card);
+        }
+        $html .= html_writer::end_div();
         $html .= html_writer::end_div();
         return $html;
     }
@@ -1466,61 +1555,73 @@ class block_sceh_dashboard extends block_base {
     }
 
     /**
-     * Dashboard cards for learners.
+     * Dashboard cards for learners — flat grid, no section headings.
+     * Order: Stream → Progress → Deadlines → Stream Selection → Competencies → Badges.
      *
      * @param int $userid
      * @return array
      */
     private function get_learner_cards($userid) {
-        $cards = [
-            [
-                'title' => get_string('caselogbook', 'block_sceh_dashboard'),
-                'icon' => 'fa-clipboard-list',
-                'color' => 'blue',
-                'url' => new moodle_url('/my/courses.php'),
-            ],
-            [
-                'title' => get_string('mycompetencies', 'block_sceh_dashboard'),
-                'icon' => 'fa-check-circle',
-                'color' => 'green',
-                'url' => new moodle_url('/admin/tool/lp/plans.php', ['userid' => $userid]),
-            ],
-            [
-                'title' => get_string('attendance', 'block_sceh_dashboard'),
-                'icon' => 'fa-calendar-check',
-                'color' => 'red',
-                'url' => new moodle_url('/my/courses.php'),
-            ],
-            [
-                'title' => get_string('mybadges', 'block_sceh_dashboard'),
-                'icon' => 'fa-trophy',
-                'color' => 'yellow',
-                'url' => new moodle_url('/badges/mybadges.php'),
-            ],
-            [
-                'title' => get_string('credentialingsheet', 'block_sceh_dashboard'),
-                'icon' => 'fa-certificate',
-                'color' => 'purple',
-                'url' => new moodle_url('/my/courses.php'),
-            ],
-            [
-                'title' => get_string('videolibrary', 'block_sceh_dashboard'),
-                'icon' => 'fa-video',
-                'color' => 'teal',
-                'url' => new moodle_url('/course/index.php'),
-            ],
-            [
-                'title' => get_string('myprogress', 'block_sceh_dashboard'),
-                'icon' => 'fa-chart-line',
-                'color' => 'orange',
-                'url' => new moodle_url('/local/sceh_rules/stream_progress.php'),
-            ],
-        ];
+        global $DB;
+        $cards = [];
 
+        // 1. Your Stream (if selected) — daily course launcher.
         $streamcard = $this->get_learner_stream_card($userid);
         if ($streamcard) {
-            array_splice($cards, 2, 0, [$streamcard]);
+            $cards[] = $streamcard;
         }
+
+        // 2. My Progress — completion tracking.
+        $cards[] = [
+            'title' => get_string('myprogress', 'block_sceh_dashboard'),
+            'icon' => 'fa-chart-line',
+            'color' => 'orange',
+            'url' => new moodle_url('/local/sceh_rules/stream_progress.php'),
+        ];
+
+        // 3. Upcoming Deadlines — with event count.
+        $upcomingevents = $this->count_user_upcoming_events($userid, 7);
+        $cards[] = [
+            'title' => get_string('learnerupcomingtitle', 'block_sceh_dashboard'),
+            'icon' => 'fa-calendar-day',
+            'color' => 'red',
+            'url' => new moodle_url('/calendar/view.php'),
+            'count' => $upcomingevents,
+        ];
+
+        // 4. Stream Selection — pending count (only if > 0).
+        $pendingstream = $this->count_learner_pending_stream_selection($userid);
+        if ($pendingstream > 0) {
+            $cards[] = [
+                'title' => get_string('learnerpendingstreamtitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-code-branch',
+                'color' => 'indigo',
+                'url' => new moodle_url('/local/sceh_rules/stream_progress.php'),
+                'count' => $pendingstream,
+            ];
+        }
+
+        // 5. My Competencies.
+        $cards[] = [
+            'title' => get_string('mycompetencies', 'block_sceh_dashboard'),
+            'icon' => 'fa-check-circle',
+            'color' => 'green',
+            'url' => new moodle_url('/admin/tool/lp/plans.php', ['userid' => $userid]),
+        ];
+
+        // 6. My Badges — with earned count.
+        $badgecount = (int) $DB->count_records_select(
+            'badge_issued',
+            'userid = :userid',
+            ['userid' => $userid]
+        );
+        $cards[] = [
+            'title' => get_string('mybadges', 'block_sceh_dashboard'),
+            'icon' => 'fa-trophy',
+            'color' => 'yellow',
+            'url' => new moodle_url('/badges/mybadges.php'),
+            'count' => $badgecount,
+        ];
 
         return $cards;
     }
@@ -1535,13 +1636,8 @@ class block_sceh_dashboard extends block_base {
         
         $systemcontext = context_system::instance();
         $cards = [];
-        $attendanceurl = new moodle_url('/my/courses.php');
-        $attendancecourseid = $this->get_first_enrolled_course_id($USER->id);
 
-        if ($attendancecourseid) {
-            $attendanceurl = new moodle_url('/mod/attendance/index.php', ['id' => $attendancecourseid]);
-        }
-
+        // 1. Manage Cohorts.
         if (has_capability('moodle/cohort:view', $systemcontext)) {
             $cards[] = [
                 'title' => get_string('managecohorts', 'block_sceh_dashboard'),
@@ -1551,6 +1647,57 @@ class block_sceh_dashboard extends block_base {
             ];
         }
 
+        // 2. Program Structure.
+        $cards[] = [
+            'title' => get_string('programstructure', 'block_sceh_dashboard'),
+            'icon' => 'fa-graduation-cap',
+            'color' => 'teal',
+            'url' => new moodle_url('/course/index.php'),
+        ];
+
+        // 3. Custom Reports.
+        if (has_capability('moodle/site:config', $systemcontext)) {
+            $cards[] = [
+                'title' => get_string('customreports', 'block_sceh_dashboard'),
+                'icon' => 'fa-file-alt',
+                'color' => 'orange',
+                'url' => new moodle_url('/admin/category.php', ['category' => 'reports']),
+            ];
+        }
+
+        // 4. Training Evaluation.
+        if (has_capability('local/kirkpatrick_dashboard:view', $systemcontext)) {
+            $cards[] = [
+                'title' => get_string('trainingevaluation', 'block_sceh_dashboard'),
+                'icon' => 'fa-chart-pie',
+                'color' => 'purple',
+                'url' => new moodle_url('/local/kirkpatrick_dashboard/index.php'),
+            ];
+        }
+
+        // 5. Badge Management.
+        if (has_any_capability([
+            'moodle/badges:viewbadges',
+            'moodle/badges:viewawarded',
+            'moodle/badges:createbadge',
+            'moodle/badges:awardbadge',
+            'moodle/badges:configurecriteria',
+            'moodle/badges:configuremessages',
+            'moodle/badges:configuredetails',
+            'moodle/badges:deletebadge',
+        ], $systemcontext)) {
+            $badgecount = $DB->count_records('badge', ['type' => 1]);
+            $badgetitle = get_string('badgemanagement', 'block_sceh_dashboard') .
+                          ' (' . $badgecount . ')';
+            $cards[] = [
+                'title' => $badgetitle,
+                'icon' => 'fa-award',
+                'color' => 'yellow',
+                'url' => new moodle_url('/badges/index.php', ['type' => 1]),
+            ];
+        }
+
+        // 6. Competency Framework.
         if (has_any_capability([
             'moodle/competency:competencyview',
             'moodle/competency:competencymanage',
@@ -1562,70 +1709,6 @@ class block_sceh_dashboard extends block_base {
                 'url' => new moodle_url('/admin/tool/lp/competencyframeworks.php', [
                     'pagecontextid' => $systemcontext->id,
                 ]),
-            ];
-        }
-
-        $cards[] = [
-                'title' => get_string('attendancereports', 'block_sceh_dashboard'),
-                'icon' => 'fa-chart-bar',
-                'color' => 'red',
-                'url' => $attendanceurl,
-            ];
-
-        if (has_capability('local/kirkpatrick_dashboard:view', $systemcontext)) {
-            $cards[] = [
-                'title' => get_string('trainingevaluation', 'block_sceh_dashboard'),
-                'icon' => 'fa-chart-pie',
-                'color' => 'purple',
-                'url' => new moodle_url('/local/kirkpatrick_dashboard/index.php'),
-            ];
-        }
-
-        if (has_any_capability([
-            'moodle/badges:viewbadges',
-            'moodle/badges:viewawarded',
-            'moodle/badges:createbadge',
-            'moodle/badges:awardbadge',
-            'moodle/badges:configurecriteria',
-            'moodle/badges:configuremessages',
-            'moodle/badges:configuredetails',
-            'moodle/badges:deletebadge',
-        ], $systemcontext)) {
-            // Count site badges
-            $badgecount = $DB->count_records('badge', ['type' => 1]);
-            $badgetitle = get_string('badgemanagement', 'block_sceh_dashboard') . 
-                          ' (' . $badgecount . ')';
-            
-            $cards[] = [
-                'title' => $badgetitle,
-                'icon' => 'fa-award',
-                'color' => 'yellow',
-                'url' => new moodle_url('/badges/index.php', ['type' => 1]),
-            ];
-        }
-
-        $cards[] = [
-                'title' => get_string('programstructure', 'block_sceh_dashboard'),
-                'icon' => 'fa-graduation-cap',
-                'color' => 'teal',
-                'url' => new moodle_url('/course/index.php'),
-            ];
-
-        if (has_capability('moodle/site:config', $systemcontext)) {
-            $cards[] = [
-                'title' => get_string('customreports', 'block_sceh_dashboard'),
-                'icon' => 'fa-file-alt',
-                'color' => 'orange',
-                'url' => new moodle_url('/admin/category.php', ['category' => 'reports']),
-            ];
-        }
-
-        if (has_capability('local/sceh_rules:managerules', $systemcontext)) {
-            $cards[] = [
-                'title' => get_string('rosterrules', 'block_sceh_dashboard'),
-                'icon' => 'fa-cogs',
-                'color' => 'indigo',
-                'url' => new moodle_url('/local/sceh_rules/roster_rules.php'),
             ];
         }
 
@@ -1684,6 +1767,14 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
+    /**
+     * Dashboard cards for trainers.
+     * Uses expandable sub-action pattern for courses (like PO's Manage Courses).
+     * Single course → direct link. Multiple courses → expandable card.
+     *
+     * @param int $userid
+     * @return array
+     */
     private function get_trainer_cards($userid) {
         $context = context_system::instance();
         $courses = [];
@@ -1698,44 +1789,33 @@ class block_sceh_dashboard extends block_base {
             }
         }
 
-        $cards = [
-            [
-                'title' => get_string('attendancereports', 'block_sceh_dashboard'),
-                'icon' => 'fa-chart-bar',
-                'color' => 'red',
-                'url' => $attendanceurl,
-            ],
-        ];
+        $cards = [];
 
-        if (has_capability('local/sceh_rules:viewassignedcohortsonly', $context)) {
+        // 1. My Courses — single card or expandable.
+        if (count($courses) === 1) {
+            $course = reset($courses);
+            $cards[] = [
+                'title' => format_string($course->fullname),
+                'icon' => 'fa-book-open',
+                'color' => 'blue',
+                'url' => new moodle_url('/course/view.php', ['id' => $course->id]),
+            ];
+        } else if (count($courses) > 1) {
+            $children = [];
             foreach ($courses as $course) {
-                $streamsections = \local_sceh_rules\helper\stream_helper::get_course_stream_sections($course->id);
-                $streamcount = count($streamsections);
-                $coursetitle = format_string($course->fullname);
-                if ($streamcount > 0) {
-                    $coursetitle .= ' (' . get_string('streamcount', 'block_sceh_dashboard', $streamcount) . ')';
-                }
-
-                $cards[] = [
-                    'title' => $coursetitle,
-                    'icon' => 'fa-users',
-                    'color' => 'blue',
+                $children[] = [
+                    'title' => format_string($course->fullname),
                     'url' => new moodle_url('/course/view.php', ['id' => $course->id]),
                 ];
-
-                foreach ($streamsections as $section) {
-                    $cards[] = [
-                        'title' => get_string('streamcardprefix', 'block_sceh_dashboard', format_string($section->streamname)),
-                        'icon' => 'fa-code-branch',
-                        'color' => 'indigo',
-                        'url' => new moodle_url('/course/view.php', [
-                            'id' => $course->id,
-                            'section' => $section->section,
-                        ]),
-                    ];
-                }
             }
+            $cards[] = [
+                'title' => get_string('trainermycourses', 'block_sceh_dashboard'),
+                'icon' => 'fa-book-open',
+                'color' => 'blue',
+                'children' => $children,
+            ];
         } else {
+            // No assigned courses — fallback to program structure.
             $cards[] = [
                 'title' => get_string('programstructure', 'block_sceh_dashboard'),
                 'icon' => 'fa-graduation-cap',
@@ -1744,6 +1824,15 @@ class block_sceh_dashboard extends block_base {
             ];
         }
 
+        // 2. Attendance Reports.
+        $cards[] = [
+            'title' => get_string('attendancereports', 'block_sceh_dashboard'),
+            'icon' => 'fa-chart-bar',
+            'color' => 'red',
+            'url' => $attendanceurl,
+        ];
+
+        // 3. Training Evaluation (coach only).
         if ($istrainercoach) {
             $cards[] = [
                 'title' => get_string('trainingevaluation', 'block_sceh_dashboard'),
@@ -1787,7 +1876,7 @@ class block_sceh_dashboard extends block_base {
     }
     
     private function render_card($card) {
-        if (class_exists('\local_sceh_rules\output\sceh_card')) {
+        if (class_exists('\local_sceh_rules\output\sceh_card') && !isset($card['count'])) {
             return \local_sceh_rules\output\sceh_card::simple($card);
         }
 
@@ -1796,6 +1885,11 @@ class block_sceh_dashboard extends block_base {
         
         $html .= html_writer::div('<i class="fa ' . $card['icon'] . ' fa-3x"></i>', 'sceh-card-icon');
         $html .= html_writer::div($card['title'], 'sceh-card-title');
+
+        // Optional count badge.
+        if (isset($card['count'])) {
+            $html .= html_writer::div((string)(int)$card['count'], 'sceh-po-status-total');
+        }
         
         $html .= html_writer::end_tag('a');
         $html .= html_writer::end_div();
@@ -1878,7 +1972,168 @@ class block_sceh_dashboard extends block_base {
 
         return (int)reset($courseids);
     }
-    
+
+    /**
+     * Build Sysadmin status/monitoring cards.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_sysadmin_status_cards(int $userid): array {
+        global $DB;
+        $failedtasks = $this->count_failed_scheduled_tasks();
+        $totalcohorts = $this->count_total_cohorts();
+        $overdueevents = $this->count_user_overdue_events($userid);
+        $activeusers = (int) $DB->count_records_select('user', 'suspended = 0 AND deleted = 0 AND id > 1');
+
+        return [
+            [
+                'title' => get_string('sysadmincrontasks', 'block_sceh_dashboard'),
+                'icon' => 'fa-gears',
+                'status' => $failedtasks > 0 ? 'danger' : 'success',
+                'steps' => [
+                    [
+                        'label' => get_string('sysadminfailedtasks', 'block_sceh_dashboard'),
+                        'count' => $failedtasks,
+                        'url' => new moodle_url('/admin/tool/task/scheduledtasks.php'),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('sysadminactiveusers', 'block_sceh_dashboard'),
+                'icon' => 'fa-user-group',
+                'status' => 'info',
+                'steps' => [
+                    [
+                        'label' => get_string('sysadmintotalactive', 'block_sceh_dashboard'),
+                        'count' => $activeusers,
+                        'url' => new moodle_url('/admin/user.php'),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('sysadminoverdue', 'block_sceh_dashboard'),
+                'icon' => 'fa-triangle-exclamation',
+                'status' => $overdueevents > 0 ? 'warning' : 'success',
+                'steps' => [
+                    [
+                        'label' => get_string('sysadminoverdueevents', 'block_sceh_dashboard'),
+                        'count' => $overdueevents,
+                        'url' => new moodle_url('/calendar/view.php'),
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Build Trainer status/monitoring cards.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_trainer_status_cards(int $userid): array {
+        $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
+        $coursecount = count($courses);
+        $ungraded = $this->count_trainer_ungraded_submissions($userid);
+        $upcomingevents = $this->count_user_upcoming_events($userid, 7);
+
+        return [
+            [
+                'title' => get_string('trainerungradedtitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-clipboard-check',
+                'status' => $ungraded > 0 ? 'warning' : 'success',
+                'steps' => [
+                    [
+                        'label' => get_string('trainerungradedlabel', 'block_sceh_dashboard'),
+                        'count' => $ungraded,
+                        'url' => new moodle_url('/my/courses.php'),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('trainercoursestitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-book-open',
+                'status' => 'info',
+                'steps' => [
+                    [
+                        'label' => get_string('trainercourseslabel', 'block_sceh_dashboard'),
+                        'count' => $coursecount,
+                        'url' => new moodle_url('/my/courses.php'),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('trainerupcomingtitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-calendar-day',
+                'status' => 'info',
+                'steps' => [
+                    [
+                        'label' => get_string('trainerupcominglabel', 'block_sceh_dashboard'),
+                        'count' => $upcomingevents,
+                        'url' => new moodle_url('/calendar/view.php'),
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Build Learner status/monitoring cards.
+     *
+     * @param int $userid
+     * @return array
+     */
+    private function get_learner_status_cards(int $userid): array {
+        global $DB;
+        $pendingstream = $this->count_learner_pending_stream_selection($userid);
+        $upcomingevents = $this->count_user_upcoming_events($userid, 7);
+        $badgecount = (int) $DB->count_records_select(
+            'badge_issued',
+            'userid = :userid',
+            ['userid' => $userid]
+        );
+
+        return [
+            [
+                'title' => get_string('learnerpendingstreamtitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-code-branch',
+                'status' => $pendingstream > 0 ? 'warning' : 'success',
+                'steps' => [
+                    [
+                        'label' => get_string('learnerpendingstreamlabel', 'block_sceh_dashboard'),
+                        'count' => $pendingstream,
+                        'url' => new moodle_url('/local/sceh_rules/stream_progress.php'),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('learnerupcomingtitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-calendar-day',
+                'status' => 'info',
+                'steps' => [
+                    [
+                        'label' => get_string('learnerupcominglabel', 'block_sceh_dashboard'),
+                        'count' => $upcomingevents,
+                        'url' => new moodle_url('/calendar/view.php'),
+                    ],
+                ],
+            ],
+            [
+                'title' => get_string('learnerbadgestitle', 'block_sceh_dashboard'),
+                'icon' => 'fa-award',
+                'status' => 'info',
+                'steps' => [
+                    [
+                        'label' => get_string('learnerbadgeslabel', 'block_sceh_dashboard'),
+                        'count' => $badgecount,
+                        'url' => new moodle_url('/badges/mybadges.php'),
+                    ],
+                ],
+            ],
+        ];
+    }
+
 
     public function applicable_formats() {
         return [

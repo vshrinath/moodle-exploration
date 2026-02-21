@@ -4,6 +4,24 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-21] — Dashboard UX parity: cleanup all roles, hide nav clutter
+
+### What changed
+- **Learner**: Removed 4 placeholder cards (Case Logbook, Attendance, Credentialing Sheet, Video Library). Reordered remaining 5 cards by priority. Added count badges on Upcoming Deadlines and My Badges. Flat grid layout with no section headings.
+- **Trainer**: Consolidated individual course cards into single expandable "My Courses" card using PO's sub-action pattern. Single course links directly, multiple courses expand a sub-action bar. Removed stream sub-cards.
+- **Sysadmin**: Removed Attendance Reports card (trainer concern). Reordered 6 cards by priority. Dropped duplicate cohort count from status row (now 3 cards: Cron Tasks, Active Users, Overdue Events).
+- **All roles**: Hidden "Dashboard" and "My courses" from header nav (SCEH logo is the home link). Hidden Workflow Queue for initial rollout (single line uncomment to restore).
+
+### Why
+Dashboard cards should be actionable, not placeholders. Each role now sees only cards relevant to their workflow, in priority order. Header cleanup reduces cognitive load for new users. Workflow Queue hidden until users are comfortable with the core dashboard.
+
+### Files touched
+- `block_sceh_dashboard/block_sceh_dashboard.php` — Role-specific card cleanup, reordering, expandable course pattern, count badges, workflow queue disabled
+- `block_sceh_dashboard/lang/en/block_sceh_dashboard.php` — Added `trainermycourses` string
+- `block_sceh_dashboard/styles.css` — Hidden primary nav items, mobile grid tweaks
+
+---
+
 ## [2026-02-19] — Remove Django-specific drift from local skills and align to Moodle/PHP
 
 ### What changed

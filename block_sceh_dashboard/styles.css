@@ -464,14 +464,14 @@
 /* Responsive */
 @media (max-width: 768px) {
     .sceh-dashboard-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 15px;
-        padding: 15px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 12px;
     }
 
     .sceh-card {
-        padding: 20px 15px;
-        min-height: 150px;
+        padding: 20px 12px;
+        min-height: 140px;
     }
 
     .sceh-card-icon i {
@@ -479,8 +479,35 @@
     }
 
     .sceh-card-title {
-        font-size: 14px;
+        font-size: 13px;
     }
+
+    .sceh-po-status-grid-steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sceh-po-subaction-card {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+}
+
+/* De-emphasize Moodle Timeline block on Dashboard so SCEH block is prominent. */
+.block_timeline {
+    order: 10 !important;
+}
+
+.block_timeline .card {
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+}
+
+/* Hide "Dashboard" and "My courses" from primary nav — SCEH logo is the home link.
+   Remove these rules to restore the default Moodle navigation. */
+.primary-navigation .nav-item:has(> a[href*="/my/"]),
+.primary-navigation .nav-item:has(> a[data-key="myhome"]),
+.primary-navigation .nav-item:has(> a[data-key="mycourses"]) {
+    display: none !important;
 }
 
 /* -------------------------------------------------------------------------

@@ -142,3 +142,36 @@ $string['postepreadyreview'] = 'Ready to Review';
 $string['postepreadyreviewdesc'] = 'Imported content awaiting review.';
 $string['postepapproved'] = 'Approved';
 $string['postepapproveddesc'] = 'Imported content approved and published.';
+
+// Sysadmin dashboard sections.
+$string['sysadminquickactions'] = 'Quick Actions';
+$string['sysadminmonitoring'] = 'Status and Monitoring';
+$string['sysadmincrontasks'] = 'Cron Tasks';
+$string['sysadminfailedtasks'] = 'Failed Tasks';
+$string['sysadmintotalcohorts'] = 'Total Cohorts';
+$string['sysadminactiveusers'] = 'Active Users';
+$string['sysadmintotalactive'] = 'Total Active';
+$string['sysadminoverdue'] = 'Overdue Events';
+$string['sysadminoverdueevents'] = 'Overdue';
+
+// Trainer dashboard sections.
+$string['trainerquickactions'] = 'My Courses & Tools';
+$string['trainerstatus'] = 'Status';
+$string['trainermycourses'] = 'My Courses';
+$string['trainerungradedtitle'] = 'Grading Queue';
+$string['trainerungradedlabel'] = 'Ungraded';
+$string['trainercoursestitle'] = 'Assigned Courses';
+$string['trainercourseslabel'] = 'Courses';
+$string['trainerupcomingtitle'] = 'Upcoming Events';
+$string['trainerupcominglabel'] = 'This Week';
+
+// Learner dashboard sections.
+$string['learnerquickactions'] = 'Quick Actions';
+$string['learnerstatus'] = 'My Status';
+$string['learnerpendingstreamtitle'] = 'Stream Selection';
+$string['learnerpendingstreamlabel'] = 'Pending';
+$string['learnerupcomingtitle'] = 'Upcoming Deadlines';
+$string['learnerupcominglabel'] = 'This Week';
+$string['learnerbadgestitle'] = 'My Badges';
+$string['learnerbadgeslabel'] = 'Earned';
+
