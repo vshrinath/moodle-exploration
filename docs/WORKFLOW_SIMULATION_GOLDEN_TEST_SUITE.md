@@ -632,6 +632,74 @@ Shared execution log for workflow simulations with consistent pass/fail criteria
 - Owner: Course blueprint coverage
 - Notes: Current test course contains stream-choice + quiz progression path, but explicit onboarding/foundation artifacts were not separately modeled/labeled in this run.
 
+### WF-09 Re-run: Trainer Execution Workflow (UI Quiz Attempt + Grading)
+
+**Run date:** 2026-02-20  
+**Tester:** Anti-Gravity run (reported by Shri)  
+**Environment:** Local browser flow (`http://127.0.0.1:8081`)  
+**Status:** Pass
+
+**Pass Criteria**
+- [x] Learner can complete a full quiz attempt.
+- [x] Trainer can view learner attempt in quiz results.
+- [x] Trainer can verify learner grade in gradebook.
+
+**Execution Notes**
+1. Learner (`mock.learner`) completed `01. Normal Eye Quiz`.
+2. Attempt completed end-to-end with score/grade visible to learner.
+3. Trainer (`mock.trainer`) verified attempt row and grade in quiz results.
+4. Trainer verified gradebook reflects the same grade value.
+
+**Evidence**
+- Learner attempt outcome:
+  - `Score: 5.00 / 10.00`
+  - `Grade: 50.00 / 100.00`
+- Screens:
+  - `learner_quiz_intro_1771565288843.png`
+  - `learner_quiz_q1_1771565305174.png`
+  - `learner_quiz_q2_1771565351691.png`
+  - `learner_quiz_q3_actual_1771565391151.png`
+  - `learner_quiz_q4_actual_2_1771565434262.png`
+  - `learner_quiz_q5_actual_final_1771565505214.png`
+  - `learner_quiz_q6_actual_final_1771565547731.png`
+  - `learner_quiz_q7_actual_final_1771565609918.png`
+  - `learner_quiz_q8_actual_finaly_last_one_1771565652259.png`
+  - `learner_quiz_q9_1771565813721.png`
+  - `learner_quiz_q10_1771565939033.png`
+  - `learner_quiz_grade_summary_1771566116157.png`
+  - `trainer_quiz_results_view_1771566624188.png`
+  - `trainer_gradebook_view_1771566707643.png`
+
+**Defects/Blockers**
+- None for WF-09 in this re-run.
+
+### WF-10 Re-run: Learner Permission Boundary (Desktop UI)
+
+**Run date:** 2026-02-20  
+**Tester:** Anti-Gravity run (reported by Shri)  
+**Environment:** Local browser flow (`http://127.0.0.1:8081`)  
+**Status:** Pass (desktop permission boundary), Mobile pending
+
+**Pass Criteria**
+- [x] Learner cannot access trainer-only lesson-plan resource.
+- [x] Learner can access released learner content.
+- [ ] Same critical-path validation confirmed on mobile viewport/device.
+
+**Execution Notes**
+1. Learner (`mock.learner`) opened course after trainer actions.
+2. Verified trainer-only lesson plan remains hidden from learner.
+3. Verified learner content remains accessible.
+4. Mobile-specific run is still pending in this evidence set.
+
+**Evidence**
+- `learner_course_permission_check_1771567010563.png`
+
+**Defects/Blockers**
+- ID: `WF10-003`
+- Severity: Medium
+- Owner: Test execution harness
+- Notes: Desktop learner permission boundary now passes in UI run; explicit mobile-browser/mobile-app execution evidence is still pending.
+
 ### WF-11: Intervention Loop Workflow
 
 **Run date:** 2026-02-18  

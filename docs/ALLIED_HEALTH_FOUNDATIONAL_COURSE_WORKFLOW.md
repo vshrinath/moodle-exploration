@@ -686,6 +686,60 @@ Use this checklist when setting up the course for the first time:
 
 ---
 
+## Known Behaviors: Enrollment Methods and Cohort Sync
+
+### Enrollment Method Independence
+
+Moodle supports multiple enrollment methods per user in a single course. Understanding how these interact is critical for cohort-based access control.
+
+**Key principle:** Cohort sync only manages enrollments it created. Manual enrollments are independent of cohort membership.
+
+### Test Validation (2026-02-20)
+
+**Test scenario:** Allied Health - Foundational (Automation) course with Mock Allied Cohort 2026
+
+**Configuration tested:**
+- Course: `AHW-FOUND-AUTO` (ID 1842)
+- Cohort: `mock-allied-2026` (ID 907)
+- Learner: `mock.learner` (ID 2070)
+- Trainer: `mock.trainer` (ID 2071)
+
+**Findings:**
+
+| User | Enrollment Method | Cohort Removal Effect | Re-add Effect |
+|---|---|---|---|
+| mock.learner | Manual enrolments only | No change — remains Active | No change — enrollment unaffected |
+| mock.trainer | Manual + Cohort sync | Cohort sync enrollment removed | Cohort sync enrollment restored |
+
+**Implication for access control:**
+
+If a learner is enrolled via Manual enrolments:
+- Removing them from the cohort does NOT suspend their course access
+- Re-adding them to the cohort does NOT change their enrollment status
+- To test true cohort-driven access control, the learner must be enrolled via Cohort sync method
+
+If a learner is enrolled via Cohort sync:
+- Removing them from the cohort will unenroll them from the course (access suspended)
+- Re-adding them to the cohort will re-enroll them (access restored)
+
+**Recommendation for production:**
+- Use Cohort sync as the primary enrollment method for cohort-based courses
+- Reserve Manual enrolments for exceptions (makeup learners, observers, special cases)
+- Document which learners have manual enrollments to avoid confusion during cohort transitions
+
+### Regression Validation
+
+**Activity visibility and data consistency confirmed:**
+- Trainer Resources: Correctly hidden from learners (role restriction working)
+- Day Content folders: Trainer can show/hide via eye icon
+- Quiz history: Preserved through cohort add/remove cycles
+- Gradebook: Consistent, no duplicate or missing entries
+- Lesson Plan visibility: Correctly hidden from students, visible to trainers
+
+**Test evidence:** Phase 3 validation (2026-02-20) — cohort lifecycle tested with no regression in quiz/content/permission workflow.
+
+---
+
 ## Key Moodle Navigation Reference
 
 | Task | Path |
