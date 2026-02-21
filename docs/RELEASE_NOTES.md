@@ -4,6 +4,29 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-21] — Team handover documentation and Phase 3 validation
+
+### What changed
+- Added comprehensive getting started guide for new team members with 45-minute onboarding path
+- Documented all known system limitations with workarounds and future enhancement recommendations
+- Added Phase 3 test report validating cohort lifecycle, enrollment methods, and regression checks
+- Documented enrollment method behavior (manual vs. cohort sync) in workflow guide
+- Added artifacts directory with test evidence from Phase 2 and Phase 3 validation
+- Tagged release as v1.0.0-handover milestone
+
+### Why
+System is production-ready for Allied Health Foundational course workflow. New team members need clear onboarding path, known limitations documentation prevents confusion, and test evidence provides confidence in system stability. Enrollment method findings are critical for production cohort management.
+
+### Files touched
+- `docs/GETTING_STARTED.md` — New team member onboarding guide
+- `docs/KNOWN_LIMITATIONS.md` — System constraints and workarounds
+- `docs/PHASE_3_COHORT_LIFECYCLE_TEST_REPORT.md` — Phase 3 validation results
+- `docs/ALLIED_HEALTH_FOUNDATIONAL_COURSE_WORKFLOW.md` — Added enrollment method behavior section
+- `artifacts/README.md` — Test artifacts documentation
+- `artifacts/allied-health-e2e/` — Phase 2 and Phase 3 test evidence (screenshots, reports)
+
+---
+
 ## [2026-02-21] — In-app Help page, completion tracking, stream progress UX
 
 ### What changed
