@@ -146,6 +146,7 @@ foreach ($relevantsections as $sectionnumber) {
         $items[] = [
             'icon' => 'fa-circle-play',
             'text' => format_string($cm->name),
+            'url' => new moodle_url('/mod/' . $cm->modname . '/view.php', ['id' => $cm->id]),
             'subtext' => get_string('streamprogress_type', 'local_sceh_rules') . ': ' .
                 format_string($cm->modname) . ' | ' .
                 get_string('streamprogress_status', 'local_sceh_rules') . ': ' . $status,

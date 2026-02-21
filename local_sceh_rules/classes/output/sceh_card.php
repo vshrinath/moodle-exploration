@@ -363,17 +363,26 @@ class sceh_card {
         $text = (string)($item['text'] ?? '');
         $subtext = (string)($item['subtext'] ?? '');
         $actions = $item['actions'] ?? [];
+        $url = isset($item['url']) ? self::normalize_url($item['url']) : null;
 
         $html = \html_writer::start_div('sceh-list-item');
-        $html .= \html_writer::div(
-            self::render_icon($icon, 'lg') .
+
+        $maininner = self::render_icon($icon, 'lg') .
             \html_writer::div(
                 \html_writer::div($text, 'sceh-list-item-text') .
                 \html_writer::div($subtext, 'sceh-list-item-subtext'),
                 'sceh-list-item-body'
-            ),
-            'sceh-list-item-main'
-        );
+            );
+
+        if ($url) {
+            $html .= \html_writer::tag('a', $maininner, [
+                'href' => $url->out(false),
+                'class' => 'sceh-list-item-main sceh-list-item-link',
+                'style' => 'text-decoration:none; color:inherit;',
+            ]);
+        } else {
+            $html .= \html_writer::div($maininner, 'sceh-list-item-main');
+        }
 
         if (!empty($actions)) {
             $actionhtml = '';
