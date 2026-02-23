@@ -90,6 +90,7 @@ function get_or_create_test_framework() {
     }
     
     // Create temporary test framework with properly configured scale
+    // Format must match Moodle's exact structure: first element has scaleid, then scale items
     $framework_data = (object)[
         'shortname' => 'Test Framework (Circular Dependency Tests)',
         'idnumber' => 'TEST_CIRC_DEP_' . time(),
@@ -98,8 +99,9 @@ function get_or_create_test_framework() {
         'contextid' => context_system::instance()->id,
         'scaleid' => $scale->id,
         'scaleconfiguration' => json_encode([
-            ['id' => 1, 'proficient' => 0, 'default' => 1],  // Not competent (default)
-            ['id' => 2, 'proficient' => 1, 'default' => 0],  // Competent (proficient)
+            ['scaleid' => (string)$scale->id],  // First element must have scaleid
+            ['id' => 1, 'scaledefault' => 0, 'proficient' => 0],  // Not competent
+            ['id' => 2, 'scaledefault' => 1, 'proficient' => 1],  // Competent (default + proficient)
         ]),
         'visible' => 1,
     ];
