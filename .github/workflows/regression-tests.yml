@@ -2,9 +2,9 @@ name: Regression Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, main, develop, front-end-explorations ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, main, develop, front-end-explorations ]
 
 jobs:
   test:
