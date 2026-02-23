@@ -353,6 +353,22 @@ function test_three_node_cycle($iteration) {
 // Run property tests
 echo "Running property tests for circular dependency prevention...\n\n";
 
+// Clean up any leftover test competencies from previous runs
+echo "Cleaning up old test data...\n";
+$old_comps = $DB->get_records_sql(
+    "SELECT id FROM {competency} WHERE idnumber LIKE 'CIRC_TEST_%'"
+);
+foreach ($old_comps as $comp) {
+    try {
+        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp->id]);
+        $DB->delete_records('competency_relatedcomp', ['relatedcompetencyid' => $comp->id]);
+        api::delete_competency($comp->id);
+    } catch (Exception $e) {
+        // Ignore cleanup errors
+    }
+}
+echo "Cleanup complete.\n\n";
+
 // Test self-dependencies
 for ($i = 1; $i <= 3; $i++) {
     if (!test_self_dependency($i)) {
