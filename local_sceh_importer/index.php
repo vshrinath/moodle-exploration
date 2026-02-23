@@ -115,7 +115,7 @@ if ($checkjob) {
         'status' => $job->status,
         'message' => $job->error, // Using error field for feedback.
         'result' => $job->result ? json_decode($job->result) : null,
-        'url' => $job->courseid ? new moodle_url('/course/view.php', ['id' => $job->courseid])->out(false) : null,
+        'url' => $job->courseid ? (new moodle_url('/course/view.php', ['id' => $job->courseid]))->out(false) : null,
     ]));
 }
 
@@ -491,7 +491,7 @@ if ($jobid) {
         $PAGE->requires->js_call_amd('local_sceh_importer/job_monitor', 'init', [
             'jobid' => $jobid,
             'sesskey' => sesskey(),
-            'checkurl' => new moodle_url('/local/sceh_importer/index.php')->out(false),
+            'checkurl' => (new moodle_url('/local/sceh_importer/index.php'))->out(false),
         ]);
         
         echo $OUTPUT->footer();
