@@ -182,6 +182,8 @@ function test_self_dependency($iteration) {
     
     echo "Iteration {$iteration} (self-dependency): ";
     
+    $comp_a_id = null;
+    
     try {
         $framework = get_or_create_test_framework();
         
@@ -194,7 +196,6 @@ function test_self_dependency($iteration) {
         
         if (!$would_be_circular) {
             echo "✗ Failed to detect self-dependency\n";
-            api::delete_competency($comp_a_id);
             return false;
         }
         
@@ -207,10 +208,6 @@ function test_self_dependency($iteration) {
             'relatedcompetencyid' => $comp_a_id
         ]);
         
-        // Cleanup
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-        api::delete_competency($comp_a_id);
-        
         if ($circular_exists) {
             echo "✗ Self-dependency was created (should be prevented)\n";
             return false;
@@ -222,6 +219,16 @@ function test_self_dependency($iteration) {
     } catch (Exception $e) {
         echo "✗ Exception: " . $e->getMessage() . "\n";
         return false;
+    } finally {
+        // Always cleanup, even on exception
+        if ($comp_a_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
+            try {
+                api::delete_competency($comp_a_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }
 
@@ -232,6 +239,9 @@ function test_two_node_cycle($iteration) {
     global $DB;
     
     echo "Iteration {$iteration} (two-node cycle): ";
+    
+    $comp_a_id = null;
+    $comp_b_id = null;
     
     try {
         $framework = get_or_create_test_framework();
@@ -251,9 +261,6 @@ function test_two_node_cycle($iteration) {
         
         if (!$would_be_circular) {
             echo "✗ Failed to detect two-node cycle\n";
-            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-            api::delete_competency($comp_a_id);
-            api::delete_competency($comp_b_id);
             return false;
         }
         
@@ -262,12 +269,6 @@ function test_two_node_cycle($iteration) {
             'competencyid' => $comp_b_id,
             'relatedcompetencyid' => $comp_a_id
         ]);
-        
-        // Cleanup
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
-        api::delete_competency($comp_a_id);
-        api::delete_competency($comp_b_id);
         
         if ($circular_exists) {
             echo "✗ Two-node cycle was created (should be prevented)\n";
@@ -280,6 +281,24 @@ function test_two_node_cycle($iteration) {
     } catch (Exception $e) {
         echo "✗ Exception: " . $e->getMessage() . "\n";
         return false;
+    } finally {
+        // Always cleanup, even on exception
+        if ($comp_a_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
+            try {
+                api::delete_competency($comp_a_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+        if ($comp_b_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
+            try {
+                api::delete_competency($comp_b_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }
 
@@ -290,6 +309,10 @@ function test_three_node_cycle($iteration) {
     global $DB;
     
     echo "Iteration {$iteration} (three-node cycle): ";
+    
+    $comp_a_id = null;
+    $comp_b_id = null;
+    $comp_c_id = null;
     
     try {
         $framework = get_or_create_test_framework();
@@ -314,11 +337,6 @@ function test_three_node_cycle($iteration) {
         
         if (!$would_be_circular) {
             echo "✗ Failed to detect three-node cycle\n";
-            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
-            api::delete_competency($comp_a_id);
-            api::delete_competency($comp_b_id);
-            api::delete_competency($comp_c_id);
             return false;
         }
         
@@ -327,14 +345,6 @@ function test_three_node_cycle($iteration) {
             'competencyid' => $comp_c_id,
             'relatedcompetencyid' => $comp_a_id
         ]);
-        
-        // Cleanup
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_c_id]);
-        api::delete_competency($comp_a_id);
-        api::delete_competency($comp_b_id);
-        api::delete_competency($comp_c_id);
         
         if ($circular_exists) {
             echo "✗ Three-node cycle was created (should be prevented)\n";
@@ -347,6 +357,32 @@ function test_three_node_cycle($iteration) {
     } catch (Exception $e) {
         echo "✗ Exception: " . $e->getMessage() . "\n";
         return false;
+    } finally {
+        // Always cleanup, even on exception
+        if ($comp_a_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
+            try {
+                api::delete_competency($comp_a_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+        if ($comp_b_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
+            try {
+                api::delete_competency($comp_b_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+        if ($comp_c_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_c_id]);
+            try {
+                api::delete_competency($comp_c_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }
 
