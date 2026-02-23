@@ -75,17 +75,31 @@ function get_or_create_test_framework() {
         return $framework;
     }
     
-    // Create temporary test framework
+    // Get or create a scale for the framework
+    $scale = $DB->get_record('scale', ['name' => 'Circular Dependency Test Scale'], '*', IGNORE_MISSING);
+    if (!$scale) {
+        $scale = new stdClass();
+        $scale->courseid = 0;
+        $scale->userid = 0;
+        $scale->name = 'Circular Dependency Test Scale';
+        $scale->scale = 'Not competent,Competent';
+        $scale->description = 'Scale for circular dependency property tests';
+        $scale->descriptionformat = FORMAT_HTML;
+        $scale->timemodified = time();
+        $scale->id = $DB->insert_record('scale', $scale);
+    }
+    
+    // Create temporary test framework with properly configured scale
     $framework_data = (object)[
         'shortname' => 'Test Framework (Circular Dependency Tests)',
         'idnumber' => 'TEST_CIRC_DEP_' . time(),
         'description' => 'Temporary framework for circular dependency property tests',
         'descriptionformat' => FORMAT_HTML,
         'contextid' => context_system::instance()->id,
-        'scaleid' => $DB->get_field_sql('SELECT MIN(id) FROM {scale}'),
+        'scaleid' => $scale->id,
         'scaleconfiguration' => json_encode([
-            ['id' => 1, 'name' => 'Not competent'],
-            ['id' => 2, 'name' => 'Competent']
+            ['id' => 1, 'scaledefault' => 0, 'proficient' => 0],  // Not competent
+            ['id' => 2, 'scaledefault' => 1, 'proficient' => 1],  // Competent (default + proficient)
         ]),
         'visible' => 1,
     ];
