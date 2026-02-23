@@ -34,11 +34,13 @@ jobs:
       - name: Start Docker Compose
         run: |
           docker compose -f docker-compose.moodlehq.yml up -d
-          # Wait for Moodle to be ready by checking logs for the startup message
-          max_attempts=60
+          # Wait for Moodle to be ready by checking for config.php on the host
+          max_attempts=120
           attempt=1
           while [ $attempt -le $max_attempts ]; do
-            if docker compose -f docker-compose.moodlehq.yml logs moodle | grep -q "Apache started"; then
+            if [ -f moodle-core/config.php ]; then
+              echo "Moodle config.php detected. Waiting a few more seconds for Apache..."
+              sleep 10
               echo "Moodle is ready."
               break
             fi
@@ -47,7 +49,7 @@ jobs:
             attempt=$((attempt+1))
           done
           if [ $attempt -gt $max_attempts ]; then
-            echo "Moodle failed to start in time."
+            echo "Moodle failed to start in time or config.php was not created."
             docker compose -f docker-compose.moodlehq.yml logs
             exit 1
           fi
