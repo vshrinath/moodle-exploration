@@ -63,7 +63,23 @@ jobs:
 
       - name: Finalize Moodle Setup
         run: |
-          docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
+          # Aggressive Resilience Pattern: Clear locks and retry
+          max_retries=3
+          for i in $(seq 1 $max_retries); do
+            echo "Attempt $i to finalize setup..."
+            docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/maintenance.php --disable || true
+            docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php || true
+            if docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable; then
+              echo "Moodle upgrade successful."
+              break
+            fi
+            echo "Upgrade failed, waiting for lock to clear..."
+            sleep 30
+            if [ $i -eq $max_retries ]; then
+              echo "Failed to finalize Moodle setup after $max_retries attempts."
+              exit 1
+            fi
+          done
           docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
 
       - name: Run Plugin Symlink Fix
