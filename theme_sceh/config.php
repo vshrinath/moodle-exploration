@@ -43,3 +43,7 @@ $THEME->iconsystem = \core\output\icon_system::FONTAWESOME;
 $THEME->haseditswitch = true;
 $THEME->usescourseindex = true;
 $THEME->removedprimarynavitems = ['home'];
+
+// Mobile app CSS — loaded by the Moodle Native App.
+// This is a raw CSS file (not SCSS) fetched at runtime.
+$THEME->mobilecssurl = $CFG->wwwroot . '/theme/sceh/mobile.css';

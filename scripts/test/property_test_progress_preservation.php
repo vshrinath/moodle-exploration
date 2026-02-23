@@ -13,7 +13,23 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+// Detect Moodle config
+if (!defined('MOODLE_INTERNAL')) {
+    $config_paths = [
+        '/var/www/html/public/config.php',
+        '/bitnami/moodle/config.php',
+        dirname(__DIR__, 2) . '/moodle-core/public/config.php',
+        dirname(__DIR__, 1) . '/config.php',
+        __DIR__ . '/config.php'
+    ];
+    foreach ($config_paths as $path) {
+        if (file_exists($path)) {
+            require_once($path);
+            break;
+        }
+    }
+}
+
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/competency/classes/api.php');
 require_once($CFG->dirroot . '/cohort/lib.php');

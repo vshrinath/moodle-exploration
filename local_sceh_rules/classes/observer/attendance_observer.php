@@ -18,6 +18,7 @@ namespace local_sceh_rules\observer;
 
 use local_sceh_rules\engine\event_handler;
 use local_sceh_rules\rules\attendance_rule;
+use local_sceh_rules\task\evaluate_rules_task;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -88,43 +89,28 @@ class attendance_observer extends event_handler {
             return;
         }
         
-        // Get affected users from the event
         $courseid = $this->get_course_from_event($event);
         
-        // Re-evaluate all attendance rules for this course
-        $this->reevaluate_course_attendance($courseid);
+        // Queue async evaluation instead of blocking the web request.
+        $this->queue_attendance_evaluation($courseid);
     }
     
     /**
-     * Re-evaluate attendance rules for all users in a course
+     * Queue an adhoc task to evaluate attendance rules for a course.
+     *
+     * Replaces the previous synchronous O(rules × enrolled_users) loop.
      *
      * @param int $courseid Course ID
      * @return void
      */
-    protected function reevaluate_course_attendance($courseid) {
-        global $DB;
-        
-        // Get all attendance rules for this course
-        $rules = $DB->get_records('local_sceh_attendance_rules', [
+    protected function queue_attendance_evaluation($courseid) {
+        $task = new evaluate_rules_task();
+        $task->set_custom_data((object) [
+            'ruletype' => 'attendance',
             'courseid' => $courseid,
-            'enabled' => 1
         ]);
-        
-        if (empty($rules)) {
-            return;
-        }
-        
-        // Get all enrolled users in the course
-        $context = \context_course::instance($courseid);
-        $enrolledusers = get_enrolled_users($context, '', 0, 'u.id');
-        
-        $evaluator = new attendance_rule();
-        
-        foreach ($rules as $rule) {
-            foreach ($enrolledusers as $user) {
-                // Evaluate the rule for this user
-                $evaluator->evaluate($user->id, $rule);
-            }
-        }
+        // set_component ensures the task is tracked against this plugin.
+        $task->set_component('local_sceh_rules');
+        \core\task\manager::queue_adhoc_task($task, true); // true = deduplicate.
     }
 }

@@ -29,9 +29,10 @@ class import_executor {
      * @param int $userid
      * @param string $extractdir
      * @param array $manifest
+     * @param int $jobid Optional job ID for background progress tracking.
      * @return array{created:array,skipped:array,replaced:array,warnings:array}
      */
-    public function execute(int $courseid, int $userid, string $extractdir, array $manifest): array {
+    public function execute(int $courseid, int $userid, string $extractdir, array $manifest, int $jobid = 0): array {
         global $CFG;
 
         require_once($CFG->dirroot . '/course/lib.php');
@@ -64,7 +65,14 @@ class import_executor {
         ];
         $this->persist_program_linkage($courseid, $userid, $manifest);
 
+        $total = count($manifest['activities'] ?? []);
+        $count = 0;
+
         foreach ($manifest['activities'] ?? [] as $activity) {
+            $count++;
+            if ($jobid > 0 && ($count % 5 === 0 || $count === $total)) {
+                $this->update_job_status($jobid, "Importing activity {$count} of {$total}...");
+            }
             $idnumber = (string)($activity['idnumber'] ?? '');
             if ($idnumber === '') {
                 $result['warnings'][] = 'Skipped activity with missing idnumber.';
@@ -889,5 +897,21 @@ class import_executor {
             ':' => '\\:',
         ];
         return strtr($text, $replacements);
+    }
+
+    /**
+     * Update job status/error message in the database.
+     *
+     * @param int $jobid
+     * @param string $statusmessage
+     * @return void
+     */
+    private function update_job_status(int $jobid, string $statusmessage): void {
+        global $DB;
+        $record = new \stdClass();
+        $record->id = $jobid;
+        $record->error = $statusmessage; // Use error field for current status message to avoid status enum collisions.
+        $record->timemodified = time();
+        $DB->update_record('local_sceh_importer_job', $record);
     }
 }

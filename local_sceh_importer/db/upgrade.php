@@ -47,5 +47,30 @@ function xmldb_local_sceh_importer_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026021701, 'local', 'sceh_importer');
     }
 
+    if ($oldversion < 2026021702) {
+        $table = new xmldb_table('local_sceh_importer_job');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'queued');
+        $table->add_field('manifest', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('extractdir', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('result', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('error', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('userid_ix', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+        $table->add_index('courseid_ix', XMLDB_INDEX_NOTUNIQUE, ['courseid']);
+        $table->add_index('status_ix', XMLDB_INDEX_NOTUNIQUE, ['status']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026021702, 'local', 'sceh_importer');
+    }
+
     return true;
 }

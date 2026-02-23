@@ -17,7 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_sceh_importer';
-$plugin->version = 2026021701;
+$plugin->version = 2026021702;
 $plugin->requires = 2024051700; // Moodle 5.1.
 $plugin->maturity = MATURITY_ALPHA;
 

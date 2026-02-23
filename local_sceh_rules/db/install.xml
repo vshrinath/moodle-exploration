@@ -60,5 +60,24 @@
         <INDEX NAME="userid_timecreated" UNIQUE="false" FIELDS="userid, timecreated"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_sceh_rules_metrics" COMMENT="Daily-bucketed telemetry counters for rules engine">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="ruletype" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="attendance or roster"/>
+        <FIELD NAME="ruleid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to the specific rule"/>
+        <FIELD NAME="metric_date" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="YYYY-MM-DD daily bucket"/>
+        <FIELD NAME="success_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="failure_count" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="total_duration_ms" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Accumulated ms for avg calc"/>
+        <FIELD NAME="last_error" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Most recent error message"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="ruletype_ruleid_date" UNIQUE="true" FIELDS="ruletype, ruleid, metric_date"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

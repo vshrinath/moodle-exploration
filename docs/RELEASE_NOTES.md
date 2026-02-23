@@ -4,6 +4,44 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-23] — Importer Async Refactor and CI/CD Integration
+
+### What changed
+- **Async Importer**: Refactored `local_sceh_importer` to use Moodle Adhoc Tasks for background processing. Added a real-time progress UI and asynchronous polling for better scalability and reliability with large packages.
+- **CI/CD Pipeline**: Integrated a GitHub Actions regression testing workflow in `.github/workflows/regression-tests.yml`.
+- **Master Test Runner**: Created `scripts/test/run_all_tests.php` as a unified entry point for automated regression testing.
+- **Environmental Parity**: Refactored 21 legacy test and utility scripts to use dynamic `config.php` detection, ensuring compatibility across local and CI environments.
+- **Automated Provisioning**: Configured CI to automatically mount plugins and execute configuration scripts for a self-validating environment.
+
+### Why
+The previous synchronous importer was prone to gateway timeouts with large files. Moving the heavy lifting to adhoc tasks makes the system production-ready and scalable. The CI/CD pipeline ensures that the "Golden Suite" of business workflows is verified automatically on every change, preventing regressions.
+
+### Files touched
+- `local_sceh_importer/` — Async logic, job tracking, and progress UI
+- `.github/workflows/regression-tests.yml` — [NEW] GitHub Actions pipeline
+- `scripts/test/run_all_tests.php` — [NEW] Master regression runner
+- `scripts/test/`, `scripts/config/`, `scripts/verify/` — 21 files refactored for path parity
+
+---
+
+## [2026-02-23] — Cost modeling, architecture documentation, and rollback strategy
+
+### What changed
+- Added comprehensive cost modeling document analyzing current infrastructure costs ($195-390/month for 2,000 users) and 10x growth projections ($1,130-1,870/month for 20,000 users)
+- Created system architecture documentation with container diagrams, data flow visualizations, plugin architecture details, and database schema reference
+- Documented configuration rollback strategy with four rollback levels (disable, snapshot, git tag, full restore) and idempotency patterns for all 28 config scripts
+- Addressed three critical gaps identified in architectural retrospective: cost planning, documentation debt, and configuration change management
+
+### Why
+The architectural retrospective identified missing documentation for cost planning (10x growth scenario), system architecture (no diagrams or data flow docs), and configuration rollback (28 scripts lack version control and rollback capability). These documents provide financial planning for scaling, technical onboarding for developers, and operational safety for configuration changes.
+
+### Files touched
+- `docs/COST_MODELING.md` — Infrastructure cost analysis and 5-year projections
+- `docs/SYSTEM_ARCHITECTURE.md` — Container architecture, data flows, plugin details, database schema
+- `docs/CONFIG_ROLLBACK_STRATEGY.md` — Version control, rollback procedures, idempotency patterns
+
+---
+
 ## [2026-02-21] — Team handover documentation and Phase 3 validation
 
 ### What changed

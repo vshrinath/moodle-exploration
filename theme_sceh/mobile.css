@@ -1,0 +1,157 @@
+/**
+ * Mobile CSS overrides for SCEH Moodle theme.
+ *
+ * Loaded by the Moodle Native App via $THEME->mobilecssurl.
+ * This is raw CSS (not SCSS) because the app fetches it directly.
+ *
+ * Targets: 6-inch screens (≤414px), Moodle app WebView.
+ */
+
+/* ===== 1. Strip desktop-only navigation ===== */
+
+/* The app renders its own native header — hide the desktop navbar. */
+.navbar.fixed-top {
+    background: var(--sceh-color-brand, #c02635) !important;
+    box-shadow: none !important;
+    border-bottom: none !important;
+}
+
+/* Hide desktop drawer/sidebar toggling — app has its own panel. */
+.drawer-toggler,
+.drawers .drawer {
+    display: none !important;
+}
+
+/* Remove the "Enrol users" button (same as internal.scss). */
+.enrolusersbutton,
+.enrol_manual_plugin,
+input.btn-primary[value="Enrol users"] {
+    display: none !important;
+}
+
+
+/* ===== 2. Card system — force single column ===== */
+
+.sceh-rules-grid {
+    display: block !important;
+}
+
+.sceh-rules-grid>* {
+    margin-bottom: 12px;
+}
+
+.sceh-card.sceh-card-system {
+    min-height: auto;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.sceh-card-small {
+    min-height: auto;
+}
+
+.sceh-metric-value {
+    font-size: 1.5rem;
+}
+
+.sceh-header-title {
+    font-size: 0.95rem;
+}
+
+.sceh-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+
+/* ===== 3. Kirkpatrick dashboard charts ===== */
+
+.chart-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+
+/* ===== 4. Dashboard filters — stack vertically ===== */
+
+.kirkpatrick-dashboard-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kirkpatrick-dashboard-filters .form-control,
+.kirkpatrick-dashboard-filters select {
+    width: 100% !important;
+}
+
+.kirkpatrick-dashboard-filters label {
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+}
+
+
+/* ===== 5. Kirkpatrick level sections ===== */
+
+.kirkpatrick-level {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--sceh-color-border, #e3e8ef);
+}
+
+.kirkpatrick-level h2 {
+    font-size: 1.1rem;
+}
+
+
+/* ===== 6. Export buttons ===== */
+
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.export-options .btn {
+    width: 100%;
+    text-align: center;
+}
+
+
+/* ===== 7. General mobile polish ===== */
+
+/* Prevent body overflow from desktop max-width rules. */
+#page.drawers .main-inner {
+    max-width: 100vw !important;
+    padding: 0 8px;
+}
+
+#region-main-box,
+#region-main {
+    max-width: 100% !important;
+}
+
+/* List items in card system — reduce min-height. */
+.sceh-list-item {
+    min-height: auto;
+    padding: 8px;
+}
+
+/* Attendance/roster status bar — full width. */
+.sceh-status {
+    margin-top: 8px;
+    padding: 6px 8px;
+    font-size: 0.85rem;
+}
+
+/* Calendar/timeline blocks hidden on mobile (already hidden for ops roles). */
+.block_calendar_month,
+.block_calendar_upcoming {
+    display: none !important;
+}

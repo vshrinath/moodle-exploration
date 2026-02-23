@@ -34,21 +34,18 @@ $systemcontext = context_system::instance();
 $has_importer_cap = has_capability('local/sceh_importer:manage', $systemcontext);
 
 if (!$has_importer_cap) {
-    // Fallback: check if user has a program owner role in any category.
-    $sql = "SELECT DISTINCT ra.id
-              FROM {role_assignments} ra
-              JOIN {role} r ON r.id = ra.roleid
-              JOIN {context} ctx ON ctx.id = ra.contextid
-             WHERE ra.userid = :userid
-               AND ctx.contextlevel = :contextlevel
-               AND r.shortname IN (:short1, :short2)";
-    $has_role = $DB->record_exists_sql($sql, [
-        'userid' => $USER->id,
-        'contextlevel' => CONTEXT_COURSECAT,
-        'short1' => 'sceh_program_owner',
-        'short2' => 'programowner',
-    ]);
-    if (!$has_role) {
+    // Check if user has the capability in any course category context.
+    // This covers program owners assigned at the category level.
+    $categories = core_course_category::get_all();
+    $has_category_cap = false;
+    foreach ($categories as $cat) {
+        $catcontext = context_coursecat::instance($cat->id, IGNORE_MISSING);
+        if ($catcontext && has_capability('local/sceh_importer:manage', $catcontext)) {
+            $has_category_cap = true;
+            break;
+        }
+    }
+    if (!$has_category_cap) {
         require_capability('local/sceh_importer:manage', $systemcontext);
     }
 }
@@ -102,6 +99,25 @@ foreach ($courses as $course) {
 
 // Get preselected courseid from URL parameter
 $preselectedcourseid = optional_param('courseid', 0, PARAM_INT);
+$jobid = optional_param('jobid', 0, PARAM_INT);
+$checkjob = optional_param('checkjob', 0, PARAM_INT);
+
+// Handle AJAX status check.
+if ($checkjob) {
+    if (!confirm_sesskey()) {
+        die(json_encode(['error' => 'Invalid session']));
+    }
+    $job = $DB->get_record('local_sceh_importer_job', ['id' => $checkjob]);
+    if (!$job) {
+        die(json_encode(['error' => 'Job not found']));
+    }
+    die(json_encode([
+        'status' => $job->status,
+        'message' => $job->error, // Using error field for feedback.
+        'result' => $job->result ? json_decode($job->result) : null,
+        'url' => $job->courseid ? new moodle_url('/course/view.php', ['id' => $job->courseid])->out(false) : null,
+    ]));
+}
 
 $mform = new upload_form(null, [
     'courses' => $courseoptions,
@@ -251,22 +267,27 @@ if (optional_param('doimport', 0, PARAM_BOOL)) {
 
         if ($execution === null) {
             try {
-                $executor = new import_executor();
-                $execution = $executor->execute(
-                    (int)$savedpreview['targetcourseid'],
-                    (int)$USER->id,
-                    (string)$savedpreview['extractdir'],
-                    (array)$preview['manifest']
-                );
-                $execution['blocked'] = false;
-                $execution['totaluploadedactivities'] = $totaluploadedactivities;
+                $job = new stdClass();
+                $job->userid = (int)$USER->id;
+                $job->courseid = (int)$savedpreview['targetcourseid'];
+                $job->status = 'queued';
+                $job->manifest = json_encode((array)$preview['manifest']);
+                $job->extractdir = (string)$savedpreview['extractdir'];
+                $job->timecreated = time();
+                $job->timemodified = time();
+                $jobid = $DB->insert_record('local_sceh_importer_job', $job);
+
+                $task = new \local_sceh_importer\task\import_package_task();
+                $task->set_custom_data(['jobid' => $jobid]);
+                $task->set_userid($USER->id);
+                \core\task\manager::queue_adhoc_task($task, true);
+
+                // Clear session state and redirect to status page.
                 unset($SESSION->$previewkey);
-                $preview = null;
+                redirect(new moodle_url('/local/sceh_importer/index.php', ['jobid' => $jobid]));
+
             } catch (Throwable $e) {
-                $preview['errors'][] = 'Execution failed: ' . $e->getMessage();
-                if (!empty($e->debuginfo)) {
-                    $preview['errors'][] = 'Debug: ' . $e->debuginfo;
-                }
+                $preview['errors'][] = 'Queueing failed: ' . $e->getMessage();
                 $execution = [
                     'blocked' => true,
                     'created' => [],
@@ -439,6 +460,44 @@ if ($data = $mform->get_data()) {
 }
 
 echo $OUTPUT->header();
+
+if ($jobid) {
+    $job = $DB->get_record('local_sceh_importer_job', ['id' => $jobid, 'userid' => $USER->id]);
+    if ($job) {
+        // Instant Runner Trigger (for prototype speed)
+        if ($job->status === 'queued') {
+            // Trigger adhoc cron immediately in the background.
+            // Note: On some systems exec() might be disabled, but for this prototype it's the fastest "instant" fix.
+            $cli = "php {$CFG->dirroot}/admin/cli/adhoc_task.php --execute > /dev/null 2>&1 &";
+            @exec($cli);
+        }
+
+        echo $OUTPUT->heading(get_string('importprogress', 'local_sceh_importer'));
+        echo html_writer::start_div('sceh-import-progress-container', ['id' => 'sceh-import-progress-container']);
+        echo html_writer::start_div('progress mb-3', ['style' => 'height: 25px;']);
+        $barclass = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+        echo html_writer::div('Queued...', $barclass, [
+            'id' => 'sceh-import-bar',
+            'role' => 'progressbar',
+            'style' => 'width: 10%;',
+            'aria-valuenow' => '10',
+            'aria-valuemin' => '0',
+            'aria-valuemax' => '100',
+        ]);
+        echo html_writer::end_div();
+        echo html_writer::div('Waiting for worker...', 'text-muted mb-4', ['id' => 'sceh-import-status-text']);
+        echo html_writer::end_div();
+
+        $PAGE->requires->js_call_amd('local_sceh_importer/job_monitor', 'init', [
+            'jobid' => $jobid,
+            'sesskey' => sesskey(),
+            'checkurl' => new moodle_url('/local/sceh_importer/index.php')->out(false),
+        ]);
+        
+        echo $OUTPUT->footer();
+        exit;
+    }
+}
 echo $OUTPUT->heading(get_string('importpage', 'local_sceh_importer'));
 echo html_writer::tag('div', 
     html_writer::tag('a', get_string('updateexisting', 'local_sceh_importer'), [

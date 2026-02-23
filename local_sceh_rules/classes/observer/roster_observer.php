@@ -18,6 +18,7 @@ namespace local_sceh_rules\observer;
 
 use local_sceh_rules\engine\event_handler;
 use local_sceh_rules\rules\roster_rule;
+use local_sceh_rules\task\evaluate_rules_task;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -55,14 +56,18 @@ class roster_observer extends event_handler {
         // Extract roster type from event data
         $rostertype = $this->extract_roster_type($event);
         if (!$rostertype) {
+            debugging(
+                'roster_observer: could not determine roster type from event ' .
+                $event->eventname . ' (objectid=' . ($event->objectid ?? 'null') . ')',
+                DEBUG_DEVELOPER
+            );
             return;
         }
         
         $userid = $this->get_user_from_event($event);
         
-        // Process roster completion
-        $evaluator = new roster_rule();
-        $evaluator->process_roster_completion($userid, $rostertype);
+        // Queue async evaluation instead of blocking the web request.
+        $this->queue_roster_evaluation($userid, $rostertype);
     }
     
     /**
@@ -72,46 +77,91 @@ class roster_observer extends event_handler {
      * @return string|null Roster type or null if not found
      */
     protected function extract_roster_type(\core\event\base $event) {
-        // Try to get roster type from event other data
-        if (isset($event->other['rostertype'])) {
+        // 1. Check event other data (custom events may provide this directly).
+        if (!empty($event->other['rostertype'])) {
             return $event->other['rostertype'];
         }
         
-        // Try to get from event object data
-        if (isset($event->other['objectid'])) {
-            // This would need to query the scheduler or database activity
-            // to determine the roster type based on the appointment/entry
-            return $this->determine_roster_type_from_appointment($event->other['objectid']);
+        // 2. Try to resolve from mod_scheduler appointment.
+        if (!empty($event->objectid)) {
+            return $this->determine_roster_type_from_scheduler($event->objectid);
         }
         
         return null;
     }
     
     /**
-     * Determine roster type from appointment or database entry
+     * Determine roster type from a scheduler appointment.
      *
-     * @param int $appointmentid Appointment or entry ID
-     * @return string|null Roster type
+     * Queries {scheduler_appointment} → {scheduler_slots} → slot name,
+     * then maps the slot name to a known roster type.
+     *
+     * @param int $appointmentid Scheduler appointment ID
+     * @return string|null Roster type or null if not resolvable
      */
-    protected function determine_roster_type_from_appointment($appointmentid) {
+    protected function determine_roster_type_from_scheduler($appointmentid) {
         global $DB;
         
-        // This is a placeholder - actual implementation would depend on
-        // how roster types are stored in the scheduler or database activity
+        // Check if scheduler tables exist (plugin may not be installed).
+        $dbman = $DB->get_manager();
+        if (!$dbman->table_exists('scheduler_appointment') || !$dbman->table_exists('scheduler_slots')) {
+            debugging('roster_observer: mod_scheduler tables not found', DEBUG_DEVELOPER);
+            return null;
+        }
         
-        // Example: Check if appointment has a custom field indicating roster type
-        $sql = "SELECT d.name as fieldname, dd.content
-                FROM {data_content} dd
-                JOIN {data_fields} d ON d.id = dd.fieldid
-                WHERE dd.recordid = :recordid
-                AND d.name = 'rostertype'";
+        // Appointment → Slot → Slot name contains the roster type keyword.
+        $sql = "SELECT s.appointmentlocation, s.notes
+                  FROM {scheduler_appointment} a
+                  JOIN {scheduler_slots} s ON s.id = a.slotid
+                 WHERE a.id = :appointmentid";
         
-        $result = $DB->get_record_sql($sql, ['recordid' => $appointmentid]);
+        $slot = $DB->get_record_sql($sql, ['appointmentid' => $appointmentid]);
         
-        if ($result && in_array($result->content, ['morning', 'night', 'training', 'satellite', 'posting'])) {
-            return $result->content;
+        if (!$slot) {
+            return null;
+        }
+        
+        // Map slot metadata to roster type.
+        // Convention: the slot's appointmentlocation or notes field contains
+        // one of the known roster type keywords.
+        return $this->match_roster_type(
+            ($slot->appointmentlocation ?? '') . ' ' . ($slot->notes ?? '')
+        );
+    }
+    
+    /**
+     * Match a text string to a known roster type.
+     *
+     * @param string $text Text to search for roster type keywords
+     * @return string|null Matched roster type or null
+     */
+    protected function match_roster_type(string $text): ?string {
+        $text = strtolower($text);
+        $types = ['morning', 'night', 'training', 'satellite', 'posting'];
+        
+        foreach ($types as $type) {
+            if (strpos($text, $type) !== false) {
+                return $type;
+            }
         }
         
         return null;
+    }
+    
+    /**
+     * Queue an adhoc task for roster rule evaluation.
+     *
+     * @param int $userid User ID
+     * @param string $rostertype Roster type
+     */
+    protected function queue_roster_evaluation(int $userid, string $rostertype) {
+        $task = new evaluate_rules_task();
+        $task->set_custom_data((object) [
+            'ruletype' => 'roster',
+            'userid' => $userid,
+            'rostertype' => $rostertype,
+        ]);
+        $task->set_component('local_sceh_rules');
+        \core\task\manager::queue_adhoc_task($task, true); // true = deduplicate.
     }
 }

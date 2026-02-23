@@ -66,6 +66,16 @@ services:
       - moodle
     environment:
       - SCEH_CRON_INTERVAL=${MOODLEHQ_CRON_INTERVAL:-60}
+      - SCEH_DB_HOST=mysql
+      - SCEH_DB_PORT=3306
+      - SCEH_DB_NAME=${MOODLEHQ_DB_NAME:-moodle}
+      - SCEH_DB_USER=${MOODLEHQ_DB_USER:-moodle}
+      - SCEH_DB_PASSWORD=${MOODLEHQ_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /var/www/html/config.php"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./moodle-core:/var/www/html
       - ./block_sceh_dashboard:/var/www/html/public/blocks/sceh_dashboard

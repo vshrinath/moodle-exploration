@@ -17,7 +17,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_sceh_rules';
-$plugin->version = 2026021301;
+$plugin->version = 2026022301;
 $plugin->requires = 2022041900; // Moodle 4.0
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0.0';
+$plugin->release = '1.1.0';
+$plugin->dependencies = [
+    'mod_attendance' => ANY_VERSION,
+];
