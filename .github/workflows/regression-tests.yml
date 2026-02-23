@@ -14,6 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Lint PHP files
+        run: |
+          find . -name "*.php" -not -path "./moodle-core/*" -print0 | xargs -0 -n 1 -P 4 php -l
+
       - name: Cache Moodle Core
         uses: actions/cache@v4
         id: cache-moodle
