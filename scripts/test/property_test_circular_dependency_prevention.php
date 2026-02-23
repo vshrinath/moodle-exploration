@@ -98,8 +98,8 @@ function get_or_create_test_framework() {
         'contextid' => context_system::instance()->id,
         'scaleid' => $scale->id,
         'scaleconfiguration' => json_encode([
-            ['id' => 1, 'scaledefault' => 0, 'proficient' => 0],  // Not competent
-            ['id' => 2, 'scaledefault' => 1, 'proficient' => 1],  // Competent (default + proficient)
+            ['id' => 1, 'proficient' => 0, 'default' => 1],  // Not competent (default)
+            ['id' => 2, 'proficient' => 1, 'default' => 0],  // Competent (proficient)
         ]),
         'visible' => 1,
     ];
