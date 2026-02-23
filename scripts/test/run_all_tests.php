@@ -2,6 +2,7 @@
 /**
  * Master test runner for SCEH Moodle Regression Suite.
  * This script executes all key integration and property tests and returns a single exit code.
+ * (Triggering CI test run - 2026-02-23)
  */
 
 define('CLI_SCRIPT', true);
