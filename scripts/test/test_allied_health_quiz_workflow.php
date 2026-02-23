@@ -848,6 +848,24 @@ try {
     log_check($results, 'AHW-AT-14', $pretrainer === false, "Learner cannot see trainer-only lesson plan (cmid={$sampletrainercmid})");
 
     set_script_user($trainer);
+    
+    // Check if trainer has required capability
+    $has_visibility_cap = has_capability(
+        'moodle/course:activityvisibility',
+        context_module::instance($samplequizcmid),
+        $trainer
+    );
+    
+    if (!$has_visibility_cap) {
+        log_check(
+            $results,
+            'AHW-AT-14A',
+            false,
+            'Trainer lacks moodle/course:activityvisibility - run configure_trainer_visibility_permissions.php'
+        );
+        fail_exit($results, 'Missing trainer permissions - run: php scripts/config/configure_trainer_visibility_permissions.php');
+    }
+    
     require_capability('moodle/course:activityvisibility', context_module::instance($samplequizcmid));
     require_capability('moodle/course:activityvisibility', context_module::instance($samplecontentcmid));
 

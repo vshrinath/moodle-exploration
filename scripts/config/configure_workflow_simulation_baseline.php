@@ -390,6 +390,8 @@ $program_owner_caps = [
     'moodle/course:view',
     'moodle/course:create',
     'moodle/course:manageactivities',
+    'moodle/course:activityvisibility',
+    'moodle/course:sectionvisibility',
     'moodle/question:add',
     'moodle/question:editall',
     'mod/resource:addinstance',

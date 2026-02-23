@@ -114,6 +114,7 @@ jobs:
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_kirkpatrick_plugins.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_attendance_tracking.php
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_trainer_visibility_permissions.php
 
       - name: Run All Regression Tests
         run: |

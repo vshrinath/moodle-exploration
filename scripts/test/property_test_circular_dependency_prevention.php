@@ -59,6 +59,41 @@ $test_iterations = 10;
 $failures = [];
 
 /**
+ * Get or create test framework
+ */
+function get_or_create_test_framework() {
+    global $DB;
+    
+    // Try to find existing framework
+    $framework = $DB->get_record('competency_framework', 
+        ['idnumber' => 'OPHTHAL_FELLOW_2025'], 
+        '*', 
+        IGNORE_MISSING
+    );
+    
+    if ($framework) {
+        return $framework;
+    }
+    
+    // Create temporary test framework
+    $framework_data = (object)[
+        'shortname' => 'Test Framework (Circular Dependency Tests)',
+        'idnumber' => 'TEST_CIRC_DEP_' . time(),
+        'description' => 'Temporary framework for circular dependency property tests',
+        'descriptionformat' => FORMAT_HTML,
+        'contextid' => context_system::instance()->id,
+        'scaleid' => $DB->get_field_sql('SELECT MIN(id) FROM {scale}'),
+        'scaleconfiguration' => json_encode([
+            ['id' => 1, 'name' => 'Not competent'],
+            ['id' => 2, 'name' => 'Competent']
+        ]),
+        'visible' => 1,
+    ];
+    
+    return api::create_framework($framework_data);
+}
+
+/**
  * Create a test competency
  */
 function create_test_competency($framework_id, $name_suffix) {
@@ -131,7 +166,7 @@ function test_self_dependency($iteration) {
     echo "Iteration {$iteration} (self-dependency): ";
     
     try {
-        $framework = $DB->get_record('competency_framework', ['idnumber' => 'OPHTHAL_FELLOW_2025']);
+        $framework = get_or_create_test_framework();
         
         // Create competency A
         $comp_a = create_test_competency($framework->id, 'A' . $iteration);
@@ -182,7 +217,7 @@ function test_two_node_cycle($iteration) {
     echo "Iteration {$iteration} (two-node cycle): ";
     
     try {
-        $framework = $DB->get_record('competency_framework', ['idnumber' => 'OPHTHAL_FELLOW_2025']);
+        $framework = get_or_create_test_framework();
         
         // Create competencies A and B
         $comp_a = create_test_competency($framework->id, 'A' . $iteration);
@@ -240,7 +275,7 @@ function test_three_node_cycle($iteration) {
     echo "Iteration {$iteration} (three-node cycle): ";
     
     try {
-        $framework = $DB->get_record('competency_framework', ['idnumber' => 'OPHTHAL_FELLOW_2025']);
+        $framework = get_or_create_test_framework();
         
         // Create competencies A, B, and C
         $comp_a = create_test_competency($framework->id, 'A' . $iteration);

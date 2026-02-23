@@ -4,6 +4,24 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-23] — CI test fixes for environment setup issues
+
+### What changed
+- Fixed circular dependency test to create test framework if missing (no longer assumes OPHTHAL_FELLOW_2025 exists)
+- Made Allied Health workflow test defensive about trainer capabilities (checks before requiring)
+- Added configure_trainer_visibility_permissions.php to CI workflow provisioning step
+- Both test failures were environment setup issues, not code bugs
+
+### Why
+CI tests were failing because: (1) circular dependency test assumed a specific competency framework existed, causing context resolution errors during cleanup, and (2) Allied Health test assumed trainer had visibility permissions without checking first. Tests now create required data or fail fast with clear error messages.
+
+### Files touched
+- `scripts/test/property_test_circular_dependency_prevention.php` — Added get_or_create_test_framework() helper
+- `scripts/test/test_allied_health_quiz_workflow.php` — Added capability check before require_capability()
+- `.github/workflows/regression-tests.yml` — Added trainer permissions config to provisioning step
+
+---
+
 ## [2026-02-23] — Importer Async Refactor and CI/CD Integration
 
 ### What changed
