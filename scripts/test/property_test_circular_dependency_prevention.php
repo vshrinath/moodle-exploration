@@ -113,9 +113,10 @@ function get_or_create_test_framework() {
  * Create a test competency
  */
 function create_test_competency($framework_id, $name_suffix) {
+    $unique_id = time() . '_' . rand(10000, 99999) . '_' . uniqid();
     $comp_data = (object)[
-        'shortname' => 'Circular Test ' . $name_suffix . '_' . time() . '_' . rand(1000, 9999),
-        'idnumber' => 'CIRC_TEST_' . $name_suffix . '_' . time() . '_' . rand(1000, 9999),
+        'shortname' => 'Circular Test ' . $name_suffix . '_' . $unique_id,
+        'idnumber' => 'CIRC_TEST_' . $name_suffix . '_' . $unique_id,
         'description' => 'Test competency for circular dependency testing',
         'descriptionformat' => FORMAT_HTML,
         'competencyframeworkid' => $framework_id,
