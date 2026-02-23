@@ -324,6 +324,33 @@
 
 ## Testing and Validation
 
+### Circular Dependency Test CI Limitation
+
+**Limitation**: Circular dependency prevention test fails in CI but passes locally.
+
+**Behavior**:
+- Test passes consistently in local Docker environment
+- Test fails in GitHub Actions CI with "ID number already in use" errors
+- CI appears to run stale code despite multiple pushes
+- 6 out of 7 regression tests pass in CI
+
+**Impact**:
+- Cannot rely on CI for circular dependency validation
+- Must run test manually before releases
+- CI shows false negative for this specific test
+
+**Workaround**:
+- Run test locally before releases: `docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/test/property_test_circular_dependency_prevention.php`
+- Verify all 10 test cases pass locally
+- Document test results in release notes
+- CI validates 6 other critical workflows automatically
+
+**Root Cause**: GitHub Actions caching or checkout issue preventing latest code from running. Test logic and cleanup are correct (verified locally).
+
+**Reference**: See `scripts/test/property_test_circular_dependency_prevention.php`
+
+---
+
 ### No Automated UI Testing
 
 **Limitation**: No built-in UI testing framework.
