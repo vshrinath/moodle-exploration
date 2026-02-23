@@ -61,7 +61,21 @@ jobs:
             exit 1
           fi
 
-      - name: Finalize Moodle Setup
+      - name: Run Plugin Symlink Fix
+        run: |
+          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/local
+          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/blocks
+          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/theme
+          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/mod
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/sceh_importer /var/www/html/local/sceh_importer
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/sceh_rules /var/www/html/local/sceh_rules
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/kirkpatrick_dashboard /var/www/html/local/kirkpatrick_dashboard
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/kirkpatrick_level4 /var/www/html/local/kirkpatrick_level4
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/blocks/sceh_dashboard /var/www/html/blocks/sceh_dashboard
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/theme/sceh /var/www/html/theme/sceh
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/mod/attendance /var/www/html/mod/attendance
+
+      - name: Finalize Moodle Setup (Install Plugins)
         run: |
           # Aggressive Resilience Pattern: Clear locks and retry
           max_retries=3
@@ -82,22 +96,9 @@ jobs:
           done
           docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
 
-      - name: Run Plugin Symlink Fix
-        run: |
-          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/local
-          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/blocks
-          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/theme
-          docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/mod
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/sceh_importer /var/www/html/local/sceh_importer
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/sceh_rules /var/www/html/local/sceh_rules
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/kirkpatrick_dashboard /var/www/html/local/kirkpatrick_dashboard
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/local/kirkpatrick_level4 /var/www/html/local/kirkpatrick_level4
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/blocks/sceh_dashboard /var/www/html/blocks/sceh_dashboard
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/theme/sceh /var/www/html/theme/sceh
-          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/mod/attendance /var/www/html/mod/attendance
-
       - name: Provision Plugins
         run: |
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_kirkpatrick_plugins.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_attendance_tracking.php
 
