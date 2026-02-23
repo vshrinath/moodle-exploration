@@ -61,6 +61,11 @@ jobs:
             exit 1
           fi
 
+      - name: Finalize Moodle Setup
+        run: |
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
+
       - name: Run Plugin Symlink Fix
         run: |
           docker exec moodlehq-dev-moodle-1 mkdir -p /var/www/html/local
