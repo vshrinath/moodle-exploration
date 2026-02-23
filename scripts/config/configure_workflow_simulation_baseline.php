@@ -284,9 +284,21 @@ function ensure_cohort(string $idnumber, string $name, int $contextid): stdClass
 // 1) Roles and users.
 $sysctx = context_system::instance();
 
-$role_sysadmin = get_role_id_by_shortname('sceh_system_admin');
-$role_program_owner = get_role_id_by_shortname('sceh_program_owner');
-$role_trainer = get_role_id_by_shortname('sceh_trainer');
+$role_sysadmin = ensure_role_exists(
+    'sceh_system_admin',
+    'SCEH System Administrator',
+    'Full system administration for SCEH'
+);
+$role_program_owner = ensure_role_exists(
+    'sceh_program_owner',
+    'SCEH Program Owner',
+    'Management of specific course categories'
+);
+$role_trainer = ensure_role_exists(
+    'sceh_trainer',
+    'SCEH Trainer',
+    'Training and assessment role'
+);
 $role_student = get_role_id_by_shortname('student');
 $role_program_owner_competency = ensure_role_exists(
     'sceh_program_owner_competency',
