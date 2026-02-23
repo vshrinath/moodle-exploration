@@ -100,7 +100,10 @@ jobs:
           done
           docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
 
-      - name: Provision Plugins
+      - name: Install Kirkpatrick Plugins
+        run: bash scripts/config/install_kirkpatrick_plugins.sh
+
+      - name: Provision Moodle Data and Config
         run: |
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_competency_scales.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_program_structure.php

@@ -56,9 +56,6 @@ function test_competency_framework_creation() {
     echo "Test 1: Competency Framework Creation\n";
     
     try {
-        // Create a test competency framework
-        $existing = $DB->get_record('competency_framework', [], 'scaleid,scaleconfiguration', IGNORE_MULTIPLE);
-        
         // Find SCEH scale or any scale with configuration
         $scale = $DB->get_record('scale', ['name' => 'SCEH Competency Scale'], 'id, name', IGNORE_MISSING);
         if (!$scale) {
@@ -67,12 +64,13 @@ function test_competency_framework_creation() {
         
         $scaleid = ($scale) ? $scale->id : 1;
         
-        // Define standard SCEH scale config
+        // Define standard SCEH scale config with Moodle-specific format
         $scaleconf = json_encode([
-            ['id' => 1, 'proficient' => 0, 'default' => 1],
-            ['id' => 2, 'proficient' => 0, 'default' => 0],
-            ['id' => 3, 'proficient' => 1, 'default' => 0],
-            ['id' => 4, 'proficient' => 1, 'default' => 0],
+            ['scaleid' => $scaleid],
+            ['id' => 1, 'scaledefault' => 1, 'proficient' => 0],
+            ['id' => 2, 'scaledefault' => 0, 'proficient' => 0],
+            ['id' => 3, 'scaledefault' => 0, 'proficient' => 1],
+            ['id' => 4, 'scaledefault' => 0, 'proficient' => 1],
         ]);
 
         $framework_data = (object)[
