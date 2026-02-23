@@ -98,7 +98,9 @@ jobs:
 
       - name: Provision Plugins
         run: |
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_competency_scales.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_program_structure.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_kirkpatrick_plugins.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_attendance_tracking.php
 

@@ -4,8 +4,7 @@ services:
   mysql:
     image: docker.io/mysql:8.4
     command: >-
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
     environment:
       - MYSQL_DATABASE=${MOODLEHQ_DB_NAME:-moodle}
@@ -15,7 +14,7 @@ services:
     volumes:
       - moodlehq_mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent" ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -56,8 +55,9 @@ services:
       - ./scripts:/var/www/html/public/scripts
       - ./scripts/moodlehq/start-web.sh:/opt/sceh/start-web.sh:ro
       - ./scripts/moodlehq/entrypoint.d:/docker-entrypoint.d:ro
+      - ./test_content:/var/www/html/public/test_content
       - moodlehq_moodledata:/var/www/moodledata
-    command: ["/bin/bash", "-lc", "/opt/sceh/start-web.sh"]
+    command: [ "/bin/bash", "-lc", "/opt/sceh/start-web.sh" ]
 
   moodle_cron:
     image: docker.io/moodlehq/moodle-php-apache:8.2
@@ -72,7 +72,7 @@ services:
       - SCEH_DB_USER=${MOODLEHQ_DB_USER:-moodle}
       - SCEH_DB_PASSWORD=${MOODLEHQ_DB_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "test -f /var/www/html/config.php"]
+      test: [ "CMD-SHELL", "test -f /var/www/html/config.php" ]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -87,7 +87,7 @@ services:
       - ./mod/attendance:/var/www/html/public/mod/attendance
       - ./scripts/moodlehq/start-cron.sh:/opt/sceh/start-cron.sh:ro
       - ./scripts/moodlehq/entrypoint.d:/docker-entrypoint.d:ro
-    command: ["/bin/bash", "-lc", "/opt/sceh/start-cron.sh"]
+    command: [ "/bin/bash", "-lc", "/opt/sceh/start-cron.sh" ]
 
 volumes:
   moodlehq_mysql_data:
