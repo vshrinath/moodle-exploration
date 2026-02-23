@@ -388,6 +388,7 @@ if ($mode === 'local') {
 // 3) WF-04 capability baseline for Program Owner role.
 $program_owner_caps = [
     'moodle/course:view',
+    'moodle/course:create',
     'moodle/course:manageactivities',
     'moodle/question:add',
     'moodle/question:editall',
