@@ -115,10 +115,11 @@ jobs:
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_kirkpatrick_plugins.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_attendance_tracking.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_trainer_visibility_permissions.php
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
 
       - name: Clean Test Data
         run: |
-          docker exec moodlehq-dev-moodle-1 php -r "define('CLI_SCRIPT', true); require_once('/bitnami/moodle/config.php'); \$DB->delete_records_select('competency', \"idnumber LIKE 'CIRC_TEST_%'\"); echo 'Cleaned old test competencies\n';"
+          docker exec moodlehq-dev-moodle-1 php -r "define('CLI_SCRIPT', true); require_once('/var/www/html/public/config.php'); \$DB->delete_records('competency_relatedcomp', []); \$DB->delete_records_select('competency', \"idnumber LIKE 'CIRC_TEST_%'\"); echo 'Cleaned old test data\n';"
 
       - name: Run All Regression Tests
         run: |

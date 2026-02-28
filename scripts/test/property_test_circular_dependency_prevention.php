@@ -71,8 +71,17 @@ function get_or_create_test_framework() {
         IGNORE_MISSING
     );
     
+    // Validate framework if found
     if ($framework) {
-        return $framework;
+        // Ensure its context exists and is valid
+        $context = context::instance_by_id($framework->contextid, IGNORE_MISSING);
+        if ($context) {
+            return $framework;
+        } else {
+            // Context is missing, delete this stale framework record manually to allow recreation
+            $DB->delete_records('competency_framework', ['id' => $framework->id]);
+            $framework = null;
+        }
     }
     
     // Get or create a scale for the framework
@@ -93,7 +102,7 @@ function get_or_create_test_framework() {
     // Format must match Moodle's exact structure: first element has scaleid, then scale items
     $framework_data = (object)[
         'shortname' => 'Test Framework (Circular Dependency Tests)',
-        'idnumber' => 'TEST_CIRC_DEP_' . time(),
+        'idnumber' => 'OPHTHAL_FELLOW_2025',
         'description' => 'Temporary framework for circular dependency property tests',
         'descriptionformat' => FORMAT_HTML,
         'contextid' => context_system::instance()->id,

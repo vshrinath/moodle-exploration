@@ -4,6 +4,22 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-02-23] — Fix circular dependency test cleanup for CI stability
+
+### What changed
+- Added cleanup logic to circular dependency test that deletes old CIRC_TEST_% competencies before running tests
+- Wrapped all cleanup in finally blocks to ensure competencies are deleted even when exceptions occur
+- Prevents "ID number already in use" errors when tests run multiple times in CI environment
+- Test now passes consistently in both local and CI environments
+
+### Why
+CI runs accumulate test competencies across multiple executions, causing ID number conflicts. When exceptions occurred during test execution, cleanup code in try blocks never ran, leaving orphaned competencies. Finally blocks guarantee cleanup happens regardless of test outcome.
+
+### Files touched
+- `scripts/test/property_test_circular_dependency_prevention.php` — Added cleanup logic at test start and finally blocks for guaranteed cleanup
+
+---
+
 ## [2026-02-23] — CI test fixes for environment setup issues
 
 ### What changed
