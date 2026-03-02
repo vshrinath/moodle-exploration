@@ -8,7 +8,7 @@ Project-specific coding standards. For behavioral rules (how AI assistants shoul
 
 - **Platform:** Moodle 5.0.1 (Build: 20250609)
 - **Backend:** PHP (Bitnami Moodle image)
-- **Database:** MariaDB
+- **Database:** MySQL 8.4
 - **Web Server:** Apache 2.4.64
 - **Deployment:** Docker containers (Bitnami images)
 - **Frontend:** Moodle templates + JavaScript (AMD modules)

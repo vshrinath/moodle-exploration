@@ -7,7 +7,9 @@ This document tracks all significant changes to the codebase. Each entry include
 ## [2026-03-02] — Added Windows compatibility guide and engineering handover documentation
 
 ### What changed
-- Created `docs/ENGINEERING_HANDOVER.md` with comprehensive setup instructions.
+- Added `docs/ENGINEERING_HANDOVER.md` with Windows setup instructions.
+- Corrected database technology from MariaDB to MySQL 8.4 in documentation.
+- Updated `docs/RELEASE_NOTES.md` with today's changes.
 - Documented Windows-specific requirements (Docker Desktop + WSL2/Git Bash).
 - Outlined 4-step initialization process (env generation, core bootstrap, stack startup, verification).
 - Added troubleshooting tips for common Docker and Moodle permission issues.
