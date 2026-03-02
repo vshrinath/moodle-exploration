@@ -4,6 +4,22 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-02] — Added Windows compatibility guide and engineering handover documentation
+
+### What changed
+- Created `docs/ENGINEERING_HANDOVER.md` with comprehensive setup instructions.
+- Documented Windows-specific requirements (Docker Desktop + WSL2/Git Bash).
+- Outlined 4-step initialization process (env generation, core bootstrap, stack startup, verification).
+- Added troubleshooting tips for common Docker and Moodle permission issues.
+
+### Why
+To ensure a smooth transition for new engineers, especially those working on Windows environments, by providing a distilled setup path that addresses the project's specific dependency on Bash-based scripts and Docker.
+
+### Files touched
+- `docs/ENGINEERING_HANDOVER.md` — [NEW] Comprehensive onboarding guide for engineers.
+
+---
+
 ## [2026-02-23] — Fix circular dependency test cleanup for CI stability
 
 ### What changed
