@@ -5,7 +5,7 @@ This document provides technical instructions for setting up and building the SC
 ## Stack Overview
 - **Moodle 5.0.1** (PHP/MySQL)
 - **Docker & Docker Compose** (Primary development environment)
-- **MariaDB** (Database)
+- **MySQL 8.4** (Database)
 - **Apache 2.4** (Web Server)
 
 ---
@@ -30,6 +30,9 @@ Run the following from the project root:
 ./scripts/generate-env.sh
 ```
 *Note: This creates a `.env` file with secure random passwords. DO NOT commit this file.*
+
+### 🛠 Note on ZIP Downloads
+If the project was downloaded as a ZIP (without Git), the bootstrap script will automatically use a containerized `git` to fetch Moodle core. **No manual Git installation is required on the host system** as long as Docker is running.
 
 ### 2. Bootstrap Moodle Core
 The repository contains custom plugins and configuration, but not Moodle core itself. Clone it using:
