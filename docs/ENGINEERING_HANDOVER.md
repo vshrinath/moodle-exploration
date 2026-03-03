@@ -69,7 +69,10 @@ docker compose -f docker-compose.moodlehq.yml up -d
 ---
 
 ## 🆘 Troubleshooting
-- **Permissions**: If you see directory creation errors, run:
-  `docker exec moodlehq-dev-moodle-1 chown -R daemon:daemon /bitnami/moodledata`
+- **Permissions (`config.php`)**: If you see a "Permission denied" error for `config.php` in the browser:
+  1. Restart the stack: `docker compose -f docker-compose.moodlehq.yml restart moodle`.
+  2. If it persists, run: `docker exec -u root moodlehq-dev-moodle-1 chmod 644 /var/www/html/config.php`.
+- **Directory Permissions**: If you see directory creation errors, run:
+  `docker exec -u root moodlehq-dev-moodle-1 chown -R www-data:www-data /var/www/moodledata /var/www/html`
 - **Cache**: When modifying UI/string files, run:
   `docker exec moodlehq-dev-moodle-1 php /var/www/html/public/admin/cli/purge_caches.php`

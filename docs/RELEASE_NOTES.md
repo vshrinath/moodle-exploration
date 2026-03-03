@@ -8,6 +8,7 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ### What changed
 - Added `docs/ENGINEERING_HANDOVER.md` with Windows setup instructions.
+- Fixed "Permission denied" errors for `config.php` in setup scripts.
 - Added explicit instructions for ZIP-based setup (no-git environment) in handover doc.
 - Corrected database technology from MariaDB to MySQL 8.4 in documentation.
 - Updated `docs/RELEASE_NOTES.md` with today's changes.

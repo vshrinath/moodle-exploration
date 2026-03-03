@@ -67,4 +67,9 @@ else
   echo "Run manual upgrade when needed: php /var/www/html/admin/cli/upgrade.php --non-interactive"
 fi
 
+# Fix potential permission issues on config.php (common on Windows/WSL2 host mounts)
+if [ -f /var/www/html/config.php ]; then
+  chmod 644 /var/www/html/config.php
+fi
+
 exec apache2-foreground
