@@ -67,9 +67,21 @@ else
   echo "Run manual upgrade when needed: php /var/www/html/admin/cli/upgrade.php --non-interactive"
 fi
 
-# Fix potential permission issues on config.php (common on Windows/WSL2 host mounts)
+# Fix potential permission and path issues on config.php (common on Windows/WSL2 host mounts)
 if [ -f /var/www/html/config.php ]; then
   chmod 644 /var/www/html/config.php
+  
+  # Ensure dirroot points to/public subdirectory to resolve missing plugins issue
+  if ! grep -q "dirroot.*=.*__DIR__" /var/www/html/config.php; then
+    echo "Correcting dirroot in config.php to include /public..."
+    # Replace existing dirroot or append it if for some reason it's missing (unlikely after install)
+    if grep -q "\$CFG->dirroot" /var/www/html/config.php; then
+      sed -i "s|^\$CFG->dirroot.*=.*|\$CFG->dirroot = __DIR__ . '/public';|" /var/www/html/config.php
+    else
+      # Append before the last line (usually require_once)
+      sed -i "/require_once/i \$CFG->dirroot = __DIR__ . '/public';" /var/www/html/config.php
+    fi
+  fi
 fi
 
 exec apache2-foreground

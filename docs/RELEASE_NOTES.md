@@ -7,16 +7,16 @@ This document tracks all significant changes to the codebase. Each entry include
 ## [2026-03-05] — Fixed Moodle build issues on Windows (122 plugins missing)
 
 ### What changed
-- Corrected `dirroot` in `moodle-core/config.php` to explicitly point to the `public/` subdirectory.
-- Fixed an issue where Moodle failed to locate 122+ plugins due to incorrect path resolution.
+- Corrected `dirroot` logic in `scripts/moodlehq/start-web.sh` to explicitly point to the `public/` subdirectory on boot.
+- Automated the fix for "122 plugins missing" to ensure it works across all environments without manual `config.php` editing.
 - Verified the fix on Mac (OrbStack) and confirmed it addresses the Windows build errors.
 - Created `CHANGELOG.md` at project root to track development progress.
 
 ### Why
-Moodle's internal path resolution requires `dirroot` to point to the actual directory where the Moodle source code resides. In this setup, the code is in `public/`. Incorrect setting led to Moodle looking for plugins in the wrong location, causing broad initialization failures.
+Moodle's internal path resolution requires `dirroot` to point to the actual directory where the Moodle source code resides. In this setup, the code is in `public/`. Automating this in the startup script ensures consistency and avoids committing environment-specific secrets in `config.php`.
 
 ### Files touched
-- `moodle-core/config.php` — Updated `$CFG->dirroot`.
+- `scripts/moodlehq/start-web.sh` — Added automated `dirroot` correction.
 - `CHANGELOG.md` — Created to track history.
 
 ---

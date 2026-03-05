@@ -5,14 +5,14 @@
 **Branch**: `master`
 
 ### What changed
-- Corrected `dirroot` in `moodle-core/config.php` to point to `/public` subdirectory.
-- Updated `docs/RELEASE_NOTES.md` with the fix details.
+- Corrected `dirroot` logic in `scripts/moodlehq/start-web.sh` to point to `/public` subdirectory on container boot.
+- Updated `docs/RELEASE_NOTES.md` with the automated fix details.
 - Verified fix on Mac (OrbStack) and provided Windows verification steps.
 
 ### Why
-Moodle on Windows was failing to resolve plugin paths because `dirroot` was incorrectly set to the parent directory instead of the `/public` directory where the core and plugins actually reside. This caused "122 plugins missing" and "misplaced plugin" errors.
+Moodle on Windows was failing to resolve plugin paths because `dirroot` was incorrectly defaulting to the parent directory instead of the `/public` directory. Automating this in `start-web.sh` provides a robust, zero-config fix for all developers.
 
 ### Files touched
-- `moodle-core/config.php` — Corrected `$CFG->dirroot` path.
+- `scripts/moodlehq/start-web.sh` — Automated `$CFG->dirroot` correction.
 - `docs/RELEASE_NOTES.md` — Documented the fix.
 - `CHANGELOG.md` — [NEW] Initialized changelog with this fix.
