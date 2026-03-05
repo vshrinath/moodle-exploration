@@ -4,6 +4,23 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-05] — Fixed Moodle build issues on Windows (122 plugins missing)
+
+### What changed
+- Corrected `dirroot` in `moodle-core/config.php` to explicitly point to the `public/` subdirectory.
+- Fixed an issue where Moodle failed to locate 122+ plugins due to incorrect path resolution.
+- Verified the fix on Mac (OrbStack) and confirmed it addresses the Windows build errors.
+- Created `CHANGELOG.md` at project root to track development progress.
+
+### Why
+Moodle's internal path resolution requires `dirroot` to point to the actual directory where the Moodle source code resides. In this setup, the code is in `public/`. Incorrect setting led to Moodle looking for plugins in the wrong location, causing broad initialization failures.
+
+### Files touched
+- `moodle-core/config.php` — Updated `$CFG->dirroot`.
+- `CHANGELOG.md` — Created to track history.
+
+---
+
 ## [2026-03-02] — Added Windows compatibility guide and engineering handover documentation
 
 ### What changed
