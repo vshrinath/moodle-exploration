@@ -4,6 +4,25 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-06] — Added one-command MoodleHQ provision script
+
+### What changed
+- Added `scripts/moodlehq/provision.sh` to run the full setup sequence in order:
+  - generate `.env` if missing
+  - bootstrap Moodle core
+  - start Docker services
+  - run `restore-custom-state.sh`
+- Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with a recommended one-command provisioning flow and WSL2 execution notes.
+
+### Why
+Engineers need a predictable, single entry point to stand up a local/Azure-like environment after clone or reset without manually sequencing setup commands.
+
+### Files touched
+- `scripts/moodlehq/provision.sh` — [NEW] One-command provisioning entry point.
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added one-command and WSL2 guidance.
+
+---
+
 ## [2026-03-06] — Added one-command post-reset restore for MoodleHQ stack
 
 ### What changed

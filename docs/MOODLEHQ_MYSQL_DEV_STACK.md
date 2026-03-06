@@ -16,6 +16,20 @@ This project now includes a parallel development stack that avoids legacy Bitnam
 
 ## First-time setup
 
+### One-command provisioning (recommended)
+
+```bash
+./scripts/moodlehq/provision.sh
+```
+
+This runs the full sequence in order:
+- generates `.env` if missing (`./scripts/generate-env.sh`)
+- bootstraps Moodle core
+- starts Docker services
+- reapplies reproducible custom state (`restore-custom-state.sh`)
+
+### Step-by-step provisioning
+
 1. Ensure `.env` exists (`./scripts/generate-env.sh` if needed).
 2. Add MoodleHQ variables to `.env` (see `.env.example`).
 3. Bootstrap Moodle core:
@@ -69,6 +83,8 @@ This script restores the reproducible parts of your customized setup:
 - Existing custom plugins are mounted from this repo into Moodle core paths.
 - On Moodle 5.1+, plugin code is mounted under `moodle-core/public/...` because `dirroot` is `/var/www/html/public`.
 - Existing scripts using `/bitnami/moodle` keep working via compatibility symlinks created at container startup.
+- This flow works in WSL2 local development when Docker Desktop integration with your WSL distro is enabled.
+- On WSL2, run scripts from the Linux filesystem path (for example `/home/<user>/...`) and not from a Windows-mounted path for best bind-mount reliability.
 
 ## Stop / restart
 

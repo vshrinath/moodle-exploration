@@ -19,6 +19,12 @@ require_file() {
   [ -f "$path" ] || fail "Missing required file: $path"
 }
 
+run_moodle_php() {
+  local script="$1"
+  shift
+  docker exec -w / "${MOODLE_CONTAINER}" php "${script}" "$@"
+}
+
 load_env_file() {
   local env_file="$1"
   [ -f "$env_file" ] || fail "Missing .env file at $env_file"
@@ -87,19 +93,19 @@ main() {
   docker compose -f "${COMPOSE_FILE}" up -d
 
   echo "Running Moodle upgrade..."
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/admin/cli/upgrade.php --non-interactive
+  run_moodle_php /var/www/html/admin/cli/upgrade.php --non-interactive
 
   echo "Finalizing admin setup..."
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/admin/cli/reset_password.php \
+  run_moodle_php /var/www/html/admin/cli/reset_password.php \
     --username="${MOODLEHQ_ADMIN_USER}" \
     --password="${MOODLEHQ_ADMIN_PASS}"
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/admin/cli/cfg.php --name=adminsetuppending --unset
+  run_moodle_php /var/www/html/admin/cli/cfg.php --name=adminsetuppending --unset
 
   echo "Applying baseline and homepage/dashboard customizations..."
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/public/scripts/add_dashboard_for_all.php
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/admin/cli/cfg.php --name=theme --set=sceh
-  docker exec "${MOODLE_CONTAINER}" php /var/www/html/admin/cli/purge_caches.php
+  run_moodle_php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
+  run_moodle_php /var/www/html/public/scripts/add_dashboard_for_all.php
+  run_moodle_php /var/www/html/admin/cli/cfg.php --name=theme --set=sceh
+  run_moodle_php /var/www/html/admin/cli/purge_caches.php
 
   echo "Restore complete."
   echo "Check: ${MOODLEHQ_WWWROOT}"
