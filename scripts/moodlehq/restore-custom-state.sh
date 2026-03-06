@@ -56,6 +56,19 @@ ensure_special_char_password() {
   fail "MOODLEHQ_ADMIN_PASS must include at least one special character."
 }
 
+set_mock_user_passwords() {
+  local mock_password="${MOCK_USERS_PASSWORD:-${MOODLEHQ_ADMIN_PASS}}"
+  if [[ ! "${mock_password}" =~ [[:punct:]] ]]; then
+    fail "MOCK_USERS_PASSWORD (or MOODLEHQ_ADMIN_PASS) must include at least one special character."
+  fi
+
+  for username in mock.sysadmin mock.programowner mock.trainer mock.learner; do
+    run_moodle_php /var/www/html/admin/cli/reset_password.php \
+      --username="${username}" \
+      --password="${mock_password}"
+  done
+}
+
 ensure_configurable_reports() {
   if [ -f "blocks/configurable_reports/version.php" ] && \
      grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php"; then
@@ -153,6 +166,8 @@ main() {
 
   echo "Applying baseline and homepage/dashboard customizations..."
   run_moodle_php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
+  echo "Setting deterministic mock user passwords..."
+  set_mock_user_passwords
   run_moodle_php /var/www/html/public/scripts/add_dashboard_for_all.php
   run_moodle_php /var/www/html/admin/cli/cfg.php --name=theme --set=sceh
   run_moodle_php /var/www/html/admin/cli/purge_caches.php
@@ -160,6 +175,8 @@ main() {
   echo "Restore complete."
   echo "Check: ${MOODLEHQ_WWWROOT}"
   echo "User: ${MOODLEHQ_ADMIN_USER}"
+  echo "Mock users: mock.sysadmin, mock.programowner, mock.trainer, mock.learner"
+  echo "Mock password source: MOCK_USERS_PASSWORD (fallback: MOODLEHQ_ADMIN_PASS)"
 }
 
 main "$@"
