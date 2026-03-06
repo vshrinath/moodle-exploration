@@ -48,6 +48,21 @@ docker compose -f docker-compose.moodlehq.yml up -d
 docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/upgrade.php --non-interactive
 ```
 
+7. Re-apply committed baseline customizations after a reset/new environment:
+
+```bash
+./scripts/moodlehq/restore-custom-state.sh
+```
+
+This script restores the reproducible parts of your customized setup:
+- Ensures `mod/questionnaire` and `block_configurable_reports` exist
+- Runs Moodle upgrade
+- Finalizes admin setup from `.env` credentials
+- Applies workflow baseline config (`--mode=local`)
+- Re-adds `block_sceh_dashboard` to homepage/dashboard
+- Sets active theme to `sceh`
+- Purges caches
+
 ## Notes
 
 - This stack runs in parallel with the legacy stack by using port `8081` by default.
@@ -70,3 +85,10 @@ rm -rf moodle-core
 ```
 
 This removes MySQL + moodledata volumes for the MoodleHQ stack.
+
+After reset, run:
+
+```bash
+./scripts/moodlehq/bootstrap-core.sh
+./scripts/moodlehq/restore-custom-state.sh
+```

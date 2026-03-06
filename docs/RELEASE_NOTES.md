@@ -4,6 +4,22 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-06] — Added one-command post-reset restore for MoodleHQ stack
+
+### What changed
+- Added `scripts/moodlehq/restore-custom-state.sh` to reapply reproducible custom setup after a fresh environment reset.
+- Script now automates plugin presence checks (`mod/questionnaire`, `block_configurable_reports`), Moodle upgrade, admin setup finalization, workflow baseline config, dashboard block placement, theme activation, and cache purge.
+- Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with the restore command and post-reset sequence.
+
+### Why
+Container volume resets remove DB-backed site customizations (homepage/dashboard block placement, theme settings, role workflow setup). This adds a consistent, scriptable recovery path for engineers provisioning local or Azure-like environments.
+
+### Files touched
+- `scripts/moodlehq/restore-custom-state.sh` — [NEW] End-to-end state restore automation.
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added restore and reset follow-up instructions.
+
+---
+
 ## [2026-03-05] — Fixed Moodle build issues on Windows (122 plugins missing)
 
 ### What changed
