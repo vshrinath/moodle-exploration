@@ -2162,6 +2162,7 @@ class block_sceh_dashboard extends block_base {
     public function applicable_formats() {
         return [
             'site-index' => true,
+            'my-index' => true,
             'my' => true,
             'course-view' => false
         ];
