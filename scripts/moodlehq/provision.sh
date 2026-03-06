@@ -48,6 +48,9 @@ main() {
   echo "Applying custom state restore..."
   ./scripts/moodlehq/restore-custom-state.sh
 
+  echo "Validating plugin lock..."
+  ./scripts/moodlehq/validate-plugin-lock.sh
+
   echo "Provisioning complete."
 }
 

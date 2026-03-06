@@ -72,6 +72,7 @@ This script restores the reproducible parts of your customized setup:
 - Ensures `mod/questionnaire` and `block_configurable_reports` exist
   - `mod/questionnaire` is restored from pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`
   - `block_configurable_reports` is validated against pinned version `2024051300` and re-seeded from `plugin-source/block_configurable_reports_moodle45_2024051300.zip` when needed
+- Validates all locked plugin/component versions from `scripts/moodlehq/plugins.lock` and fails fast if drift is detected
 - Runs Moodle upgrade
 - Finalizes admin setup from `.env` credentials
 - Applies workflow baseline config (`--mode=local`)

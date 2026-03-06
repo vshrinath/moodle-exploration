@@ -16,6 +16,7 @@ This document tracks all significant changes to the codebase. Each entry include
 - Updated `scripts/moodlehq/restore-custom-state.sh` to prefer a pinned local questionnaire artifact and avoid network dependency by default.
 - Added pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`.
 - Added strict pin validation for `block_configurable_reports` (expected version `2024051300`) with automatic re-seed from local artifact when mismatched.
+- Added `scripts/moodlehq/plugins.lock` and `scripts/moodlehq/validate-plugin-lock.sh` for fail-fast plugin drift detection during restore/provision.
 
 ### Why
 Engineers need a predictable, single entry point to stand up a local/Azure-like environment after clone or reset without manually sequencing setup commands.
@@ -25,6 +26,8 @@ Engineers need a predictable, single entry point to stand up a local/Azure-like 
 - `scripts/moodlehq/restore-custom-state.sh` — Pinned local questionnaire source by default.
 - `plugin-source/mod_questionnaire_moodle50_2025110900.zip` — [NEW] Pinned questionnaire plugin artifact.
 - `scripts/moodlehq/restore-custom-state.sh` — Added pinned version enforcement for configurable reports.
+- `scripts/moodlehq/plugins.lock` — [NEW] Locked plugin/component version manifest.
+- `scripts/moodlehq/validate-plugin-lock.sh` — [NEW] Plugin lock validator script.
 - `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added one-command and WSL2 guidance.
 
 ---

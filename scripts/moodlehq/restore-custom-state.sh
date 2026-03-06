@@ -11,6 +11,7 @@ QUESTIONNAIRE_REPO="${QUESTIONNAIRE_REPO:-https://github.com/PoetOS/moodle-mod_q
 ALLOW_NETWORK_FALLBACK="${ALLOW_NETWORK_FALLBACK:-0}"
 CONFIG_REPORTS_ZIP="${CONFIG_REPORTS_ZIP:-plugin-source/block_configurable_reports_moodle45_2024051300.zip}"
 CONFIG_REPORTS_VERSION_EXPECTED="${CONFIG_REPORTS_VERSION_EXPECTED:-2024051300}"
+QUESTIONNAIRE_VERSION_EXPECTED="${QUESTIONNAIRE_VERSION_EXPECTED:-2025041400.03}"
 NEED_CONTAINER_RECREATE=0
 
 fail() {
@@ -57,7 +58,7 @@ ensure_special_char_password() {
 
 ensure_configurable_reports() {
   if [ -f "blocks/configurable_reports/version.php" ] && \
-     grep -q "\$plugin->version = ${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php"; then
+     grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php"; then
     echo "Configurable Reports already present (version ${CONFIG_REPORTS_VERSION_EXPECTED})."
     return 0
   fi
@@ -73,14 +74,15 @@ ensure_configurable_reports() {
     -lc "rm -rf blocks/configurable_reports && unzip -q \"${CONFIG_REPORTS_ZIP}\" -d blocks"
 
   [ -f "blocks/configurable_reports/version.php" ] || fail "Configurable Reports extraction failed."
-  grep -q "\$plugin->version = ${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php" || \
+  grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php" || \
     fail "Configurable Reports version mismatch after extraction."
   NEED_CONTAINER_RECREATE=1
 }
 
 ensure_questionnaire() {
-  if [ -f "mod/questionnaire/version.php" ]; then
-    echo "Questionnaire already present."
+  if [ -f "mod/questionnaire/version.php" ] && \
+     grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${QUESTIONNAIRE_VERSION_EXPECTED};" "mod/questionnaire/version.php"; then
+    echo "Questionnaire already present (version ${QUESTIONNAIRE_VERSION_EXPECTED})."
     return 0
   fi
 
@@ -98,6 +100,8 @@ ensure_questionnaire() {
       docker.io/moodlehq/moodle-php-apache:8.2 \
       -lc "rm -rf mod/questionnaire && unzip -q \"${QUESTIONNAIRE_ZIP}\" -d mod"
     [ -f "mod/questionnaire/version.php" ] || fail "Questionnaire extraction failed."
+    grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${QUESTIONNAIRE_VERSION_EXPECTED};" "mod/questionnaire/version.php" || \
+      fail "Questionnaire version mismatch after extraction."
     NEED_CONTAINER_RECREATE=1
     return 0
   fi
@@ -107,6 +111,8 @@ ensure_questionnaire() {
     rm -rf mod/questionnaire
     git clone --depth 1 "${QUESTIONNAIRE_REPO}" mod/questionnaire
     [ -f "mod/questionnaire/version.php" ] || fail "Questionnaire clone failed."
+    grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${QUESTIONNAIRE_VERSION_EXPECTED};" "mod/questionnaire/version.php" || \
+      fail "Questionnaire version mismatch after clone."
     NEED_CONTAINER_RECREATE=1
     return 0
   fi
@@ -121,6 +127,7 @@ main() {
 
   ensure_configurable_reports
   ensure_questionnaire
+  ./scripts/moodlehq/validate-plugin-lock.sh
 
   echo "Starting Docker stack..."
   docker compose -f "${COMPOSE_FILE}" up -d
