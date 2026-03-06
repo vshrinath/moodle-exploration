@@ -70,12 +70,15 @@ docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/upgrade.php --non-
 
 This script restores the reproducible parts of your customized setup:
 - Ensures `mod/questionnaire` and `block_configurable_reports` exist
+  - `mod/questionnaire` is restored from pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`
 - Runs Moodle upgrade
 - Finalizes admin setup from `.env` credentials
 - Applies workflow baseline config (`--mode=local`)
 - Re-adds `block_sceh_dashboard` to homepage/dashboard
 - Sets active theme to `sceh`
 - Purges caches
+
+By default this does not require GitHub/network access for questionnaire plugin installation.
 
 ## Notes
 

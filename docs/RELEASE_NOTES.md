@@ -13,12 +13,16 @@ This document tracks all significant changes to the codebase. Each entry include
   - start Docker services
   - run `restore-custom-state.sh`
 - Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with a recommended one-command provisioning flow and WSL2 execution notes.
+- Updated `scripts/moodlehq/restore-custom-state.sh` to prefer a pinned local questionnaire artifact and avoid network dependency by default.
+- Added pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`.
 
 ### Why
 Engineers need a predictable, single entry point to stand up a local/Azure-like environment after clone or reset without manually sequencing setup commands.
 
 ### Files touched
 - `scripts/moodlehq/provision.sh` — [NEW] One-command provisioning entry point.
+- `scripts/moodlehq/restore-custom-state.sh` — Pinned local questionnaire source by default.
+- `plugin-source/mod_questionnaire_moodle50_2025110900.zip` — [NEW] Pinned questionnaire plugin artifact.
 - `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added one-command and WSL2 guidance.
 
 ---

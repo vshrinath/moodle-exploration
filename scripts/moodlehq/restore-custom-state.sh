@@ -6,8 +6,11 @@ cd "${ROOT_DIR}"
 
 COMPOSE_FILE="docker-compose.moodlehq.yml"
 MOODLE_CONTAINER="moodlehq-dev-moodle-1"
+QUESTIONNAIRE_ZIP="${QUESTIONNAIRE_ZIP:-plugin-source/mod_questionnaire_moodle50_2025110900.zip}"
 QUESTIONNAIRE_REPO="${QUESTIONNAIRE_REPO:-https://github.com/PoetOS/moodle-mod_questionnaire.git}"
+ALLOW_NETWORK_FALLBACK="${ALLOW_NETWORK_FALLBACK:-0}"
 CONFIG_REPORTS_ZIP="${CONFIG_REPORTS_ZIP:-plugin-source/block_configurable_reports_moodle45_2024051300.zip}"
+NEED_CONTAINER_RECREATE=0
 
 fail() {
   echo "ERROR: $*" >&2
@@ -23,6 +26,11 @@ run_moodle_php() {
   local script="$1"
   shift
   docker exec -w / "${MOODLE_CONTAINER}" php "${script}" "$@"
+}
+
+container_has_file() {
+  local path="$1"
+  docker exec -w / "${MOODLE_CONTAINER}" sh -lc "test -f \"$path\""
 }
 
 load_env_file() {
@@ -63,6 +71,7 @@ ensure_configurable_reports() {
     -lc "rm -rf blocks/configurable_reports && unzip -q \"${CONFIG_REPORTS_ZIP}\" -d blocks"
 
   [ -f "blocks/configurable_reports/version.php" ] || fail "Configurable Reports extraction failed."
+  NEED_CONTAINER_RECREATE=1
 }
 
 ensure_questionnaire() {
@@ -75,10 +84,30 @@ ensure_questionnaire() {
     fail "mod/questionnaire exists but is incomplete. Resolve manually, then rerun."
   fi
 
-  echo "Cloning Questionnaire plugin..."
-  rm -rf mod/questionnaire
-  git clone --depth 1 "${QUESTIONNAIRE_REPO}" mod/questionnaire
-  [ -f "mod/questionnaire/version.php" ] || fail "Questionnaire clone failed."
+  if [ -f "${QUESTIONNAIRE_ZIP}" ]; then
+    echo "Extracting Questionnaire plugin from pinned zip..."
+    docker run --rm \
+      --user "$(id -u):$(id -g)" \
+      -v "${ROOT_DIR}:/work" \
+      -w /work \
+      --entrypoint sh \
+      docker.io/moodlehq/moodle-php-apache:8.2 \
+      -lc "rm -rf mod/questionnaire && unzip -q \"${QUESTIONNAIRE_ZIP}\" -d mod"
+    [ -f "mod/questionnaire/version.php" ] || fail "Questionnaire extraction failed."
+    NEED_CONTAINER_RECREATE=1
+    return 0
+  fi
+
+  if [ "${ALLOW_NETWORK_FALLBACK}" = "1" ]; then
+    echo "Pinned questionnaire zip missing. Falling back to git clone..."
+    rm -rf mod/questionnaire
+    git clone --depth 1 "${QUESTIONNAIRE_REPO}" mod/questionnaire
+    [ -f "mod/questionnaire/version.php" ] || fail "Questionnaire clone failed."
+    NEED_CONTAINER_RECREATE=1
+    return 0
+  fi
+
+  fail "Missing ${QUESTIONNAIRE_ZIP}. Add the pinned zip or set ALLOW_NETWORK_FALLBACK=1."
 }
 
 main() {
@@ -91,6 +120,16 @@ main() {
 
   echo "Starting Docker stack..."
   docker compose -f "${COMPOSE_FILE}" up -d
+  if [ -f "mod/questionnaire/version.php" ] && ! container_has_file "/var/www/html/public/mod/questionnaire/version.php"; then
+    NEED_CONTAINER_RECREATE=1
+  fi
+  if [ -f "blocks/configurable_reports/version.php" ] && ! container_has_file "/var/www/html/public/blocks/configurable_reports/version.php"; then
+    NEED_CONTAINER_RECREATE=1
+  fi
+  if [ "${NEED_CONTAINER_RECREATE}" = "1" ]; then
+    echo "Refreshing Moodle containers for updated plugin mounts..."
+    docker compose -f "${COMPOSE_FILE}" up -d --force-recreate moodle moodle_cron
+  fi
 
   echo "Running Moodle upgrade..."
   run_moodle_php /var/www/html/admin/cli/upgrade.php --non-interactive
