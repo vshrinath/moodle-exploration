@@ -10,6 +10,7 @@ QUESTIONNAIRE_ZIP="${QUESTIONNAIRE_ZIP:-plugin-source/mod_questionnaire_moodle50
 QUESTIONNAIRE_REPO="${QUESTIONNAIRE_REPO:-https://github.com/PoetOS/moodle-mod_questionnaire.git}"
 ALLOW_NETWORK_FALLBACK="${ALLOW_NETWORK_FALLBACK:-0}"
 CONFIG_REPORTS_ZIP="${CONFIG_REPORTS_ZIP:-plugin-source/block_configurable_reports_moodle45_2024051300.zip}"
+CONFIG_REPORTS_VERSION_EXPECTED="${CONFIG_REPORTS_VERSION_EXPECTED:-2024051300}"
 NEED_CONTAINER_RECREATE=0
 
 fail() {
@@ -55,13 +56,14 @@ ensure_special_char_password() {
 }
 
 ensure_configurable_reports() {
-  if [ -f "blocks/configurable_reports/version.php" ]; then
-    echo "Configurable Reports already present."
+  if [ -f "blocks/configurable_reports/version.php" ] && \
+     grep -q "\$plugin->version = ${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php"; then
+    echo "Configurable Reports already present (version ${CONFIG_REPORTS_VERSION_EXPECTED})."
     return 0
   fi
 
   require_file "${CONFIG_REPORTS_ZIP}"
-  echo "Extracting Configurable Reports plugin..."
+  echo "Extracting pinned Configurable Reports plugin..."
   docker run --rm \
     --user "$(id -u):$(id -g)" \
     -v "${ROOT_DIR}:/work" \
@@ -71,6 +73,8 @@ ensure_configurable_reports() {
     -lc "rm -rf blocks/configurable_reports && unzip -q \"${CONFIG_REPORTS_ZIP}\" -d blocks"
 
   [ -f "blocks/configurable_reports/version.php" ] || fail "Configurable Reports extraction failed."
+  grep -q "\$plugin->version = ${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php" || \
+    fail "Configurable Reports version mismatch after extraction."
   NEED_CONTAINER_RECREATE=1
 }
 
