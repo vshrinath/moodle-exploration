@@ -168,6 +168,7 @@ main() {
   run_moodle_php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
   echo "Setting deterministic mock user passwords..."
   set_mock_user_passwords
+  run_moodle_php /var/www/html/public/scripts/add_dashboard_block.php
   run_moodle_php /var/www/html/public/scripts/add_dashboard_for_all.php
   run_moodle_php /var/www/html/admin/cli/cfg.php --name=theme --set=sceh
   run_moodle_php /var/www/html/admin/cli/purge_caches.php

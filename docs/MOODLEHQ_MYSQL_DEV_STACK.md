@@ -78,7 +78,7 @@ This script restores the reproducible parts of your customized setup:
 - Applies workflow baseline config (`--mode=local`)
 - Sets deterministic passwords for mock users (`mock.sysadmin`, `mock.programowner`, `mock.trainer`, `mock.learner`)
   - Uses `MOCK_USERS_PASSWORD` if set, otherwise reuses `MOODLEHQ_ADMIN_PASS`
-- Re-adds `block_sceh_dashboard` to homepage/dashboard
+- Re-adds `block_sceh_dashboard` to homepage, default dashboard, and private dashboard page
 - Sets active theme to `sceh`
 - Purges caches
 
