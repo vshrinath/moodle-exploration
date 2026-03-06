@@ -1,0 +1,16 @@
+# Handle line endings automatically for files detected as text
+# and leave all files untouched that are detected as binary.
+* text=auto
+
+# Enforce LF endings for shell scripts to prevent Docker/Linux breakage
+*.sh text eol=lf
+
+# JavaScript and CSS files
+*.js text
+*.css text
+
+# Moodle-specific files
+*.php text
+*.xml text
+*.json text
+*.md text
