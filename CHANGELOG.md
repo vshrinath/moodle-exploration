@@ -6,6 +6,7 @@
 
 ### What changed
 - Fixed non-portable `sed` regex in `scripts/moodlehq/validate-plugin-lock.sh` to work on both Mac (BSD) and Linux (GNU).
+- Added a 5-minute wait loop in `scripts/moodlehq/restore-custom-state.sh` to prevent race conditions during fresh installs (esp. on WSL).
 - Updated local `.env` with a compliant admin password (included special character).
 - Successfully provisioned the MoodleHQ MySQL stack on the `fix/windows-dev-environment` branch.
 
