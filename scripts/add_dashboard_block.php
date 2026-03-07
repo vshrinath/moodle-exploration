@@ -1,59 +1,40 @@
 <?php
 /**
- * Add SCEH Dashboard block to the user's dashboard
+ * Add SCEH Dashboard block to the DEFAULT dashboard layout
+ * 
+ * This adds the block to the default my-index page (subpagepattern='')
+ * so it appears for ALL users automatically, not just specific users.
+ * 
+ * This is idempotent - safe to run multiple times.
  */
 define('CLI_SCRIPT', true);
 require_once(__DIR__ . '/lib/config_helper.php');
 require_moodle_config();
-require_once($CFG->dirroot . '/my/lib.php');
 
-echo "\n=== Adding Fellowship Dashboard Block ===\n\n";
+echo "\n=== Adding Fellowship Dashboard Block to Default Layout ===\n\n";
 
-// Get the default my page
-$page = my_get_page(null, MY_PAGE_PRIVATE);
+$systemcontext = context_system::instance();
 
-if (!$page) {
-    echo "✗ Could not find user dashboard page\n";
-    exit(1);
-}
-
-// Check if block already exists on this private my page.
+// Check if block already exists on the DEFAULT my-index page (no subpage)
 $existing = $DB->get_record('block_instances', [
     'blockname' => 'sceh_dashboard',
-    'parentcontextid' => context_system::instance()->id,
+    'parentcontextid' => $systemcontext->id,
     'pagetypepattern' => 'my-index',
-    'subpagepattern' => (string)$page->id,
+    'subpagepattern' => '',  // Empty = default layout for all users
 ]);
 
 if ($existing) {
-    echo "✓ Block already exists (ID: {$existing->id})\n";
-    $position = $DB->get_record('block_positions', [
-        'blockinstanceid' => $existing->id,
-        'pagetype' => 'my-index',
-        'subpage' => (string)$page->id,
-    ]);
-    if (!$position) {
-        $position = new stdClass();
-        $position->blockinstanceid = $existing->id;
-        $position->contextid = context_system::instance()->id;
-        $position->pagetype = 'my-index';
-        $position->subpage = (string)$page->id;
-        $position->visible = 1;
-        $position->region = 'content';
-        $position->weight = 0;
-        $DB->insert_record('block_positions', $position);
-        echo "✓ Block position repaired on dashboard\n";
-    }
+    echo "✓ Block already exists on default layout (ID: {$existing->id})\n";
 } else {
-    // Create block instance
+    // Create block instance on default my-index page
     $blockinstance = new stdClass();
     $blockinstance->blockname = 'sceh_dashboard';
-    $blockinstance->parentcontextid = context_system::instance()->id;
+    $blockinstance->parentcontextid = $systemcontext->id;
     $blockinstance->showinsubcontexts = 0;
     $blockinstance->pagetypepattern = 'my-index';
-    $blockinstance->subpagepattern = $page->id;
+    $blockinstance->subpagepattern = '';  // Empty = default layout
     $blockinstance->defaultregion = 'content';
-    $blockinstance->defaultweight = 0;
+    $blockinstance->defaultweight = -10;  // Negative weight = top of region
     $blockinstance->configdata = '';
     $blockinstance->timecreated = time();
     $blockinstance->timemodified = time();
@@ -61,20 +42,8 @@ if ($existing) {
     $blockid = $DB->insert_record('block_instances', $blockinstance);
     
     if ($blockid) {
-        echo "✓ Block added successfully (ID: {$blockid})\n";
-        
-        // Add to block positions
-        $position = new stdClass();
-        $position->blockinstanceid = $blockid;
-        $position->contextid = context_system::instance()->id;
-        $position->pagetype = 'my-index';
-        $position->subpage = $page->id;
-        $position->visible = 1;
-        $position->region = 'content';
-        $position->weight = 0;
-        
-        $DB->insert_record('block_positions', $position);
-        echo "✓ Block positioned on dashboard\n";
+        echo "✓ Block added to default layout (ID: {$blockid})\n";
+        echo "  All users will see this block on their dashboard\n";
     } else {
         echo "✗ Failed to add block\n";
         exit(1);
@@ -82,5 +51,5 @@ if ($existing) {
 }
 
 echo "\n=== Success! ===\n";
-echo "Refresh your browser at: http://localhost:8080/my/\n";
-echo "You should see the Fellowship Training Dashboard!\n\n";
+echo "The Fellowship Training Dashboard is now on the default layout.\n";
+echo "All users will see it at: http://localhost:8080/my/\n\n";

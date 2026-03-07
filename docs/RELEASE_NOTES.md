@@ -4,6 +4,21 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-07] — Fixed dashboard block to appear for all users by default
+
+### What changed
+- Updated `scripts/add_dashboard_block.php` to add the Fellowship Training Dashboard to the default my-index layout (subpagepattern='') instead of user-specific private layouts
+- Dashboard block now appears automatically for all users without requiring manual dashboard customization
+- Made script idempotent and added clear documentation about default layout behavior
+
+### Why
+The previous implementation added the dashboard block to individual user's private dashboard layouts, which only appeared after users customized their dashboard. This caused confusion when the block didn't appear on first login. By placing it on the default layout, all users see it immediately, and the setup is reproducible across environments.
+
+### Files touched
+- `scripts/add_dashboard_block.php` — Changed to use default layout (subpagepattern='') for universal visibility
+
+---
+
 ## [2026-03-06] — Added one-command MoodleHQ provision script
 
 ### What changed
