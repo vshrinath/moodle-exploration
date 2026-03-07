@@ -166,13 +166,13 @@ main() {
     docker compose -f "${COMPOSE_FILE}" up -d --force-recreate moodle moodle_cron
   fi
 
-  echo "Waiting for Moodle installation to complete (this can take 15+ minutes on WSL)..."
-  for i in $(seq 1 180); do
+  echo "Waiting for Moodle installation to complete (this can take 30+ minutes on WSL depending on disk speed)..."
+  for i in $(seq 1 360); do
     if run_moodle_php /var/www/html/admin/cli/cfg.php --name=version >/dev/null 2>&1; then
       echo "Moodle installation detected."
       break
     fi
-    [ "$i" -eq 180 ] && fail "Moodle installation failed to complete in time."
+    [ "$i" -eq 360 ] && fail "Moodle installation failed to complete in time."
     sleep 5
   done
 
