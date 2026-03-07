@@ -17,59 +17,6 @@
     margin-bottom: 8px;
 }
 
-/* Program Owner quick actions: accessible flat colors (no gradients). */
-.sceh-program-owner-dashboard .sceh-card {
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-}
-
-.sceh-program-owner-dashboard .sceh-card-link {
-    color: #111827;
-}
-
-.sceh-program-owner-dashboard .sceh-card-icon {
-    color: #1f2937;
-}
-
-.sceh-program-owner-dashboard .sceh-card-blue {
-    background: #dbeafe;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-green {
-    background: #dcfce7;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-red {
-    background: #fee2e2;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-yellow {
-    background: #fef9c3;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-purple {
-    background: #f3e8ff;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-teal {
-    background: #ccfbf1;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-orange {
-    background: #ffedd5;
-    background-image: none !important;
-}
-
-.sceh-program-owner-dashboard .sceh-card-indigo {
-    background: #e0e7ff;
-    background-image: none !important;
-}
-
 .sceh-po-card-accordion {
     padding: 0;
     min-height: 180px;
@@ -404,6 +351,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    background-color: #ffffff; /* Base fallback */
 }
 
 .sceh-card:hover {
@@ -413,13 +361,14 @@
 
 .sceh-card-link {
     text-decoration: none;
-    color: white;
+    color: #1f2937; /* Default to dark text for visibility on white */
     display: block;
 }
 
 .sceh-card-icon {
     margin-bottom: 15px;
     opacity: 0.9;
+    color: #1f2937;
 }
 
 .sceh-card-title {
@@ -428,37 +377,49 @@
     line-height: 1.3;
 }
 
-/* Color schemes */
+/* Color schemes: Flat single colors only (no gradients) as requested. */
 .sceh-card-blue {
-    background: var(--sceh-card-blue-gradient);
+    background: #dbeafe !important;
 }
 
 .sceh-card-green {
-    background: var(--sceh-card-green-gradient);
+    background: #dcfce7 !important;
 }
 
 .sceh-card-red {
-    background: var(--sceh-card-red-gradient);
+    background: #fee2e2 !important;
 }
 
 .sceh-card-yellow {
-    background: var(--sceh-card-yellow-gradient);
+    background: #fef9c3 !important;
 }
 
 .sceh-card-purple {
-    background: var(--sceh-card-purple-gradient);
+    background: #f3e8ff !important;
 }
 
 .sceh-card-teal {
-    background: var(--sceh-card-teal-gradient);
+    background: #ccfbf1 !important;
 }
 
 .sceh-card-orange {
-    background: var(--sceh-card-orange-gradient);
+    background: #ffedd5 !important;
 }
 
 .sceh-card-indigo {
-    background: var(--sceh-card-indigo-gradient);
+    background: #e0e7ff !important;
+}
+
+/* Ensure consistent text visibility across all card color states. */
+.sceh-card-blue .sceh-card-link,
+.sceh-card-green .sceh-card-link,
+.sceh-card-red .sceh-card-link,
+.sceh-card-yellow .sceh-card-link,
+.sceh-card-purple .sceh-card-link,
+.sceh-card-teal .sceh-card-link,
+.sceh-card-orange .sceh-card-link,
+.sceh-card-indigo .sceh-card-link {
+    color: #111827;
 }
 
 /* Responsive */
@@ -502,20 +463,17 @@
     box-shadow: none;
 }
 
-/* Hide "Dashboard" and "My courses" from primary nav — SCEH logo is the home link.
-   Remove these rules to restore the default Moodle navigation. */
-.primary-navigation .nav-item:has(> a[href*="/my/"]),
-.primary-navigation .nav-item:has(> a[data-key="myhome"]),
-.primary-navigation .nav-item:has(> a[data-key="mycourses"]) {
+/* Hide "Dashboard" and "My courses" from primary nav — SCEH logo is the home link. */
+.primary-navigation .nav-item:has(> a[href*=\"/my/\"]),
+.primary-navigation .nav-item:has(> a[data-key=\"myhome\"]),
+.primary-navigation .nav-item:has(> a[data-key=\"mycourses\"]) {
     display: none !important;
 }
 
 /* -------------------------------------------------------------------------
    SCEH Organic Backend Integration
-   These styles soften the transition from the custom dashboard to standard Moodle pages.
    -------------------------------------------------------------------------- */
 
-/* Smoother background and container for administrative pages */
 body.path-course-edit,
 body.path-course-management,
 body.path-enrol-users,
@@ -544,7 +502,6 @@ body.path-cohort #region-main {
     margin-top: 1.5rem !important;
 }
 
-/* Hero Headings for Backend Pages */
 .page-header-headings h1 {
     font-size: 2.25rem !important;
     font-weight: 800 !important;
@@ -563,7 +520,6 @@ body.path-cohort #region-main {
     font-weight: 600;
 }
 
-/* SCEH Accent Color Integration for Tabs and Links */
 .nav-tabs .nav-link,
 .nav-pills .nav-link {
     transition: all 0.2s ease;
@@ -573,7 +529,6 @@ body.path-cohort #region-main {
 .nav-tabs .nav-link.active,
 .nav-pills .nav-link.active {
     border-bottom: 3px solid #6366f1 !important;
-    /* SCEH Indigo */
     color: #4338ca !important;
     background: rgba(99, 102, 241, 0.04) !important;
     font-weight: 700;
@@ -584,7 +539,6 @@ body.path-cohort #region-main {
     border-bottom-color: rgba(99, 102, 241, 0.3);
 }
 
-/* Button Refinement to match SCEH aesthetic */
 .btn-primary {
     background-color: #6366f1 !important;
     border-color: #6366f1 !important;
@@ -616,7 +570,6 @@ body.path-cohort #region-main {
     border-color: #cbd5e1 !important;
 }
 
-/* Table styling for management pages */
 .generictable {
     border: none !important;
 }
@@ -636,7 +589,6 @@ body.path-cohort #region-main {
     border-bottom: 1px solid #f1f5f9 !important;
 }
 
-/* Card System consistency for custom pages */
 .sceh-card-system-container {
     padding: 1.5rem 0;
 }

@@ -3,7 +3,8 @@
  * Add SCEH Dashboard block to the user's dashboard
  */
 define('CLI_SCRIPT', true);
-require('/bitnami/moodle/config.php');
+require_once(__DIR__ . '/lib/config_helper.php');
+require_moodle_config();
 require_once($CFG->dirroot . '/my/lib.php');
 
 echo "\n=== Adding Fellowship Dashboard Block ===\n\n";

@@ -3,7 +3,8 @@
  * Add dashboard block to site index (homepage) for all users
  */
 define('CLI_SCRIPT', true);
-require('/bitnami/moodle/config.php');
+require_once(__DIR__ . '/lib/config_helper.php');
+require_moodle_config();
 
 echo "\n=== Adding Dashboard Block to Homepage ===\n\n";
 
