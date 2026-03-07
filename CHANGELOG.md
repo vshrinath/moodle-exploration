@@ -1,5 +1,20 @@
 # Changelog
 
+## [2026-03-07] — Fixed sed portability for Mac and updated Docker stack help
+
+**Branch**: `fix/windows-dev-environment`
+
+### What changed
+- Fixed non-portable `sed` regex in `scripts/moodlehq/validate-plugin-lock.sh` to work on both Mac (BSD) and Linux (GNU).
+- Updated local `.env` with a compliant admin password (included special character).
+- Successfully provisioned the MoodleHQ MySQL stack on the `fix/windows-dev-environment` branch.
+
+### Why
+The `+` quantifier is not supported by standard BSD/Darwin `sed`, which caused the plugin validation to fail during provisioning on Mac. Reverting to `*` ensures the script is portable. The admin password update was necessary to meet Moodle's default security policy.
+
+### Files touched
+- `scripts/moodlehq/validate-plugin-lock.sh` — Portability fix for component/version extraction.
+
 ## [2026-03-05] — Fixed Moodle build issues on Windows (122 plugins missing)
 
 **Branch**: `master`

@@ -20,12 +20,12 @@ trim() {
 
 extract_component() {
   local file="$1"
-  sed -n "s/^[[:space:]]*\\\$plugin->component[[:space:]]*=[[:space:]]*'\\([^']\\+\\)'.*/\\1/p" "$file" | head -n1
+  sed -n "s/^[[:space:]]*\\\$plugin->component[[:space:]]*=[[:space:]]*'\\([^']*\\)'.*/\\1/p" "$file" | head -n1
 }
 
 extract_version() {
   local file="$1"
-  sed -n "s/^[[:space:]]*\\\$plugin->version[[:space:]]*=[[:space:]]*\\([^;]\\+\\);.*/\\1/p" "$file" | head -n1
+  sed -n "s/^[[:space:]]*\\\$plugin->version[[:space:]]*=[[:space:]]*\\([^;]*\\);.*/\\1/p" "$file" | head -n1
 }
 
 [ -f "${LOCK_FILE}" ] || fail "Missing lock file: ${LOCK_FILE}"
