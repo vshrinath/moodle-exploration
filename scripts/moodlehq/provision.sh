@@ -25,10 +25,25 @@ check_prereqs() {
 ensure_env() {
   if [ -f ".env" ]; then
     echo ".env already exists."
+    ensure_standard_pass
     return 0
   fi
   echo "Generating .env..."
   ./scripts/generate-env.sh
+}
+
+ensure_standard_pass() {
+  local new_pass="Test@2026!"
+  if grep -Fq "MOODLEHQ_ADMIN_PASS=${new_pass}" .env; then
+    return 0
+  fi
+  echo "Updating .env to use standard developer password: ${new_pass}"
+  # Use a portable sed approach for macOS vs Linux
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s/^MOODLEHQ_ADMIN_PASS=.*/MOODLEHQ_ADMIN_PASS=${new_pass}/" .env
+  else
+    sed -i "s/^MOODLEHQ_ADMIN_PASS=.*/MOODLEHQ_ADMIN_PASS=${new_pass}/" .env
+  fi
 }
 
 main() {

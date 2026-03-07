@@ -21,7 +21,7 @@ fi
 echo "🔐 Generating secure passwords..."
 MOODLEHQ_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 MOODLEHQ_DB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
-MOODLEHQ_ADMIN_PASS=$(openssl rand -base64 24 | tr -d "=+/" | cut -c1-20)
+MOODLEHQ_ADMIN_PASS="Test@2026!"
 
 # Create .env file
 cat > "$ENV_FILE" << EOF
