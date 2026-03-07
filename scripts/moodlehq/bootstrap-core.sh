@@ -5,7 +5,7 @@ MOODLE_CORE_DIR="${MOODLE_CORE_DIR:-moodle-core}"
 MOODLE_GIT_BRANCH="${MOODLE_GIT_BRANCH:-MOODLE_501_STABLE}"
 MOODLE_REPO_URL="${MOODLE_REPO_URL:-https://github.com/moodle/moodle.git}"
 
-if [ -f "${MOODLE_CORE_DIR}/version.php" ]; then
+if [ -f "${MOODLE_CORE_DIR}/version.php" ] || [ -f "${MOODLE_CORE_DIR}/public/version.php" ]; then
   echo "Moodle core already present at ${MOODLE_CORE_DIR}; skipping clone."
   exit 0
 fi
