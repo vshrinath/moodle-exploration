@@ -4,6 +4,54 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-06] — Added one-command MoodleHQ provision script
+
+### What changed
+- Added `scripts/moodlehq/provision.sh` to run the full setup sequence in order:
+  - generate `.env` if missing
+  - bootstrap Moodle core
+  - start Docker services
+  - run `restore-custom-state.sh`
+- Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with a recommended one-command provisioning flow and WSL2 execution notes.
+- Updated `scripts/moodlehq/restore-custom-state.sh` to prefer a pinned local questionnaire artifact and avoid network dependency by default.
+- Added pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`.
+- Added strict pin validation for `block_configurable_reports` (expected version `2024051300`) with automatic re-seed from local artifact when mismatched.
+- Added `scripts/moodlehq/plugins.lock` and `scripts/moodlehq/validate-plugin-lock.sh` for fail-fast plugin drift detection during restore/provision.
+- Updated restore flow to set deterministic passwords for baseline mock users, using `MOCK_USERS_PASSWORD` (fallback: `MOODLEHQ_ADMIN_PASS`).
+- Updated restore flow to also place `block_sceh_dashboard` on private dashboard pages to avoid blank `/my/` screens.
+
+### Why
+Engineers need a predictable, single entry point to stand up a local/Azure-like environment after clone or reset without manually sequencing setup commands.
+
+### Files touched
+- `scripts/moodlehq/provision.sh` — [NEW] One-command provisioning entry point.
+- `scripts/moodlehq/restore-custom-state.sh` — Pinned local questionnaire source by default.
+- `plugin-source/mod_questionnaire_moodle50_2025110900.zip` — [NEW] Pinned questionnaire plugin artifact.
+- `scripts/moodlehq/restore-custom-state.sh` — Added pinned version enforcement for configurable reports.
+- `scripts/moodlehq/plugins.lock` — [NEW] Locked plugin/component version manifest.
+- `scripts/moodlehq/validate-plugin-lock.sh` — [NEW] Plugin lock validator script.
+- `scripts/moodlehq/restore-custom-state.sh` — Sets known mock-user passwords after baseline provisioning.
+- `scripts/moodlehq/restore-custom-state.sh` — Ensures dashboard block placement on private dashboard pages.
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added one-command and WSL2 guidance.
+
+---
+
+## [2026-03-06] — Added one-command post-reset restore for MoodleHQ stack
+
+### What changed
+- Added `scripts/moodlehq/restore-custom-state.sh` to reapply reproducible custom setup after a fresh environment reset.
+- Script now automates plugin presence checks (`mod/questionnaire`, `block_configurable_reports`), Moodle upgrade, admin setup finalization, workflow baseline config, dashboard block placement, theme activation, and cache purge.
+- Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with the restore command and post-reset sequence.
+
+### Why
+Container volume resets remove DB-backed site customizations (homepage/dashboard block placement, theme settings, role workflow setup). This adds a consistent, scriptable recovery path for engineers provisioning local or Azure-like environments.
+
+### Files touched
+- `scripts/moodlehq/restore-custom-state.sh` — [NEW] End-to-end state restore automation.
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added restore and reset follow-up instructions.
+
+---
+
 ## [2026-03-05] — Fixed Moodle build issues on Windows (122 plugins missing)
 
 ### What changed

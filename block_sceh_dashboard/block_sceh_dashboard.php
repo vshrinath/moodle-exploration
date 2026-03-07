@@ -2238,6 +2238,7 @@ class block_sceh_dashboard extends block_base
     {
         return [
             'site-index' => true,
+            'my-index' => true,
             'my' => true,
             'course-view' => false
         ];
