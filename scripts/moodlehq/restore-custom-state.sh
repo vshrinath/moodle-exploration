@@ -69,6 +69,15 @@ set_mock_user_passwords() {
   done
 }
 
+unblock_login_nag() {
+  echo "Ensuring users can log in without redirects/nags..."
+  # Clear force password change and auto-agree to policies for admin and all mock users
+  docker exec -h mysql "${MOODLE_CONTAINER}" mysql -h mysql -u"${MOODLEHQ_DB_USER}" -p"${MOODLEHQ_DB_PASSWORD}" "${MOODLEHQ_DB_NAME}" -e "
+    DELETE FROM mdl_user_preferences WHERE name = 'auth_forcepasswordchange' AND userid IN (2, 3, 4, 5, 6);
+    UPDATE mdl_user SET confirmed=1, policyagreed=1 WHERE id IN (2, 3, 4, 5, 6);
+  "
+}
+
 ensure_configurable_reports() {
   if [ -f "blocks/configurable_reports/version.php" ] && \
      grep -Eq "\\\$plugin->version[[:space:]]*=[[:space:]]*${CONFIG_REPORTS_VERSION_EXPECTED};" "blocks/configurable_reports/version.php"; then
@@ -178,6 +187,7 @@ main() {
   run_moodle_php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
   echo "Setting deterministic mock user passwords..."
   set_mock_user_passwords
+  unblock_login_nag
   run_moodle_php /var/www/html/public/scripts/add_dashboard_block.php
   run_moodle_php /var/www/html/public/scripts/add_dashboard_for_all.php
   run_moodle_php /var/www/html/admin/cli/cfg.php --name=theme --set=sceh

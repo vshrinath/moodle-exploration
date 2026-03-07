@@ -8,9 +8,8 @@
 - Fixed non-portable `sed` regex in `scripts/moodlehq/validate-plugin-lock.sh` to work on both Mac (BSD) and Linux (GNU).
 - Added a 5-minute wait loop in `scripts/moodlehq/restore-custom-state.sh` to prevent race conditions during fresh installs (esp. on WSL).
 - Refactored `init_cli_admin` in `scripts/lib/config_helper.php` to bypass restrictive capability checks in CLI mode.
-- Automated standard developer password (`Test@2026!`) across environments:
-    - `generate-env.sh` now uses it by default.
-    - `provision.sh` auto-detects and updates existing `.env` files.
+- Automated standard developer password (`Test@2026!`) across environments.
+- **Login Stability**: Automated removal of "Force password change" and site policy nags for mock users in `restore-custom-state.sh`, preventing permission errors on WSL/Windows.
 - Successfully provisioned the MoodleHQ MySQL stack on the `fix/windows-dev-environment` branch.
 
 ### Why
