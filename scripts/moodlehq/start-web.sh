@@ -43,8 +43,8 @@ if ! wait_for_db "${SCEH_DB_HOST}" "${SCEH_DB_PORT}" "${SCEH_DB_USER}" "${SCEH_D
   exit 1
 fi
 
-if [ ! -f /var/www/html/config.php ]; then
-  echo "No config.php found; running initial Moodle install..."
+if ! grep -q "\$CFG" /var/www/html/config.php 2>/dev/null; then
+  echo "No valid config.php found; running initial Moodle install..."
   php /var/www/html/admin/cli/install.php \
     --non-interactive \
     --agree-license \
@@ -63,7 +63,7 @@ if [ ! -f /var/www/html/config.php ]; then
     --adminpass="${SCEH_ADMIN_PASS}" \
     --adminemail="${SCEH_ADMIN_EMAIL}"
 else
-  echo "config.php found; skipping automatic upgrade on boot."
+  echo "Valid config.php found; skipping automatic upgrade on boot."
   echo "Run manual upgrade when needed: php /var/www/html/admin/cli/upgrade.php --non-interactive"
 fi
 
