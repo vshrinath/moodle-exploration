@@ -5,6 +5,7 @@
 define('CLI_SCRIPT', true);
 require_once(__DIR__ . '/lib/config_helper.php');
 require_moodle_config();
+init_cli_admin();
 
 echo "\n=== Adding Dashboard Block to Homepage ===\n\n";
 
