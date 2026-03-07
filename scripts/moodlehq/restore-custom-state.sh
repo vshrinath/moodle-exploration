@@ -27,7 +27,9 @@ require_file() {
 run_moodle_php() {
   local script="$1"
   shift
-  docker exec -w / "${MOODLE_CONTAINER}" php "${script}" "$@"
+  # Use -T (disable pseudo-TTY allocation) and < /dev/null to prevent
+  # SSH/WSL sessions from hanging when docker exec waits on stdin.
+  docker exec -T -w / "${MOODLE_CONTAINER}" php "${script}" "$@" < /dev/null
 }
 
 container_has_file() {
@@ -72,10 +74,10 @@ set_mock_user_passwords() {
 unblock_login_nag() {
   echo "Ensuring users can log in without redirects/nags..."
   # Clear force password change and auto-agree to policies for admin and all mock users
-  docker exec -h mysql "${MOODLE_CONTAINER}" mysql -h mysql -u"${MOODLEHQ_DB_USER}" -p"${MOODLEHQ_DB_PASSWORD}" "${MOODLEHQ_DB_NAME}" -e "
+  docker exec -T -h mysql "${MOODLE_CONTAINER}" mysql -h mysql -u"${MOODLEHQ_DB_USER}" -p"${MOODLEHQ_DB_PASSWORD}" "${MOODLEHQ_DB_NAME}" -e "
     DELETE FROM mdl_user_preferences WHERE name = 'auth_forcepasswordchange' AND userid IN (2, 3, 4, 5, 6);
     UPDATE mdl_user SET confirmed=1, policyagreed=1 WHERE id IN (2, 3, 4, 5, 6);
-  "
+  " < /dev/null
 }
 
 ensure_configurable_reports() {
@@ -174,7 +176,7 @@ main() {
     sleep 5
   done
 
-  echo "Running Moodle upgrade..."
+  echo "Running Moodle upgrade (THIS CAN TAKE 10+ MINUTES ON WSL - DO NOT CANCEL!)..."
   run_moodle_php /var/www/html/admin/cli/upgrade.php --non-interactive
 
   echo "Finalizing admin setup..."
