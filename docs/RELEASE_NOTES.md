@@ -4,6 +4,125 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-06] — Added one-command MoodleHQ provision script
+
+### What changed
+- Added `scripts/moodlehq/provision.sh` to run the full setup sequence in order:
+  - generate `.env` if missing
+  - bootstrap Moodle core
+  - start Docker services
+  - run `restore-custom-state.sh`
+- Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with a recommended one-command provisioning flow and WSL2 execution notes.
+- Updated `scripts/moodlehq/restore-custom-state.sh` to prefer a pinned local questionnaire artifact and avoid network dependency by default.
+- Added pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`.
+- Added strict pin validation for `block_configurable_reports` (expected version `2024051300`) with automatic re-seed from local artifact when mismatched.
+- Added `scripts/moodlehq/plugins.lock` and `scripts/moodlehq/validate-plugin-lock.sh` for fail-fast plugin drift detection during restore/provision.
+- Updated restore flow to set deterministic passwords for baseline mock users, using `MOCK_USERS_PASSWORD` (fallback: `MOODLEHQ_ADMIN_PASS`).
+- Updated restore flow to also place `block_sceh_dashboard` on private dashboard pages to avoid blank `/my/` screens.
+
+### Why
+Engineers need a predictable, single entry point to stand up a local/Azure-like environment after clone or reset without manually sequencing setup commands.
+
+### Files touched
+- `scripts/moodlehq/provision.sh` — [NEW] One-command provisioning entry point.
+- `scripts/moodlehq/restore-custom-state.sh` — Pinned local questionnaire source by default.
+- `plugin-source/mod_questionnaire_moodle50_2025110900.zip` — [NEW] Pinned questionnaire plugin artifact.
+- `scripts/moodlehq/restore-custom-state.sh` — Added pinned version enforcement for configurable reports.
+- `scripts/moodlehq/plugins.lock` — [NEW] Locked plugin/component version manifest.
+- `scripts/moodlehq/validate-plugin-lock.sh` — [NEW] Plugin lock validator script.
+- `scripts/moodlehq/restore-custom-state.sh` — Sets known mock-user passwords after baseline provisioning.
+- `scripts/moodlehq/restore-custom-state.sh` — Ensures dashboard block placement on private dashboard pages.
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added one-command and WSL2 guidance.
+
+---
+
+## [2026-03-06] — Added one-command post-reset restore for MoodleHQ stack
+
+### What changed
+- Added `scripts/moodlehq/restore-custom-state.sh` to reapply reproducible custom setup after a fresh environment reset.
+- Script now automates plugin presence checks (`mod/questionnaire`, `block_configurable_reports`), Moodle upgrade, admin setup finalization, workflow baseline config, dashboard block placement, theme activation, and cache purge.
+- Updated `docs/MOODLEHQ_MYSQL_DEV_STACK.md` with the restore command and post-reset sequence.
+
+### Why
+Container volume resets remove DB-backed site customizations (homepage/dashboard block placement, theme settings, role workflow setup). This adds a consistent, scriptable recovery path for engineers provisioning local or Azure-like environments.
+
+### Files touched
+- `scripts/moodlehq/restore-custom-state.sh` — [NEW] End-to-end state restore automation.
+- `docs/MOODLEHQ_MYSQL_DEV_STACK.md` — Added restore and reset follow-up instructions.
+
+---
+
+## [2026-03-05] — Fixed Moodle build issues on Windows (122 plugins missing)
+
+### What changed
+- Corrected `dirroot` logic in `scripts/moodlehq/start-web.sh` to explicitly point to the `public/` subdirectory on boot.
+- Automated the fix for "122 plugins missing" to ensure it works across all environments without manual `config.php` editing.
+- Verified the fix on Mac (OrbStack) and confirmed it addresses the Windows build errors.
+- Created `CHANGELOG.md` at project root to track development progress.
+
+### Why
+Moodle's internal path resolution requires `dirroot` to point to the actual directory where the Moodle source code resides. In this setup, the code is in `public/`. Automating this in the startup script ensures consistency and avoids committing environment-specific secrets in `config.php`.
+
+### Files touched
+- `scripts/moodlehq/start-web.sh` — Added automated `dirroot` correction.
+- `CHANGELOG.md` — Created to track history.
+
+---
+
+## [2026-03-02] — Added Windows compatibility guide and engineering handover documentation
+
+### What changed
+- Added `docs/ENGINEERING_HANDOVER.md` with Windows setup instructions.
+- Fixed "Permission denied" errors for `config.php` in setup scripts.
+- Added explicit instructions for ZIP-based setup (no-git environment) in handover doc.
+- Corrected database technology from MariaDB to MySQL 8.4 in documentation.
+- Updated `docs/RELEASE_NOTES.md` with today's changes.
+- Documented Windows-specific requirements (Docker Desktop + WSL2/Git Bash).
+- Outlined 4-step initialization process (env generation, core bootstrap, stack startup, verification).
+- Added troubleshooting tips for common Docker and Moodle permission issues.
+
+### Why
+To ensure a smooth transition for new engineers, especially those working on Windows environments, by providing a distilled setup path that addresses the project's specific dependency on Bash-based scripts and Docker.
+
+### Files touched
+- `docs/ENGINEERING_HANDOVER.md` — [NEW] Comprehensive onboarding guide for engineers.
+
+---
+
+## [2026-02-23] — Fix circular dependency test cleanup for CI stability
+
+### What changed
+- Added cleanup logic to circular dependency test that deletes old CIRC_TEST_% competencies before running tests
+- Wrapped all cleanup in finally blocks to ensure competencies are deleted even when exceptions occur
+- Prevents "ID number already in use" errors when tests run multiple times in CI environment
+- Test now passes consistently in both local and CI environments
+
+### Why
+CI runs accumulate test competencies across multiple executions, causing ID number conflicts. When exceptions occurred during test execution, cleanup code in try blocks never ran, leaving orphaned competencies. Finally blocks guarantee cleanup happens regardless of test outcome.
+
+### Files touched
+- `scripts/test/property_test_circular_dependency_prevention.php` — Added cleanup logic at test start and finally blocks for guaranteed cleanup
+
+---
+
+## [2026-02-23] — CI test fixes for environment setup issues
+
+### What changed
+- Fixed circular dependency test to create test framework if missing (no longer assumes OPHTHAL_FELLOW_2025 exists)
+- Made Allied Health workflow test defensive about trainer capabilities (checks before requiring)
+- Added configure_trainer_visibility_permissions.php to CI workflow provisioning step
+- Both test failures were environment setup issues, not code bugs
+
+### Why
+CI tests were failing because: (1) circular dependency test assumed a specific competency framework existed, causing context resolution errors during cleanup, and (2) Allied Health test assumed trainer had visibility permissions without checking first. Tests now create required data or fail fast with clear error messages.
+
+### Files touched
+- `scripts/test/property_test_circular_dependency_prevention.php` — Added get_or_create_test_framework() helper
+- `scripts/test/test_allied_health_quiz_workflow.php` — Added capability check before require_capability()
+- `.github/workflows/regression-tests.yml` — Added trainer permissions config to provisioning step
+
+---
+
 ## [2026-02-23] — Importer Async Refactor and CI/CD Integration
 
 ### What changed

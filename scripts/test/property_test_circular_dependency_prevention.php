@@ -59,12 +59,73 @@ $test_iterations = 10;
 $failures = [];
 
 /**
+ * Get or create test framework
+ */
+function get_or_create_test_framework() {
+    global $DB;
+    
+    // Try to find existing framework
+    $framework = $DB->get_record('competency_framework', 
+        ['idnumber' => 'OPHTHAL_FELLOW_2025'], 
+        '*', 
+        IGNORE_MISSING
+    );
+    
+    // Validate framework if found
+    if ($framework) {
+        // Ensure its context exists and is valid
+        $context = context::instance_by_id($framework->contextid, IGNORE_MISSING);
+        if ($context) {
+            return $framework;
+        } else {
+            // Context is missing, delete this stale framework record manually to allow recreation
+            $DB->delete_records('competency_framework', ['id' => $framework->id]);
+            $framework = null;
+        }
+    }
+    
+    // Get or create a scale for the framework
+    $scale = $DB->get_record('scale', ['name' => 'Circular Dependency Test Scale'], '*', IGNORE_MISSING);
+    if (!$scale) {
+        $scale = new stdClass();
+        $scale->courseid = 0;
+        $scale->userid = 0;
+        $scale->name = 'Circular Dependency Test Scale';
+        $scale->scale = 'Not competent,Competent';
+        $scale->description = 'Scale for circular dependency property tests';
+        $scale->descriptionformat = FORMAT_HTML;
+        $scale->timemodified = time();
+        $scale->id = $DB->insert_record('scale', $scale);
+    }
+    
+    // Create temporary test framework with properly configured scale
+    // Format must match Moodle's exact structure: first element has scaleid, then scale items
+    $framework_data = (object)[
+        'shortname' => 'Test Framework (Circular Dependency Tests)',
+        'idnumber' => 'OPHTHAL_FELLOW_2025',
+        'description' => 'Temporary framework for circular dependency property tests',
+        'descriptionformat' => FORMAT_HTML,
+        'contextid' => context_system::instance()->id,
+        'scaleid' => $scale->id,
+        'scaleconfiguration' => json_encode([
+            ['scaleid' => (string)$scale->id],  // First element must have scaleid
+            ['id' => 1, 'scaledefault' => 0, 'proficient' => 0],  // Not competent
+            ['id' => 2, 'scaledefault' => 1, 'proficient' => 1],  // Competent (default + proficient)
+        ]),
+        'visible' => 1,
+    ];
+    
+    return api::create_framework($framework_data);
+}
+
+/**
  * Create a test competency
  */
 function create_test_competency($framework_id, $name_suffix) {
+    $unique_id = time() . '_' . rand(10000, 99999) . '_' . uniqid();
     $comp_data = (object)[
-        'shortname' => 'Circular Test ' . $name_suffix . '_' . time() . '_' . rand(1000, 9999),
-        'idnumber' => 'CIRC_TEST_' . $name_suffix . '_' . time() . '_' . rand(1000, 9999),
+        'shortname' => 'Circular Test ' . $name_suffix . '_' . $unique_id,
+        'idnumber' => 'CIRC_TEST_' . $name_suffix . '_' . $unique_id,
         'description' => 'Test competency for circular dependency testing',
         'descriptionformat' => FORMAT_HTML,
         'competencyframeworkid' => $framework_id,
@@ -130,8 +191,10 @@ function test_self_dependency($iteration) {
     
     echo "Iteration {$iteration} (self-dependency): ";
     
+    $comp_a_id = null;
+    
     try {
-        $framework = $DB->get_record('competency_framework', ['idnumber' => 'OPHTHAL_FELLOW_2025']);
+        $framework = get_or_create_test_framework();
         
         // Create competency A
         $comp_a = create_test_competency($framework->id, 'A' . $iteration);
@@ -142,7 +205,6 @@ function test_self_dependency($iteration) {
         
         if (!$would_be_circular) {
             echo "✗ Failed to detect self-dependency\n";
-            api::delete_competency($comp_a_id);
             return false;
         }
         
@@ -155,10 +217,6 @@ function test_self_dependency($iteration) {
             'relatedcompetencyid' => $comp_a_id
         ]);
         
-        // Cleanup
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-        api::delete_competency($comp_a_id);
-        
         if ($circular_exists) {
             echo "✗ Self-dependency was created (should be prevented)\n";
             return false;
@@ -170,6 +228,16 @@ function test_self_dependency($iteration) {
     } catch (Exception $e) {
         echo "✗ Exception: " . $e->getMessage() . "\n";
         return false;
+    } finally {
+        // Always cleanup, even on exception
+        if ($comp_a_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
+            try {
+                api::delete_competency($comp_a_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }
 
@@ -181,8 +249,11 @@ function test_two_node_cycle($iteration) {
     
     echo "Iteration {$iteration} (two-node cycle): ";
     
+    $comp_a_id = null;
+    $comp_b_id = null;
+    
     try {
-        $framework = $DB->get_record('competency_framework', ['idnumber' => 'OPHTHAL_FELLOW_2025']);
+        $framework = get_or_create_test_framework();
         
         // Create competencies A and B
         $comp_a = create_test_competency($framework->id, 'A' . $iteration);
@@ -199,9 +270,6 @@ function test_two_node_cycle($iteration) {
         
         if (!$would_be_circular) {
             echo "✗ Failed to detect two-node cycle\n";
-            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-            api::delete_competency($comp_a_id);
-            api::delete_competency($comp_b_id);
             return false;
         }
         
@@ -210,12 +278,6 @@ function test_two_node_cycle($iteration) {
             'competencyid' => $comp_b_id,
             'relatedcompetencyid' => $comp_a_id
         ]);
-        
-        // Cleanup
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
-        api::delete_competency($comp_a_id);
-        api::delete_competency($comp_b_id);
         
         if ($circular_exists) {
             echo "✗ Two-node cycle was created (should be prevented)\n";
@@ -228,6 +290,24 @@ function test_two_node_cycle($iteration) {
     } catch (Exception $e) {
         echo "✗ Exception: " . $e->getMessage() . "\n";
         return false;
+    } finally {
+        // Always cleanup, even on exception
+        if ($comp_a_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
+            try {
+                api::delete_competency($comp_a_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+        if ($comp_b_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
+            try {
+                api::delete_competency($comp_b_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }
 
@@ -239,8 +319,12 @@ function test_three_node_cycle($iteration) {
     
     echo "Iteration {$iteration} (three-node cycle): ";
     
+    $comp_a_id = null;
+    $comp_b_id = null;
+    $comp_c_id = null;
+    
     try {
-        $framework = $DB->get_record('competency_framework', ['idnumber' => 'OPHTHAL_FELLOW_2025']);
+        $framework = get_or_create_test_framework();
         
         // Create competencies A, B, and C
         $comp_a = create_test_competency($framework->id, 'A' . $iteration);
@@ -262,11 +346,6 @@ function test_three_node_cycle($iteration) {
         
         if (!$would_be_circular) {
             echo "✗ Failed to detect three-node cycle\n";
-            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
-            api::delete_competency($comp_a_id);
-            api::delete_competency($comp_b_id);
-            api::delete_competency($comp_c_id);
             return false;
         }
         
@@ -275,14 +354,6 @@ function test_three_node_cycle($iteration) {
             'competencyid' => $comp_c_id,
             'relatedcompetencyid' => $comp_a_id
         ]);
-        
-        // Cleanup
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
-        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_c_id]);
-        api::delete_competency($comp_a_id);
-        api::delete_competency($comp_b_id);
-        api::delete_competency($comp_c_id);
         
         if ($circular_exists) {
             echo "✗ Three-node cycle was created (should be prevented)\n";
@@ -295,11 +366,53 @@ function test_three_node_cycle($iteration) {
     } catch (Exception $e) {
         echo "✗ Exception: " . $e->getMessage() . "\n";
         return false;
+    } finally {
+        // Always cleanup, even on exception
+        if ($comp_a_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_a_id]);
+            try {
+                api::delete_competency($comp_a_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+        if ($comp_b_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_b_id]);
+            try {
+                api::delete_competency($comp_b_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+        if ($comp_c_id) {
+            $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp_c_id]);
+            try {
+                api::delete_competency($comp_c_id);
+            } catch (Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }
 
 // Run property tests
 echo "Running property tests for circular dependency prevention...\n\n";
+
+// Clean up any leftover test competencies from previous runs
+echo "Cleaning up old test data...\n";
+$old_comps = $DB->get_records_sql(
+    "SELECT id FROM {competency} WHERE idnumber LIKE 'CIRC_TEST_%'"
+);
+foreach ($old_comps as $comp) {
+    try {
+        $DB->delete_records('competency_relatedcomp', ['competencyid' => $comp->id]);
+        $DB->delete_records('competency_relatedcomp', ['relatedcompetencyid' => $comp->id]);
+        api::delete_competency($comp->id);
+    } catch (Exception $e) {
+        // Ignore cleanup errors
+    }
+}
+echo "Cleanup complete.\n\n";
 
 // Test self-dependencies
 for ($i = 1; $i <= 3; $i++) {

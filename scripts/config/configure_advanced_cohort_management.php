@@ -12,7 +12,8 @@
  */
 
 define('CLI_SCRIPT', true);
-require_once(__DIR__ . '/config.php');
+require_once(__DIR__ . '/../lib/config_helper.php');
+require_moodle_config();
 require_once($CFG->libdir . '/adminlib.php');
 
 global $DB, $CFG;

@@ -16,6 +16,20 @@ This project now includes a parallel development stack that avoids legacy Bitnam
 
 ## First-time setup
 
+### One-command provisioning (recommended)
+
+```bash
+./scripts/moodlehq/provision.sh
+```
+
+This runs the full sequence in order:
+- generates `.env` if missing (`./scripts/generate-env.sh`)
+- bootstraps Moodle core
+- starts Docker services
+- reapplies reproducible custom state (`restore-custom-state.sh`)
+
+### Step-by-step provisioning
+
 1. Ensure `.env` exists (`./scripts/generate-env.sh` if needed).
 2. Add MoodleHQ variables to `.env` (see `.env.example`).
 3. Bootstrap Moodle core:
@@ -48,12 +62,36 @@ docker compose -f docker-compose.moodlehq.yml up -d
 docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/upgrade.php --non-interactive
 ```
 
+7. Re-apply committed baseline customizations after a reset/new environment:
+
+```bash
+./scripts/moodlehq/restore-custom-state.sh
+```
+
+This script restores the reproducible parts of your customized setup:
+- Ensures `mod/questionnaire` and `block_configurable_reports` exist
+  - `mod/questionnaire` is restored from pinned artifact `plugin-source/mod_questionnaire_moodle50_2025110900.zip`
+  - `block_configurable_reports` is validated against pinned version `2024051300` and re-seeded from `plugin-source/block_configurable_reports_moodle45_2024051300.zip` when needed
+- Validates all locked plugin/component versions from `scripts/moodlehq/plugins.lock` and fails fast if drift is detected
+- Runs Moodle upgrade
+- Finalizes admin setup from `.env` credentials
+- Applies workflow baseline config (`--mode=local`)
+- Sets deterministic passwords for mock users (`mock.sysadmin`, `mock.programowner`, `mock.trainer`, `mock.learner`)
+  - Uses `MOCK_USERS_PASSWORD` if set, otherwise reuses `MOODLEHQ_ADMIN_PASS`
+- Re-adds `block_sceh_dashboard` to homepage, default dashboard, and private dashboard page
+- Sets active theme to `sceh`
+- Purges caches
+
+By default this does not require GitHub/network access for questionnaire plugin installation.
+
 ## Notes
 
 - This stack runs in parallel with the legacy stack by using port `8081` by default.
 - Existing custom plugins are mounted from this repo into Moodle core paths.
 - On Moodle 5.1+, plugin code is mounted under `moodle-core/public/...` because `dirroot` is `/var/www/html/public`.
 - Existing scripts using `/bitnami/moodle` keep working via compatibility symlinks created at container startup.
+- This flow works in WSL2 local development when Docker Desktop integration with your WSL distro is enabled.
+- On WSL2, run scripts from the Linux filesystem path (for example `/home/<user>/...`) and not from a Windows-mounted path for best bind-mount reliability.
 
 ## Stop / restart
 
@@ -70,3 +108,10 @@ rm -rf moodle-core
 ```
 
 This removes MySQL + moodledata volumes for the MoodleHQ stack.
+
+After reset, run:
+
+```bash
+./scripts/moodlehq/bootstrap-core.sh
+./scripts/moodlehq/restore-custom-state.sh
+```

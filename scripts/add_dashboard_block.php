@@ -3,7 +3,9 @@
  * Add SCEH Dashboard block to the user's dashboard
  */
 define('CLI_SCRIPT', true);
-require('/bitnami/moodle/config.php');
+require_once(__DIR__ . '/lib/config_helper.php');
+require_moodle_config();
+init_cli_admin();
 require_once($CFG->dirroot . '/my/lib.php');
 
 echo "\n=== Adding Fellowship Dashboard Block ===\n\n";
@@ -16,14 +18,33 @@ if (!$page) {
     exit(1);
 }
 
-// Check if block already exists
+// Check if block already exists on this private my page.
 $existing = $DB->get_record('block_instances', [
     'blockname' => 'sceh_dashboard',
-    'parentcontextid' => context_system::instance()->id
+    'parentcontextid' => context_system::instance()->id,
+    'pagetypepattern' => 'my-index',
+    'subpagepattern' => (string)$page->id,
 ]);
 
 if ($existing) {
     echo "✓ Block already exists (ID: {$existing->id})\n";
+    $position = $DB->get_record('block_positions', [
+        'blockinstanceid' => $existing->id,
+        'pagetype' => 'my-index',
+        'subpage' => (string)$page->id,
+    ]);
+    if (!$position) {
+        $position = new stdClass();
+        $position->blockinstanceid = $existing->id;
+        $position->contextid = context_system::instance()->id;
+        $position->pagetype = 'my-index';
+        $position->subpage = (string)$page->id;
+        $position->visible = 1;
+        $position->region = 'content';
+        $position->weight = 0;
+        $DB->insert_record('block_positions', $position);
+        echo "✓ Block position repaired on dashboard\n";
+    }
 } else {
     // Create block instance
     $blockinstance = new stdClass();
@@ -62,5 +83,5 @@ if ($existing) {
 }
 
 echo "\n=== Success! ===\n";
-echo "Refresh your browser at: http://localhost:8080/my/\n";
+echo "Refresh your browser at: {$CFG->wwwroot}/my/\n";
 echo "You should see the Fellowship Training Dashboard!\n\n";

@@ -42,6 +42,9 @@ jobs:
           mkdir -p moodle-core/public
           sudo chown -R 1001:1001 .
 
+      - name: Install Kirkpatrick Plugins
+        run: bash scripts/config/install_kirkpatrick_plugins.sh
+
       - name: Start Docker Compose
         run: |
           docker compose -f docker-compose.moodlehq.yml up -d
@@ -78,6 +81,8 @@ jobs:
           docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/blocks/sceh_dashboard /var/www/html/blocks/sceh_dashboard
           docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/theme/sceh /var/www/html/theme/sceh
           docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/mod/attendance /var/www/html/mod/attendance
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/mod/questionnaire /var/www/html/mod/questionnaire
+          docker exec moodlehq-dev-moodle-1 ln -sf /var/www/html/public/blocks/configurable_reports /var/www/html/blocks/configurable_reports
 
       - name: Finalize Moodle Setup (Install Plugins)
         run: |
@@ -100,13 +105,21 @@ jobs:
           done
           docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
 
-      - name: Provision Plugins
+
+      - name: Provision Moodle Data and Config
         run: |
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_competency_scales.php
-          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_program_structure.php
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_advanced_cohort_management.php
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=local
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_kirkpatrick_plugins.php
           docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_attendance_tracking.php
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/public/scripts/config/configure_trainer_visibility_permissions.php
+          docker exec moodlehq-dev-moodle-1 php /var/www/html/admin/cli/purge_caches.php
+
+      - name: Clean Test Data
+        run: |
+          docker exec moodlehq-dev-moodle-1 php -r "define('CLI_SCRIPT', true); require_once('/var/www/html/public/config.php'); \$DB->delete_records('competency_relatedcomp', []); \$DB->delete_records_select('competency', \"idnumber LIKE 'CIRC_TEST_%'\"); echo 'Cleaned old test data\n';"
 
       - name: Run All Regression Tests
         run: |

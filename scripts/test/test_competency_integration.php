@@ -56,27 +56,22 @@ function test_competency_framework_creation() {
     echo "Test 1: Competency Framework Creation\n";
     
     try {
-        // Create a test competency framework
-        $existing = $DB->get_record('competency_framework', [], 'scaleid,scaleconfiguration', IGNORE_MULTIPLE);
-        
         // Find SCEH scale or any scale with configuration
-        $scale = $DB->get_record('scale', ['name' => 'SCEH Competency Scale'], 'id', IGNORE_MISSING);
+        $scale = $DB->get_record('scale', ['name' => 'SCEH Competency Scale'], 'id, name', IGNORE_MISSING);
         if (!$scale) {
-             $scale = $DB->get_record('scale', ['courseid' => 0], 'id', IGNORE_MULTIPLE, 'id ASC');
+             $scale = $DB->get_record('scale', ['courseid' => 0], 'id, name', IGNORE_MULTIPLE, 'id ASC');
         }
         
-        $scaleid = $existing ? $existing->scaleid : ($scale ? $scale->id : 1);
-        $scaleconf = $existing ? $existing->scaleconfiguration : '';
+        $scaleid = ($scale) ? $scale->id : 1;
         
-        // If we found the SCEH scale, we know its config
-        if ($scale && $scale->name === 'SCEH Competency Scale' && empty($scaleconf)) {
-            $scaleconf = json_encode([
-                ['id' => 1, 'proficient' => 0, 'default' => 1],
-                ['id' => 2, 'proficient' => 0, 'default' => 0],
-                ['id' => 3, 'proficient' => 1, 'default' => 0],
-                ['id' => 4, 'proficient' => 1, 'default' => 0],
-            ]);
-        }
+        // Define standard SCEH scale config with Moodle-specific format
+        $scaleconf = json_encode([
+            ['scaleid' => $scaleid],
+            ['id' => 1, 'scaledefault' => 1, 'proficient' => 0],
+            ['id' => 2, 'scaledefault' => 0, 'proficient' => 0],
+            ['id' => 3, 'scaledefault' => 0, 'proficient' => 1],
+            ['id' => 4, 'scaledefault' => 0, 'proficient' => 1],
+        ]);
 
         $framework_data = (object)[
             'shortname' => 'test_framework_' . time(),

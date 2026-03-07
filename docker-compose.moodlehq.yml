@@ -52,6 +52,8 @@ services:
       - ./local_kirkpatrick_level4:/var/www/html/public/local/kirkpatrick_level4
       - ./theme_sceh:/var/www/html/public/theme/sceh
       - ./mod/attendance:/var/www/html/public/mod/attendance
+      - ./mod/questionnaire:/var/www/html/public/mod/questionnaire
+      - ./blocks/configurable_reports:/var/www/html/public/blocks/configurable_reports
       - ./scripts:/var/www/html/public/scripts
       - ./scripts/moodlehq/start-web.sh:/opt/sceh/start-web.sh:ro
       - ./scripts/moodlehq/entrypoint.d:/docker-entrypoint.d:ro
@@ -85,6 +87,8 @@ services:
       - ./local_kirkpatrick_level4:/var/www/html/public/local/kirkpatrick_level4
       - ./theme_sceh:/var/www/html/public/theme/sceh
       - ./mod/attendance:/var/www/html/public/mod/attendance
+      - ./mod/questionnaire:/var/www/html/public/mod/questionnaire
+      - ./blocks/configurable_reports:/var/www/html/public/blocks/configurable_reports
       - ./scripts/moodlehq/start-cron.sh:/opt/sceh/start-cron.sh:ro
       - ./scripts/moodlehq/entrypoint.d:/docker-entrypoint.d:ro
     command: [ "/bin/bash", "-lc", "/opt/sceh/start-cron.sh" ]

@@ -3,7 +3,9 @@
  * Add dashboard block to site index (homepage) for all users
  */
 define('CLI_SCRIPT', true);
-require('/bitnami/moodle/config.php');
+require_once(__DIR__ . '/lib/config_helper.php');
+require_moodle_config();
+init_cli_admin();
 
 echo "\n=== Adding Dashboard Block to Homepage ===\n\n";
 
@@ -75,6 +77,6 @@ if (!$existing_my) {
 
 echo "\n=== Complete ===\n";
 echo "The Fellowship Dashboard should now appear on:\n";
-echo "- Homepage (http://localhost:8080)\n";
-echo "- Dashboard (http://localhost:8080/my/)\n\n";
+echo "- Homepage ({$CFG->wwwroot})\n";
+echo "- Dashboard ({$CFG->wwwroot}/my/)\n\n";
 echo "Clear cache and refresh your browser!\n\n";

@@ -1,0 +1,10 @@
+# component|path|expected_version|artifact
+block_sceh_dashboard|block_sceh_dashboard|2026020300|-
+local_sceh_rules|local_sceh_rules|2026022301|-
+local_sceh_importer|local_sceh_importer|2026021702|-
+local_kirkpatrick_dashboard|local_kirkpatrick_dashboard|2025011700|-
+local_kirkpatrick_level4|local_kirkpatrick_level4|2025011700|-
+theme_sceh|theme_sceh|2026021400|-
+mod_attendance|mod/attendance|2025122100|-
+mod_questionnaire|mod/questionnaire|2025041400.03|plugin-source/mod_questionnaire_moodle50_2025110900.zip
+block_configurable_reports|blocks/configurable_reports|2024051300|plugin-source/block_configurable_reports_moodle45_2024051300.zip

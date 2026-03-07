@@ -43,8 +43,8 @@ if ! wait_for_db "${SCEH_DB_HOST}" "${SCEH_DB_PORT}" "${SCEH_DB_USER}" "${SCEH_D
   exit 1
 fi
 
-if [ ! -f /var/www/html/config.php ]; then
-  echo "No config.php found; running initial Moodle install..."
+if ! grep -q "\$CFG" /var/www/html/config.php 2>/dev/null; then
+  echo "No valid config.php found; running initial Moodle install..."
   php /var/www/html/admin/cli/install.php \
     --non-interactive \
     --agree-license \
@@ -63,8 +63,25 @@ if [ ! -f /var/www/html/config.php ]; then
     --adminpass="${SCEH_ADMIN_PASS}" \
     --adminemail="${SCEH_ADMIN_EMAIL}"
 else
-  echo "config.php found; skipping automatic upgrade on boot."
+  echo "Valid config.php found; skipping automatic upgrade on boot."
   echo "Run manual upgrade when needed: php /var/www/html/admin/cli/upgrade.php --non-interactive"
+fi
+
+# Fix potential permission and path issues on config.php (common on Windows/WSL2 host mounts)
+if [ -f /var/www/html/config.php ]; then
+  chmod 644 /var/www/html/config.php || true
+  
+  # Ensure dirroot points to/public subdirectory to resolve missing plugins issue
+  if ! grep -q "dirroot.*=.*__DIR__" /var/www/html/config.php; then
+    echo "Correcting dirroot in config.php to include /public..."
+    # Replace existing dirroot or append it if for some reason it's missing (unlikely after install)
+    if grep -q "\$CFG->dirroot" /var/www/html/config.php; then
+      sed -i "s|^\$CFG->dirroot.*=.*|\$CFG->dirroot = __DIR__ . '/public';|" /var/www/html/config.php
+    else
+      # Append before the last line (usually require_once)
+      sed -i "/require_once/i \$CFG->dirroot = __DIR__ . '/public';" /var/www/html/config.php
+    fi
+  fi
 fi
 
 exec apache2-foreground

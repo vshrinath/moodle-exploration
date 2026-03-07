@@ -47,16 +47,23 @@ function require_moodle_config() {
  * @throws Exception if no admin user found or capability check fails
  */
 function init_cli_admin($capability = 'moodle/site:config') {
+    global $USER;
+    
     $admin = get_admin();
     if (!$admin) {
         fwrite(STDERR, "ERROR: No admin user found\n");
         throw new Exception('No admin user found');
     }
     
+    // Set up the user session properly for CLI
     \core\session\manager::set_user($admin);
     
-    if ($capability) {
-        require_capability($capability, context_system::instance());
+    // In CLI scripts, we generally bypass strict capability checks to avoid
+    // race conditions during fresh installs where the access cache isn't ready.
+    // However, we still verify we have a valid admin user for the scripts.
+    if (!is_siteadmin($USER)) {
+        fwrite(STDERR, "ERROR: Current CLI user is not a site administrator\n");
+        throw new Exception('CLI user must be site admin');
     }
     
     return $admin;
