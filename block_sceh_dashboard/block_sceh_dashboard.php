@@ -1,19 +1,22 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-class block_sceh_dashboard extends block_base {
-    
-    public function init() {
+class block_sceh_dashboard extends block_base
+{
+
+    public function init()
+    {
         $this->title = get_string('pluginname', 'block_sceh_dashboard');
     }
-    
-    public function get_content() {
+
+    public function get_content()
+    {
         global $USER, $PAGE;
-        
+
         if ($this->content !== null) {
             return $this->content;
         }
-        
+
         $this->content = new stdClass();
         $this->content->text = '';
 
@@ -21,15 +24,18 @@ class block_sceh_dashboard extends block_base {
         $PAGE->requires->css(new moodle_url('/local/sceh_rules/styles/sceh_card_system.css'));
 
         $context = context_system::instance();
-        $userid = (int) $USER->id;
+        $userid = (int)$USER->id;
 
         if ($this->is_program_owner_user($userid)) {
             $this->content->text .= $this->render_program_owner_dashboard($userid);
-        } else if (has_capability('local/sceh_rules:systemadmin', $context)) {
+        }
+        else if (has_capability('local/sceh_rules:systemadmin', $context)) {
             $this->content->text .= $this->render_sysadmin_dashboard($userid);
-        } else if (has_capability('local/sceh_rules:trainer', $context)) {
+        }
+        else if (has_capability('local/sceh_rules:trainer', $context)) {
             $this->content->text .= $this->render_trainer_dashboard($userid);
-        } else {
+        }
+        else {
             $this->content->text .= $this->render_learner_dashboard($userid);
         }
 
@@ -60,7 +66,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return bool
      */
-    private function is_program_owner_user(int $userid): bool {
+    private function is_program_owner_user(int $userid): bool
+    {
         $context = context_system::instance();
         if (has_capability('local/sceh_rules:systemadmin', $context, $userid)) {
             return false;
@@ -80,7 +87,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return string
      */
-    private function render_program_owner_dashboard(int $userid): string {
+    private function render_program_owner_dashboard(int $userid): string
+    {
         $actions = $this->get_program_owner_quick_actions($userid);
         $statuscards = $this->get_program_owner_status_cards($userid);
 
@@ -112,7 +120,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return string
      */
-    private function render_sysadmin_dashboard(int $userid): string {
+    private function render_sysadmin_dashboard(int $userid): string
+    {
         $cards = $this->get_system_admin_cards();
         $statuscards = $this->get_sysadmin_status_cards($userid);
 
@@ -145,7 +154,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return string
      */
-    private function render_trainer_dashboard(int $userid): string {
+    private function render_trainer_dashboard(int $userid): string
+    {
         $actions = $this->get_trainer_cards($userid);
         $statuscards = $this->get_trainer_status_cards($userid);
 
@@ -157,7 +167,8 @@ class block_sceh_dashboard extends block_base {
         foreach ($actions as $action) {
             if (!empty($action['children'])) {
                 $html .= $this->render_program_owner_action($action);
-            } else {
+            }
+            else {
                 $html .= $this->render_card($action);
             }
         }
@@ -183,7 +194,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return string
      */
-    private function render_learner_dashboard(int $userid): string {
+    private function render_learner_dashboard(int $userid): string
+    {
         $cards = $this->get_learner_cards($userid);
 
         $html = html_writer::start_div('sceh-program-owner-dashboard');
@@ -202,7 +214,8 @@ class block_sceh_dashboard extends block_base {
      * @param array $action
      * @return string
      */
-    private function render_program_owner_action(array $action): string {
+    private function render_program_owner_action(array $action): string
+    {
         if (empty($action['children'])) {
             return $this->render_card([
                 'title' => $action['title'],
@@ -218,10 +231,10 @@ class block_sceh_dashboard extends block_base {
             '#',
             html_writer::div('<i class="fa ' . $action['icon'] . ' fa-3x"></i>', 'sceh-card-icon') .
             html_writer::div(format_string($action['title']), 'sceh-card-title'),
-            [
-                'class' => 'sceh-card-link sceh-po-open-subactions',
-                'data-action-key' => $actionkey,
-            ]
+        [
+            'class' => 'sceh-card-link sceh-po-open-subactions',
+            'data-action-key' => $actionkey,
+        ]
         );
         $html .= html_writer::end_div();
         return $html;
@@ -233,7 +246,8 @@ class block_sceh_dashboard extends block_base {
      * @param array $statuscard
      * @return string
      */
-    private function render_program_owner_status_summary_card(array $statuscard): string {
+    private function render_program_owner_status_summary_card(array $statuscard): string
+    {
         $statuskey = clean_param(core_text::strtolower($statuscard['title']), PARAM_ALPHANUMEXT);
         $color = $this->program_owner_status_color((string)($statuscard['status'] ?? 'info'));
         $totalcount = (int)array_sum(array_column($statuscard['steps'], 'count'));
@@ -244,10 +258,10 @@ class block_sceh_dashboard extends block_base {
             html_writer::div('<i class="fa ' . $statuscard['icon'] . ' fa-3x"></i>', 'sceh-card-icon') .
             html_writer::div(format_string($statuscard['title']), 'sceh-card-title') .
             html_writer::div((string)$totalcount, 'sceh-po-status-total'),
-            [
-                'class' => 'sceh-card-link sceh-po-open-status',
-                'data-status-key' => $statuskey,
-            ]
+        [
+            'class' => 'sceh-card-link sceh-po-open-status',
+            'data-status-key' => $statuskey,
+        ]
         );
         $html .= html_writer::end_div();
         return $html;
@@ -259,7 +273,8 @@ class block_sceh_dashboard extends block_base {
      * @param array $statuscards
      * @return string
      */
-    private function render_program_owner_status_panels(array $statuscards): string {
+    private function render_program_owner_status_panels(array $statuscards): string
+    {
         $html = '';
         $hasbar = false;
 
@@ -273,7 +288,7 @@ class block_sceh_dashboard extends block_base {
             $color = $this->program_owner_status_color((string)($statuscard['status'] ?? 'info'));
             $html .= html_writer::start_div(
                 'sceh-po-status-panel sceh-po-subactions-panel sceh-po-status-panel-' . $color . ' sceh-po-subactions-panel-' . $color,
-                [
+            [
                 'id' => 'sceh-po-status-panel-' . $statuskey,
                 'data-status-key' => $statuskey,
                 'data-color' => $color,
@@ -296,7 +311,7 @@ class block_sceh_dashboard extends block_base {
                 $html .= html_writer::link(
                     $step['url'],
                     $stepcontent,
-                    ['class' => 'sceh-po-status-step-card sceh-po-subaction-card sceh-po-status-step-card-' . $color . ' sceh-po-subaction-card-' . $color]
+                ['class' => 'sceh-po-status-step-card sceh-po-subaction-card sceh-po-status-step-card-' . $color . ' sceh-po-subaction-card-' . $color]
                 );
             }
             $html .= html_writer::end_div();
@@ -339,7 +354,8 @@ class block_sceh_dashboard extends block_base {
      * @param string $status
      * @return string
      */
-    private function program_owner_status_color(string $status): string {
+    private function program_owner_status_color(string $status): string
+    {
         switch ($status) {
             case 'success':
                 return 'green';
@@ -359,7 +375,8 @@ class block_sceh_dashboard extends block_base {
      * @param array $actions
      * @return string
      */
-    private function render_program_owner_subactions_bar(array $actions): string {
+    private function render_program_owner_subactions_bar(array $actions): string
+    {
         $html = '';
         $hasbar = false;
         $openeddefault = false;
@@ -380,7 +397,8 @@ class block_sceh_dashboard extends block_base {
             ];
             if ($openeddefault) {
                 $attrs['hidden'] = 'hidden';
-            } else {
+            }
+            else {
                 $attrs['class'] .= ' is-open';
                 $openeddefault = true;
             }
@@ -399,7 +417,7 @@ class block_sceh_dashboard extends block_base {
                 $html .= html_writer::link(
                     $child['url'],
                     format_string($child['title']),
-                    ['class' => 'sceh-po-subaction-card sceh-po-subaction-card-' . $color]
+                ['class' => 'sceh-po-subaction-card sceh-po-subaction-card-' . $color]
                 );
             }
             $html .= html_writer::end_div();
@@ -442,7 +460,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return string
      */
-    private function render_workflow_queue($userid) {
+    private function render_workflow_queue($userid)
+    {
         if (!class_exists('\local_sceh_rules\output\sceh_card')) {
             return '';
         }
@@ -506,9 +525,10 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_workflow_queue_items($userid) {
+    private function get_workflow_queue_items($userid)
+    {
         $context = context_system::instance();
-        
+
         // Re-verify capabilities for defense-in-depth
         $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
         $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
@@ -519,9 +539,11 @@ class block_sceh_dashboard extends block_base {
 
         if ($is_system_admin) {
             return $this->build_system_admin_queue($userid);
-        } else if ($is_program_owner) {
+        }
+        else if ($is_program_owner) {
             return $this->build_program_owner_queue($userid);
-        } else if ($is_trainer) {
+        }
+        else if ($is_trainer) {
             return $this->build_trainer_queue($userid);
         }
 
@@ -534,7 +556,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function build_system_admin_queue($userid) {
+    private function build_system_admin_queue($userid)
+    {
         $failedtasks = $this->count_failed_scheduled_tasks();
         $overdueevents = $this->count_user_overdue_events($userid);
         $upcomingevents = $this->count_user_upcoming_events($userid, 7);
@@ -547,19 +570,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-gears',
-                        get_string('workflowfailedtasks', 'block_sceh_dashboard', $failedtasks),
-                        get_string('workflowfailedtasksdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/admin/tool/task/scheduledtasks.php'),
-                        $failedtasks > 0
-                    ),
+                    'fa-gears',
+                    get_string('workflowfailedtasks', 'block_sceh_dashboard', $failedtasks),
+                    get_string('workflowfailedtasksdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/admin/tool/task/scheduledtasks.php'),
+                    $failedtasks > 0
+                ),
                     $this->workflow_item(
-                        'fa-triangle-exclamation',
-                        get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
-                        get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        $overdueevents > 0
-                    ),
+                    'fa-triangle-exclamation',
+                    get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
+                    get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    $overdueevents > 0
+                ),
                 ]),
             ],
             [
@@ -569,19 +592,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-users',
-                        get_string('workflowmanagecohorts', 'block_sceh_dashboard'),
-                        get_string('workflowcohortcount', 'block_sceh_dashboard', $this->count_total_cohorts()),
-                        new moodle_url('/cohort/index.php'),
-                        true
-                    ),
+                    'fa-users',
+                    get_string('workflowmanagecohorts', 'block_sceh_dashboard'),
+                    get_string('workflowcohortcount', 'block_sceh_dashboard', $this->count_total_cohorts()),
+                    new moodle_url('/cohort/index.php'),
+                    true
+                ),
                     $this->workflow_item(
-                        'fa-calendar-day',
-                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
-                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        true
-                    ),
+                    'fa-calendar-day',
+                    get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
+                    get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    true
+                ),
                 ]),
             ],
             [
@@ -591,19 +614,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-chart-pie',
-                        get_string('workflowevaluation', 'block_sceh_dashboard'),
-                        get_string('workflowevaluationdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/local/kirkpatrick_dashboard/index.php'),
-                        has_capability('local/kirkpatrick_dashboard:view', context_system::instance())
-                    ),
+                    'fa-chart-pie',
+                    get_string('workflowevaluation', 'block_sceh_dashboard'),
+                    get_string('workflowevaluationdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/local/kirkpatrick_dashboard/index.php'),
+                    has_capability('local/kirkpatrick_dashboard:view', context_system::instance())
+                ),
                     $this->workflow_item(
-                        'fa-file-lines',
-                        get_string('workflowreports', 'block_sceh_dashboard'),
-                        get_string('workflowreportsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/admin/category.php', ['category' => 'reports']),
-                        true
-                    ),
+                    'fa-file-lines',
+                    get_string('workflowreports', 'block_sceh_dashboard'),
+                    get_string('workflowreportsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/admin/category.php', ['category' => 'reports']),
+                    true
+                ),
                 ]),
             ],
         ];
@@ -615,7 +638,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function build_program_owner_queue($userid) {
+    private function build_program_owner_queue($userid)
+    {
         $issueids = $this->get_program_owner_stream_issue_course_ids($userid);
         $streamissues = count($issueids);
         $streamissuesurl = new moodle_url('/local/sceh_rules/stream_setup_check.php');
@@ -634,12 +658,12 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-tasks',
-                        get_string('workflowstreamissues', 'block_sceh_dashboard', $streamissues),
-                        get_string('workflowstreamissuesdesc', 'block_sceh_dashboard'),
-                        $streamissuesurl,
-                        true
-                    ),
+                    'fa-tasks',
+                    get_string('workflowstreamissues', 'block_sceh_dashboard', $streamissues),
+                    get_string('workflowstreamissuesdesc', 'block_sceh_dashboard'),
+                    $streamissuesurl,
+                    true
+                ),
                 ]),
             ],
             [
@@ -649,19 +673,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-folder-tree',
-                        get_string('workflowassignedcategories', 'block_sceh_dashboard', $categorycount),
-                        get_string('workflowassignedcategoriesdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/course/index.php'),
-                        true
-                    ),
+                    'fa-folder-tree',
+                    get_string('workflowassignedcategories', 'block_sceh_dashboard', $categorycount),
+                    get_string('workflowassignedcategoriesdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/course/index.php'),
+                    true
+                ),
                     $this->workflow_item(
-                        'fa-calendar-day',
-                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
-                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        true
-                    ),
+                    'fa-calendar-day',
+                    get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
+                    get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    true
+                ),
                 ]),
             ],
             [
@@ -671,21 +695,21 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-sitemap',
-                        get_string('workflowcompetencyreview', 'block_sceh_dashboard'),
-                        get_string('workflowcompetencyreviewdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/admin/tool/lp/competencyframeworks.php', [
-                            'pagecontextid' => context_system::instance()->id,
-                        ]),
-                        true
-                    ),
+                    'fa-sitemap',
+                    get_string('workflowcompetencyreview', 'block_sceh_dashboard'),
+                    get_string('workflowcompetencyreviewdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/admin/tool/lp/competencyframeworks.php', [
+                        'pagecontextid' => context_system::instance()->id,
+                    ]),
+                    true
+                ),
                     $this->workflow_item(
-                        'fa-chart-column',
-                        get_string('workflowreviewreports', 'block_sceh_dashboard'),
-                        get_string('workflowreviewreportsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/admin/category.php', ['category' => 'reports']),
-                        true
-                    ),
+                    'fa-chart-column',
+                    get_string('workflowreviewreports', 'block_sceh_dashboard'),
+                    get_string('workflowreviewreportsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/admin/category.php', ['category' => 'reports']),
+                    true
+                ),
                 ]),
             ],
         ];
@@ -697,7 +721,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function build_trainer_queue($userid) {
+    private function build_trainer_queue($userid)
+    {
         $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
         $coursecount = count($courses);
         $ungraded = $this->count_trainer_ungraded_submissions($userid);
@@ -711,19 +736,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-clipboard-check',
-                        get_string('workflowungraded', 'block_sceh_dashboard', $ungraded),
-                        get_string('workflowungradeddesc', 'block_sceh_dashboard'),
-                        new moodle_url('/my/courses.php'),
-                        true
-                    ),
+                    'fa-clipboard-check',
+                    get_string('workflowungraded', 'block_sceh_dashboard', $ungraded),
+                    get_string('workflowungradeddesc', 'block_sceh_dashboard'),
+                    new moodle_url('/my/courses.php'),
+                    true
+                ),
                     $this->workflow_item(
-                        'fa-calendar-check',
-                        get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
-                        get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        $overdueevents > 0
-                    ),
+                    'fa-calendar-check',
+                    get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
+                    get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    $overdueevents > 0
+                ),
                 ]),
             ],
             [
@@ -733,19 +758,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-users',
-                        get_string('workflowassignedcourses', 'block_sceh_dashboard', $coursecount),
-                        get_string('workflowassignedcoursesdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/my/courses.php'),
-                        true
-                    ),
+                    'fa-users',
+                    get_string('workflowassignedcourses', 'block_sceh_dashboard', $coursecount),
+                    get_string('workflowassignedcoursesdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/my/courses.php'),
+                    true
+                ),
                     $this->workflow_item(
-                        'fa-calendar-day',
-                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $this->count_user_upcoming_events($userid, 7)),
-                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        true
-                    ),
+                    'fa-calendar-day',
+                    get_string('workflowupcomingevents', 'block_sceh_dashboard', $this->count_user_upcoming_events($userid, 7)),
+                    get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    true
+                ),
                 ]),
             ],
             [
@@ -755,12 +780,12 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-chart-line',
-                        get_string('workflowstreamprogress', 'block_sceh_dashboard'),
-                        get_string('workflowstreamprogressdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/local/sceh_rules/stream_progress.php'),
-                        true
-                    ),
+                    'fa-chart-line',
+                    get_string('workflowstreamprogress', 'block_sceh_dashboard'),
+                    get_string('workflowstreamprogressdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/local/sceh_rules/stream_progress.php'),
+                    true
+                ),
                 ]),
             ],
         ];
@@ -772,7 +797,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function build_learner_queue($userid) {
+    private function build_learner_queue($userid)
+    {
         $pendingstream = $this->count_learner_pending_stream_selection($userid);
         $overdueevents = $this->count_user_overdue_events($userid);
         $upcomingevents = $this->count_user_upcoming_events($userid, 7);
@@ -785,19 +811,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusnow', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-calendar-xmark',
-                        get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
-                        get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        $overdueevents > 0
-                    ),
+                    'fa-calendar-xmark',
+                    get_string('workflowoverdueevents', 'block_sceh_dashboard', $overdueevents),
+                    get_string('workflowoverdueeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    $overdueevents > 0
+                ),
                     $this->workflow_item(
-                        'fa-code-branch',
-                        get_string('workflowpendingstream', 'block_sceh_dashboard', $pendingstream),
-                        get_string('workflowpendingstreamdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/local/sceh_rules/stream_progress.php'),
-                        $pendingstream > 0
-                    ),
+                    'fa-code-branch',
+                    get_string('workflowpendingstream', 'block_sceh_dashboard', $pendingstream),
+                    get_string('workflowpendingstreamdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/local/sceh_rules/stream_progress.php'),
+                    $pendingstream > 0
+                ),
                 ]),
             ],
             [
@@ -807,19 +833,19 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatusweek', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-calendar-day',
-                        get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
-                        get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/calendar/view.php'),
-                        true
-                    ),
+                    'fa-calendar-day',
+                    get_string('workflowupcomingevents', 'block_sceh_dashboard', $upcomingevents),
+                    get_string('workflowupcomingeventsdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/calendar/view.php'),
+                    true
+                ),
                     $this->workflow_item(
-                        'fa-chart-line',
-                        get_string('workflowtrackprogress', 'block_sceh_dashboard'),
-                        get_string('workflowtrackprogressdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/local/sceh_rules/stream_progress.php'),
-                        true
-                    ),
+                    'fa-chart-line',
+                    get_string('workflowtrackprogress', 'block_sceh_dashboard'),
+                    get_string('workflowtrackprogressdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/local/sceh_rules/stream_progress.php'),
+                    true
+                ),
                 ]),
             ],
             [
@@ -829,12 +855,12 @@ class block_sceh_dashboard extends block_base {
                 'statustext' => get_string('workflowstatuswatchlist', 'block_sceh_dashboard'),
                 'items' => array_filter([
                     $this->workflow_item(
-                        'fa-award',
-                        get_string('workflowbadges', 'block_sceh_dashboard'),
-                        get_string('workflowbadgesdesc', 'block_sceh_dashboard'),
-                        new moodle_url('/badges/mybadges.php'),
-                        true
-                    ),
+                    'fa-award',
+                    get_string('workflowbadges', 'block_sceh_dashboard'),
+                    get_string('workflowbadgesdesc', 'block_sceh_dashboard'),
+                    new moodle_url('/badges/mybadges.php'),
+                    true
+                ),
                 ]),
             ],
         ];
@@ -850,7 +876,8 @@ class block_sceh_dashboard extends block_base {
      * @param bool $enabled
      * @return array|null
      */
-    private function workflow_item($icon, $text, $subtext, moodle_url $url, $enabled = true) {
+    private function workflow_item($icon, $text, $subtext, moodle_url $url, $enabled = true)
+    {
         if (!$enabled) {
             return null;
         }
@@ -868,7 +895,8 @@ class block_sceh_dashboard extends block_base {
      *
      * @return int
      */
-    private function count_failed_scheduled_tasks() {
+    private function count_failed_scheduled_tasks()
+    {
         global $DB;
         return (int)$DB->count_records_select('task_scheduled', 'faildelay > 0');
     }
@@ -879,12 +907,13 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int
      */
-    private function count_user_overdue_events($userid) {
+    private function count_user_overdue_events($userid)
+    {
         global $DB;
         return (int)$DB->count_records_select(
             'event',
             'userid = :userid AND timestart > 0 AND timestart < :now',
-            ['userid' => $userid, 'now' => time()]
+        ['userid' => $userid, 'now' => time()]
         );
     }
 
@@ -895,14 +924,15 @@ class block_sceh_dashboard extends block_base {
      * @param int $days
      * @return int
      */
-    private function count_user_upcoming_events($userid, $days = 7) {
+    private function count_user_upcoming_events($userid, $days = 7)
+    {
         global $DB;
         $now = time();
         $horizon = $now + ($days * DAYSECS);
         return (int)$DB->count_records_select(
             'event',
             'userid = :userid AND timestart >= :now AND timestart <= :horizon',
-            ['userid' => $userid, 'now' => $now, 'horizon' => $horizon]
+        ['userid' => $userid, 'now' => $now, 'horizon' => $horizon]
         );
     }
 
@@ -911,7 +941,8 @@ class block_sceh_dashboard extends block_base {
      *
      * @return int
      */
-    private function count_total_cohorts() {
+    private function count_total_cohorts()
+    {
         global $DB;
         return (int)$DB->count_records('cohort');
     }
@@ -922,7 +953,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int
      */
-    private function count_program_owner_stream_issues($userid) {
+    private function count_program_owner_stream_issues($userid)
+    {
         return count($this->get_program_owner_stream_issue_course_ids($userid));
     }
 
@@ -932,7 +964,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int[]
      */
-    private function get_program_owner_stream_issue_course_ids($userid) {
+    private function get_program_owner_stream_issue_course_ids($userid)
+    {
         global $DB;
 
         $categories = $this->get_program_owner_categories($userid);
@@ -940,7 +973,7 @@ class block_sceh_dashboard extends block_base {
             return [];
         }
 
-        $categoryids = array_map(function($category) {
+        $categoryids = array_map(function ($category) {
             return (int)$category->id;
         }, $categories);
         list($catsql, $catparams) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
@@ -957,11 +990,11 @@ class block_sceh_dashboard extends block_base {
                      ON c.id = co.choiceid
                   WHERE c.course = :courseid
                     AND (LOWER(c.name) LIKE :streamname OR LOWER(c.name) LIKE :specializationname)",
-                [
-                    'courseid' => $course->id,
-                    'streamname' => '%stream%',
-                    'specializationname' => '%specialization%',
-                ]
+            [
+                'courseid' => $course->id,
+                'streamname' => '%stream%',
+                'specializationname' => '%specialization%',
+            ]
             );
 
             if (empty($streamsections) || !$haschoiceoptions) {
@@ -978,7 +1011,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int
      */
-    private function count_trainer_ungraded_submissions($userid) {
+    private function count_trainer_ungraded_submissions($userid)
+    {
         global $DB;
 
         $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
@@ -986,7 +1020,7 @@ class block_sceh_dashboard extends block_base {
             return 0;
         }
 
-        $courseids = array_map(function($course) {
+        $courseids = array_map(function ($course) {
             return (int)$course->id;
         }, $courses);
         list($insql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
@@ -1013,7 +1047,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int
      */
-    private function count_learner_pending_stream_selection($userid) {
+    private function count_learner_pending_stream_selection($userid)
+    {
         $courses = enrol_get_users_courses($userid, true, 'id');
         if (empty($courses)) {
             return 0;
@@ -1041,7 +1076,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_program_owner_quick_actions(int $userid): array {
+    private function get_program_owner_quick_actions(int $userid): array
+    {
         $categories = $this->get_program_owner_categories($userid);
         $categoryids = $this->get_program_owner_category_ids($userid);
         $primarycategoryid = $categoryids[0] ?? 0;
@@ -1052,7 +1088,7 @@ class block_sceh_dashboard extends block_base {
         $singlecatparams = $is_single_program ? ['categoryid' => $primarycategoryid] : [];
 
         $managecoursechildren = [];
-        
+
         if ($is_single_program) {
             // Simplified view for single program owner.
             $managecoursechildren[] = [
@@ -1063,7 +1099,8 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('pocreatecourse', 'block_sceh_dashboard'),
                 'url' => new moodle_url('/course/edit.php', ['category' => $primarycategoryid]),
             ];
-        } else {
+        }
+        else {
             // Multi-program view (existing logic consolidated).
             $managecoursechildren[] = [
                 'title' => get_string('poconsole', 'block_sceh_dashboard'),
@@ -1073,7 +1110,7 @@ class block_sceh_dashboard extends block_base {
                 'title' => get_string('poallcourses', 'block_sceh_dashboard'),
                 'url' => new moodle_url('/course/index.php'),
             ];
-            
+
             foreach ($categories as $category) {
                 $catname = format_string($category->name);
                 $managecoursechildren[] = [
@@ -1087,8 +1124,8 @@ class block_sceh_dashboard extends block_base {
         $managecoursechildren[] = [
             'title' => get_string('pobulkimport', 'block_sceh_dashboard'),
             'url' => $primarycourseid > 0
-                ? new moodle_url('/local/sceh_importer/index.php', ['courseid' => $primarycourseid])
-                : new moodle_url('/local/sceh_importer/index.php'),
+            ? new moodle_url('/local/sceh_importer/index.php', ['courseid' => $primarycourseid])
+            : new moodle_url('/local/sceh_importer/index.php'),
         ];
         $managecoursechildren[] = [
             'title' => get_string('povalidatecourses', 'block_sceh_dashboard'),
@@ -1131,12 +1168,13 @@ class block_sceh_dashboard extends block_base {
                 'icon' => 'fa-user-check',
                 'color' => 'orange',
                 'url' => $primarycourseid > 0
-                    ? new moodle_url('/user/index.php', ['id' => $primarycourseid])
-                    : new moodle_url('/course/index.php'),
+                ? new moodle_url('/user/index.php', ['id' => $primarycourseid])
+                : new moodle_url('/course/index.php'),
                 'children' => [],
             ],
         ];
 
+        $canmanagecohorts = has_capability('moodle/cohort:manage', context_system::instance(), $userid);
         if ($canmanagecohorts) {
             $actions[] = [
                 'title' => get_string('pomanagecohorts', 'block_sceh_dashboard'),
@@ -1156,7 +1194,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_program_owner_status_cards(int $userid): array {
+    private function get_program_owner_status_cards(int $userid): array
+    {
         $categoryids = $this->get_program_owner_category_ids($userid);
         $courseids = $this->get_program_owner_course_ids($userid);
         $courseids = array_map('intval', $courseids);
@@ -1165,7 +1204,7 @@ class block_sceh_dashboard extends block_base {
         $singlecatparams = (count($categoryids) === 1) ? ['categoryid' => reset($categoryids)] : [];
 
         $publishing = $this->get_program_owner_publishing_status($userid, $courseids);
-        
+
         // Apply issue filter and single category scoping to publishing links.
         foreach ($publishing['steps'] as &$step) {
             $labelkey = str_replace('postep', '', $step['label']);
@@ -1176,7 +1215,8 @@ class block_sceh_dashboard extends block_base {
                 if (!empty($singlecatparams)) {
                     $step['url']->params($singlecatparams);
                 }
-            } else if (strpos($step['url']->out(), 'course/index.php') !== false) {
+            }
+            else if (strpos($step['url']->out(), 'course/index.php') !== false) {
                 if (!empty($singlecatparams)) {
                     $step['url']->params($singlecatparams);
                 }
@@ -1233,9 +1273,10 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int[]
      */
-    private function get_program_owner_category_ids(int $userid): array {
+    private function get_program_owner_category_ids(int $userid): array
+    {
         $categories = $this->get_program_owner_categories($userid);
-        return array_values(array_map(static function($category): int {
+        return array_values(array_map(static function ($category): int {
             return (int)$category->id;
         }, $categories));
     }
@@ -1246,7 +1287,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int[]
      */
-    private function get_program_owner_course_ids(int $userid): array {
+    private function get_program_owner_course_ids(int $userid): array
+    {
         global $DB;
 
         $categoryids = $this->get_program_owner_category_ids($userid);
@@ -1256,7 +1298,7 @@ class block_sceh_dashboard extends block_base {
 
         list($insql, $params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
         $records = $DB->get_records_select('course', 'category ' . $insql, $params, 'id DESC', 'id');
-        return array_values(array_map(static function($record): int {
+        return array_values(array_map(static function ($record): int {
             return (int)$record->id;
         }, $records));
     }
@@ -1268,7 +1310,8 @@ class block_sceh_dashboard extends block_base {
      * @param int[] $courseids
      * @return array
      */
-    private function get_program_owner_publishing_status(int $userid, array $courseids): array {
+    private function get_program_owner_publishing_status(int $userid, array $courseids): array
+    {
         global $DB;
 
         $draft = 0;
@@ -1288,7 +1331,7 @@ class block_sceh_dashboard extends block_base {
         $warn = ($needschanges > 0 || $draft > 0);
 
         $baseurl = new moodle_url('/course/index.php');
-        
+
         // Deep linking logic.
         $drafturl = $baseurl;
         if ($draft === 1) {
@@ -1316,7 +1359,8 @@ class block_sceh_dashboard extends block_base {
      * @param int[] $courseids
      * @return array
      */
-    private function get_program_owner_cohort_status(array $courseids): array {
+    private function get_program_owner_cohort_status(array $courseids): array
+    {
         global $DB;
 
         $notconfigured = 0;
@@ -1360,11 +1404,14 @@ class block_sceh_dashboard extends block_base {
                 $visible = !empty($visiblerecords[$courseid]) ? (int)$visiblerecords[$courseid]->visible : 0;
                 if (!$hasany) {
                     $notconfigured++;
-                } else if (!$hasboth) {
+                }
+                else if (!$hasboth) {
                     $setupprogress++;
-                } else if ($visible === 1) {
+                }
+                else if ($visible === 1) {
                     $active++;
-                } else {
+                }
+                else {
                     $ready++;
                 }
             }
@@ -1389,7 +1436,8 @@ class block_sceh_dashboard extends block_base {
      * @param int[] $courseids
      * @return array
      */
-    private function get_program_owner_learner_status(array $courseids): array {
+    private function get_program_owner_learner_status(array $courseids): array
+    {
         global $DB;
 
         $notstarted = 0;
@@ -1458,7 +1506,8 @@ class block_sceh_dashboard extends block_base {
      * @param int[] $courseids
      * @return array
      */
-    private function get_program_owner_trainer_status(int $userid, array $courseids): array {
+    private function get_program_owner_trainer_status(int $userid, array $courseids): array
+    {
         global $DB;
 
         $assigned = 0;
@@ -1479,11 +1528,11 @@ class block_sceh_dashboard extends block_base {
                   WHERE ctx.instanceid {$insql}
                     AND r.shortname = :editingshortname",
                 $params + [
-                    'coursecontext' => CONTEXT_COURSE,
-                    'editingshortname' => 'editingteacher',
-                ]
+                'coursecontext' => CONTEXT_COURSE,
+                'editingshortname' => 'editingteacher',
+            ]
             );
-            $assignedcourseids = array_map(static function($row): int {
+            $assignedcourseids = array_map(static function ($row): int {
                 return (int)$row->courseid;
             }, $rows);
             $assigned = count($assignedcourseids);
@@ -1510,7 +1559,8 @@ class block_sceh_dashboard extends block_base {
      * @param int[] $courseids
      * @return array
      */
-    private function get_program_owner_content_pipeline_status(int $userid, array $courseids): array {
+    private function get_program_owner_content_pipeline_status(int $userid, array $courseids): array
+    {
         global $DB;
 
         $newimports = 0;
@@ -1536,7 +1586,8 @@ class block_sceh_dashboard extends block_base {
                 }
                 if ((int)$course->visible === 1) {
                     $approved++;
-                } else {
+                }
+                else {
                     $readyreview++;
                 }
             }
@@ -1552,12 +1603,13 @@ class block_sceh_dashboard extends block_base {
             ],
         ];
     }
-    
-    private function get_dashboard_cards() {
+
+    private function get_dashboard_cards()
+    {
         global $USER;
-        
+
         $context = context_system::instance();
-        
+
         // Check user roles via local_sceh_rules capability model.
         $is_system_admin = has_capability('local/sceh_rules:systemadmin', $context);
         $is_program_owner = has_capability('local/sceh_rules:programowner', $context);
@@ -1568,9 +1620,11 @@ class block_sceh_dashboard extends block_base {
 
         if ($is_system_admin) {
             return $this->get_system_admin_cards();
-        } else if ($is_program_owner) {
+        }
+        else if ($is_program_owner) {
             return $this->get_program_owner_cards($USER->id);
-        } else if ($is_trainer) {
+        }
+        else if ($is_trainer) {
             return $this->get_trainer_cards($USER->id);
         }
 
@@ -1584,7 +1638,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_learner_cards($userid) {
+    private function get_learner_cards($userid)
+    {
         global $DB;
         $cards = [];
 
@@ -1641,10 +1696,10 @@ class block_sceh_dashboard extends block_base {
         ];
 
         // 6. My Badges — with earned count.
-        $badgecount = (int) $DB->count_records_select(
+        $badgecount = (int)$DB->count_records_select(
             'badge_issued',
             'userid = :userid',
-            ['userid' => $userid]
+        ['userid' => $userid]
         );
         $cards[] = [
             'title' => get_string('mybadges', 'block_sceh_dashboard'),
@@ -1662,9 +1717,10 @@ class block_sceh_dashboard extends block_base {
      *
      * @return array
      */
-    private function get_system_admin_cards() {
+    private function get_system_admin_cards()
+    {
         global $DB, $USER;
-        
+
         $systemcontext = context_system::instance();
         $cards = [];
 
@@ -1708,18 +1764,18 @@ class block_sceh_dashboard extends block_base {
 
         // 5. Badge Management.
         if (has_any_capability([
-            'moodle/badges:viewbadges',
-            'moodle/badges:viewawarded',
-            'moodle/badges:createbadge',
-            'moodle/badges:awardbadge',
-            'moodle/badges:configurecriteria',
-            'moodle/badges:configuremessages',
-            'moodle/badges:configuredetails',
-            'moodle/badges:deletebadge',
+        'moodle/badges:viewbadges',
+        'moodle/badges:viewawarded',
+        'moodle/badges:createbadge',
+        'moodle/badges:awardbadge',
+        'moodle/badges:configurecriteria',
+        'moodle/badges:configuremessages',
+        'moodle/badges:configuredetails',
+        'moodle/badges:deletebadge',
         ], $systemcontext)) {
             $badgecount = $DB->count_records('badge', ['type' => 1]);
             $badgetitle = get_string('badgemanagement', 'block_sceh_dashboard') .
-                          ' (' . $badgecount . ')';
+                ' (' . $badgecount . ')';
             $cards[] = [
                 'title' => $badgetitle,
                 'icon' => 'fa-award',
@@ -1730,8 +1786,8 @@ class block_sceh_dashboard extends block_base {
 
         // 6. Competency Framework.
         if (has_any_capability([
-            'moodle/competency:competencyview',
-            'moodle/competency:competencymanage',
+        'moodle/competency:competencyview',
+        'moodle/competency:competencymanage',
         ], $systemcontext)) {
             $cards[] = [
                 'title' => get_string('competencyframework', 'block_sceh_dashboard'),
@@ -1752,7 +1808,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_program_owner_cards($userid) {
+    private function get_program_owner_cards($userid)
+    {
         $systemcontext = context_system::instance();
 
         $cards = [
@@ -1806,7 +1863,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_trainer_cards($userid) {
+    private function get_trainer_cards($userid)
+    {
         $context = context_system::instance();
         $courses = [];
         $attendanceurl = new moodle_url('/my/courses.php');
@@ -1831,7 +1889,8 @@ class block_sceh_dashboard extends block_base {
                 'color' => 'blue',
                 'url' => new moodle_url('/course/view.php', ['id' => $course->id]),
             ];
-        } else if (count($courses) > 1) {
+        }
+        else if (count($courses) > 1) {
             $children = [];
             foreach ($courses as $course) {
                 $children[] = [
@@ -1845,7 +1904,8 @@ class block_sceh_dashboard extends block_base {
                 'color' => 'blue',
                 'children' => $children,
             ];
-        } else {
+        }
+        else {
             // No assigned courses — fallback to program structure.
             $cards[] = [
                 'title' => get_string('programstructure', 'block_sceh_dashboard'),
@@ -1882,7 +1942,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_program_owner_categories($userid) {
+    private function get_program_owner_categories($userid)
+    {
         global $DB;
 
         $sql = "SELECT DISTINCT cc.id, cc.name
@@ -1905,15 +1966,16 @@ class block_sceh_dashboard extends block_base {
             'fallbackshortname' => 'programowner',
         ]);
     }
-    
-    private function render_card($card) {
+
+    private function render_card($card)
+    {
         if (class_exists('\local_sceh_rules\output\sceh_card') && !isset($card['count'])) {
             return \local_sceh_rules\output\sceh_card::simple($card);
         }
 
         $html = html_writer::start_div('sceh-card sceh-card-system sceh-card-' . $card['color']);
         $html .= html_writer::start_tag('a', ['href' => $card['url'], 'class' => 'sceh-card-link']);
-        
+
         $html .= html_writer::div('<i class="fa ' . $card['icon'] . ' fa-3x"></i>', 'sceh-card-icon');
         $html .= html_writer::div($card['title'], 'sceh-card-title');
 
@@ -1921,10 +1983,10 @@ class block_sceh_dashboard extends block_base {
         if (isset($card['count'])) {
             $html .= html_writer::div((string)(int)$card['count'], 'sceh-po-status-total');
         }
-        
+
         $html .= html_writer::end_tag('a');
         $html .= html_writer::end_div();
-        
+
         return $html;
     }
 
@@ -1934,7 +1996,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array|null
      */
-    private function get_learner_stream_card($userid) {
+    private function get_learner_stream_card($userid)
+    {
         $courses = enrol_get_users_courses($userid, true, 'id, fullname, visible');
         if (empty($courses)) {
             return null;
@@ -1968,12 +2031,13 @@ class block_sceh_dashboard extends block_base {
      *
      * @return int
      */
-    private function get_first_regular_course_id() {
+    private function get_first_regular_course_id()
+    {
         global $DB;
 
         $courseid = $DB->get_field_sql(
             'SELECT id FROM {course} WHERE id > :sitecourseid ORDER BY id ASC',
-            ['sitecourseid' => 1],
+        ['sitecourseid' => 1],
             IGNORE_MULTIPLE
         );
 
@@ -1990,13 +2054,14 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return int
      */
-    private function get_first_enrolled_course_id($userid) {
+    private function get_first_enrolled_course_id($userid)
+    {
         $courses = enrol_get_users_courses($userid, true, 'id');
         if (empty($courses)) {
             return 0;
         }
 
-        $courseids = array_map(function($course) {
+        $courseids = array_map(function ($course) {
             return (int)$course->id;
         }, $courses);
         sort($courseids, SORT_NUMERIC);
@@ -2010,12 +2075,13 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_sysadmin_status_cards(int $userid): array {
+    private function get_sysadmin_status_cards(int $userid): array
+    {
         global $DB;
         $failedtasks = $this->count_failed_scheduled_tasks();
         $totalcohorts = $this->count_total_cohorts();
         $overdueevents = $this->count_user_overdue_events($userid);
-        $activeusers = (int) $DB->count_records_select('user', 'suspended = 0 AND deleted = 0 AND id > 1');
+        $activeusers = (int)$DB->count_records_select('user', 'suspended = 0 AND deleted = 0 AND id > 1');
 
         return [
             [
@@ -2063,7 +2129,8 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_trainer_status_cards(int $userid): array {
+    private function get_trainer_status_cards(int $userid): array
+    {
         $courses = \local_sceh_rules\helper\cohort_filter::get_trainer_courses($userid);
         $coursecount = count($courses);
         $ungraded = $this->count_trainer_ungraded_submissions($userid);
@@ -2115,14 +2182,15 @@ class block_sceh_dashboard extends block_base {
      * @param int $userid
      * @return array
      */
-    private function get_learner_status_cards(int $userid): array {
+    private function get_learner_status_cards(int $userid): array
+    {
         global $DB;
         $pendingstream = $this->count_learner_pending_stream_selection($userid);
         $upcomingevents = $this->count_user_upcoming_events($userid, 7);
-        $badgecount = (int) $DB->count_records_select(
+        $badgecount = (int)$DB->count_records_select(
             'badge_issued',
             'userid = :userid',
-            ['userid' => $userid]
+        ['userid' => $userid]
         );
 
         return [
@@ -2166,15 +2234,17 @@ class block_sceh_dashboard extends block_base {
     }
 
 
-    public function applicable_formats() {
+    public function applicable_formats()
+    {
         return [
             'site-index' => true,
             'my' => true,
             'course-view' => false
         ];
     }
-    
-    public function has_config() {
+
+    public function has_config()
+    {
         return false;
     }
 }
