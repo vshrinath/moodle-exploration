@@ -83,5 +83,5 @@ if ($existing) {
 }
 
 echo "\n=== Success! ===\n";
-echo "Refresh your browser at: http://localhost:8080/my/\n";
+echo "Refresh your browser at: {$CFG->wwwroot}/my/\n";
 echo "You should see the Fellowship Training Dashboard!\n\n";

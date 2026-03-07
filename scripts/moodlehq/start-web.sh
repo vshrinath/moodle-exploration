@@ -69,7 +69,7 @@ fi
 
 # Fix potential permission and path issues on config.php (common on Windows/WSL2 host mounts)
 if [ -f /var/www/html/config.php ]; then
-  chmod 644 /var/www/html/config.php
+  chmod 644 /var/www/html/config.php || true
   
   # Ensure dirroot points to/public subdirectory to resolve missing plugins issue
   if ! grep -q "dirroot.*=.*__DIR__" /var/www/html/config.php; then
