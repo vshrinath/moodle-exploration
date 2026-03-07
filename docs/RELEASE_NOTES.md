@@ -4,6 +4,26 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-07] — Added comprehensive maintenance documentation for developers and AI systems
+
+### What changed
+- Added SCRIPT_PATTERNS.md with mandatory patterns for config/verify/test scripts including idempotency, error handling, and output formats
+- Added PLUGIN_DEVELOPMENT_GUIDE.md with complete plugin development patterns, naming conventions, version management, and anti-patterns
+- Added TROUBLESHOOTING_PLAYBOOK.md with diagnostic procedures for 10 common issues including dashboard blocks, permissions, database connections, and CI failures
+- Added CUSTOM_API_REFERENCE.md with complete API documentation for sceh_card renderer, config_helper, dashboard block, role helpers, and custom capabilities
+- All documentation designed for both human engineers and agentic systems with explicit patterns, anti-patterns, and verification checklists
+
+### Why
+System is production-ready but lacked maintainability documentation. Engineers and AI systems need explicit patterns to avoid common mistakes when extending plugins, writing scripts, or troubleshooting issues. These docs provide step-by-step procedures, code examples, and diagnostic commands to ensure consistent, safe modifications.
+
+### Files touched
+- `docs/SCRIPT_PATTERNS.md` — Mandatory patterns for all automation scripts
+- `docs/PLUGIN_DEVELOPMENT_GUIDE.md` — Complete plugin development reference
+- `docs/TROUBLESHOOTING_PLAYBOOK.md` — Diagnostic procedures for common issues
+- `docs/CUSTOM_API_REFERENCE.md` — API documentation for custom plugins
+
+---
+
 ## [2026-03-07] — Fixed dashboard block to appear for all users by default
 
 ### What changed
