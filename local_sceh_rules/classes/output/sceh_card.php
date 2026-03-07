@@ -61,7 +61,7 @@ class sceh_card {
             ]);
         }
 
-        return \html_writer::div($inner, 'sceh-card sceh-card-' . $color . ' ' . $sizeclass);
+        return \html_writer::div($inner, 'sceh-card sceh-card-system sceh-card-' . $color . ' ' . $sizeclass);
     }
 
     /**

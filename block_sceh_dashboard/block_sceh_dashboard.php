@@ -33,7 +33,7 @@ class block_sceh_dashboard extends block_base {
             $this->content->text .= $this->render_learner_dashboard($userid);
         }
 
-        // Workflow Queue hidden for initial rollout. Uncomment when users are comfortable.
+        // Workflow Queue intentionally hidden for current rollout.
         // $this->content->text .= $this->render_workflow_queue($USER->id);
 
         // Inject "Help" link into primary navigation.
@@ -213,7 +213,7 @@ class block_sceh_dashboard extends block_base {
         }
 
         $actionkey = clean_param(core_text::strtolower($action['title']), PARAM_ALPHANUMEXT);
-        $html = html_writer::start_div('sceh-card sceh-card-' . ($action['color'] ?? 'indigo'));
+        $html = html_writer::start_div('sceh-card sceh-card-system sceh-card-' . ($action['color'] ?? 'indigo'));
         $html .= html_writer::link(
             '#',
             html_writer::div('<i class="fa ' . $action['icon'] . ' fa-3x"></i>', 'sceh-card-icon') .
@@ -238,7 +238,7 @@ class block_sceh_dashboard extends block_base {
         $color = $this->program_owner_status_color((string)($statuscard['status'] ?? 'info'));
         $totalcount = (int)array_sum(array_column($statuscard['steps'], 'count'));
 
-        $html = html_writer::start_div('sceh-card sceh-card-' . $color);
+        $html = html_writer::start_div('sceh-card sceh-card-system sceh-card-' . $color);
         $html .= html_writer::link(
             '#',
             html_writer::div('<i class="fa ' . $statuscard['icon'] . ' fa-3x"></i>', 'sceh-card-icon') .
@@ -362,6 +362,7 @@ class block_sceh_dashboard extends block_base {
     private function render_program_owner_subactions_bar(array $actions): string {
         $html = '';
         $hasbar = false;
+        $openeddefault = false;
 
         $html .= html_writer::start_div('sceh-po-subactions-bar', ['id' => 'sceh-po-subactions-bar']);
         foreach ($actions as $action) {
@@ -371,13 +372,19 @@ class block_sceh_dashboard extends block_base {
             $hasbar = true;
             $actionkey = clean_param(core_text::strtolower($action['title']), PARAM_ALPHANUMEXT);
             $color = clean_param((string)($action['color'] ?? 'blue'), PARAM_ALPHANUMEXT);
-            $html .= html_writer::start_div('sceh-po-subactions-panel', [
+            $attrs = [
                 'id' => 'sceh-po-panel-' . $actionkey,
                 'data-action-key' => $actionkey,
                 'data-color' => $color,
                 'class' => 'sceh-po-subactions-panel sceh-po-subactions-panel-' . $color,
-                'hidden' => 'hidden',
-            ]);
+            ];
+            if ($openeddefault) {
+                $attrs['hidden'] = 'hidden';
+            } else {
+                $attrs['class'] .= ' is-open';
+                $openeddefault = true;
+            }
+            $html .= html_writer::start_div('sceh-po-subactions-panel', $attrs);
             $html .= html_writer::start_div('sceh-po-subactions-header');
             $html .= html_writer::tag('h5', format_string($action['title']));
             $html .= html_writer::tag('button', '&times;', [
@@ -1904,7 +1911,7 @@ class block_sceh_dashboard extends block_base {
             return \local_sceh_rules\output\sceh_card::simple($card);
         }
 
-        $html = html_writer::start_div('sceh-card sceh-card-' . $card['color']);
+        $html = html_writer::start_div('sceh-card sceh-card-system sceh-card-' . $card['color']);
         $html .= html_writer::start_tag('a', ['href' => $card['url'], 'class' => 'sceh-card-link']);
         
         $html .= html_writer::div('<i class="fa ' . $card['icon'] . ' fa-3x"></i>', 'sceh-card-icon');
