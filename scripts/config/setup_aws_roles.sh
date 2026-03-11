@@ -387,14 +387,14 @@ foreach (\$roles_to_hide as \$shortname) {
         // Set sortorder to 0 to hide from assignment UI
         \$DB->set_field('role', 'sortorder', 0, ['id' => \$role->id]);
         \$hidden_count++;
-        echo 'Hidden: ' . \$shortname . PHP_EOL;
+        echo 'Hidden: ' . \$shortname . '\n';
     }
 }
 
 echo 'HIDDEN_COUNT:' . \$hidden_count;
-")
+") || true
 
-HIDDEN_COUNT=$(echo "$HIDE_RESULT" | grep "HIDDEN_COUNT:" | cut -d: -f2)
+HIDDEN_COUNT=$(echo "$HIDE_RESULT" | grep "HIDDEN_COUNT:" | cut -d: -f2 || echo "0")
 if [ -n "$HIDDEN_COUNT" ] && [ "$HIDDEN_COUNT" -gt 0 ]; then
     log_success "Hidden ${HIDDEN_COUNT} default roles from assignment UI"
     echo "$HIDE_RESULT" | grep "Hidden:" | while read line; do
