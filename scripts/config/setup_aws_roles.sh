@@ -35,7 +35,7 @@ CATEGORY_IDNUMBER="sceh_mra"
 CATEGORY_NAME="MRA Programs"
 PROGRAM_OWNER_USERNAME="mra.program.owner"
 PROGRAM_OWNER_EMAIL="sivasankari@sceh.net"
-PROGRAM_OWNER_PASSWORD="P9\$tz*2J"
+PROGRAM_OWNER_PASSWORD="Moodle@2026!"
 PROGRAM_OWNER_FIRSTNAME="MRA"
 PROGRAM_OWNER_LASTNAME="Program Owner"
 DOCKER_CONTAINER="moodlehq-dev-moodle-1"
@@ -89,7 +89,7 @@ exec_moodle() {
 }
 
 exec_moodle_cli() {
-    docker exec -u www-data "${DOCKER_CONTAINER}" php "$1"
+    docker exec -u www-data "${DOCKER_CONTAINER}" php "$@"
 }
 
 # ============================================================================
@@ -252,7 +252,7 @@ echo ""
 log_info "Step 4/8: Creating custom roles and category..."
 log_info "This may take 30-60 seconds..."
 
-if ! exec_moodle_cli "/var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php --mode=apply-real-env --category-idnumber=${CATEGORY_IDNUMBER} --program-owner-usernames=${PROGRAM_OWNER_USERNAME}"; then
+if ! exec_moodle_cli "/var/www/html/public/scripts/config/configure_workflow_simulation_baseline.php" "--mode=apply-real-env" "--category-idnumber=${CATEGORY_IDNUMBER}" "--program-owner-usernames=${PROGRAM_OWNER_USERNAME}"; then
     log_error "Baseline configuration failed"
     log_info "Check the output above for details"
     exit 1

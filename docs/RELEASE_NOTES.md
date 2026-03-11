@@ -4,6 +4,103 @@ This document tracks all significant changes to the codebase. Each entry include
 
 ---
 
+## [2026-03-11] — Fixed AWS role setup script argument passing
+
+### What changed
+- Fixed exec_moodle_cli function to properly pass arguments to PHP CLI scripts inside Docker containers
+- Changed password from auto-generated to standardized Moodle@2026!
+- Script now correctly executes configure_workflow_simulation_baseline.php with separate arguments instead of concatenating them into the filename
+
+### Why
+The script was failing on AWS with "Could not open input file" error because bash arguments were being treated as part of the filename rather than separate PHP script arguments. Changed from "$1" to "$@" in exec_moodle_cli to properly expand all arguments, and split the function call to pass script path and arguments separately.
+
+### Files touched
+- `scripts/config/setup_aws_roles.sh` — Fixed argument passing in exec_moodle_cli function and updated password
+
+---
+
+## [2026-03-07] — Comprehensive USER_FAQ.md update with all program types and tasks
+
+### What changed
+- Expanded USER_FAQ.md to cover all four training programs (Fellowship, Allied Health, Technician, Management)
+- Added comprehensive sections on attendance tracking, grading/assessments, OJT assessments, badges/certificates, and content visibility control
+- Added 15+ new troubleshooting entries covering common issues
+- Updated cross-references to link USER_FAQ.md and SYSTEM_FAQ.md from ONBOARDING.md
+- Document now covers all potential user tasks across all roles
+
+### Why
+Users need comprehensive, role-based guidance for all tasks in the system. The updated FAQ covers all four program types, explains attendance workflows, OJT assessment procedures, badge issuance, content visibility control, and troubleshooting for common issues. This makes the system accessible to all user roles without requiring technical documentation.
+
+### Files touched
+- `docs/USER_FAQ.md` — Comprehensive update with all program types and tasks
+- `docs/ONBOARDING.md` — Added links to USER_FAQ.md and SYSTEM_FAQ.md
+
+---
+
+## [2026-03-07] — Added domain concepts guide for non-experts
+
+### What changed
+- Added DOMAIN_CONCEPTS.md explaining competency-based education, Kirkpatrick evaluation model, allied health training workflows, and key terminology
+- Updated ONBOARDING.md to include domain concepts as first reading step
+- Document explains educational concepts (what is a competency, why Kirkpatrick, how OJT works) before technical implementation
+
+### Why
+Engineers and AI systems without allied health training background need to understand domain concepts before working on the system. This guide explains the "what" and "why" behind competency frameworks, Kirkpatrick levels, and training workflows, enabling non-experts to make informed technical decisions.
+
+### Files touched
+- `docs/DOMAIN_CONCEPTS.md` — Educational concepts explained for non-experts
+- `docs/ONBOARDING.md` — Updated to include domain concepts as first reading step
+
+---
+
+## [2026-03-07] — Added onboarding and quick reference guides for AI systems
+
+### What changed
+- Added ONBOARDING.md with 5-minute quick start guide for AI coding systems and new engineers, including system overview, critical rules, quick start commands, file structure map, and code patterns
+- Added QUICK_REFERENCE.md with task-based quick reference for common operations including plugin development, database operations, script development, testing, troubleshooting, deployment, and emergency procedures
+- Both documents designed to reduce AI system onboarding time from 15-30 minutes to 5-10 minutes with copy-paste ready code templates
+
+### Why
+AI coding systems and new engineers need immediate access to common tasks without reading full documentation. These guides provide decision trees, code templates, and step-by-step procedures for routine operations, enabling faster onboarding and reducing errors.
+
+### Files touched
+- `docs/ONBOARDING.md` — 5-minute quick start for AI systems and new engineers
+- `docs/QUICK_REFERENCE.md` — Task-based quick reference with code templates
+
+---
+
+## [2026-03-07] — Added deployment and performance tuning documentation
+
+### What changed
+- Added DEPLOYMENT_GUIDE.md with complete production deployment procedures for self-hosted (Docker Compose), Azure (App Service + MySQL), and AWS (Elastic Beanstalk + RDS) environments
+- Added PERFORMANCE_TUNING.md with database optimization strategies, caching configurations (Redis, CDN), PHP/MySQL tuning, monitoring setup, and load testing procedures
+- Both documents include step-by-step deployment checklists, rollback procedures, troubleshooting guides, and anti-patterns
+
+### Why
+Engineers need comprehensive deployment and performance documentation to safely deploy to production and optimize system performance. These docs provide environment-specific deployment steps, security checklists, volume management, caching strategies, and performance benchmarks to ensure reliable production operations.
+
+### Files touched
+- `docs/DEPLOYMENT_GUIDE.md` — Complete production deployment procedures for multiple platforms
+- `docs/PERFORMANCE_TUNING.md` — Database optimization, caching, and performance monitoring
+
+---
+
+## [2026-03-07] — Added database schema and CI/CD maintenance documentation
+
+### What changed
+- Added DATABASE_SCHEMA.md with complete reference for all 5 custom database tables including schema definitions, relationships, indexes, migration patterns, query patterns, and maintenance procedures
+- Added CI_CD_MAINTENANCE.md with complete CI/CD pipeline documentation including GitHub Actions workflow, test suite structure, adding new tests, troubleshooting common failures, and cache management
+- Both documents include explicit code examples, anti-patterns, and verification checklists designed for both human engineers and AI systems
+
+### Why
+Engineers and AI systems need comprehensive database and CI/CD documentation to safely modify schemas, add tests, and troubleshoot pipeline failures. These docs provide step-by-step procedures for common tasks like adding columns, creating indexes, writing new tests, and debugging CI failures.
+
+### Files touched
+- `docs/DATABASE_SCHEMA.md` — Complete database schema reference with migration patterns
+- `docs/CI_CD_MAINTENANCE.md` — Complete CI/CD pipeline and test suite documentation
+
+---
+
 ## [2026-03-07] — Added comprehensive maintenance documentation for developers and AI systems
 
 ### What changed
